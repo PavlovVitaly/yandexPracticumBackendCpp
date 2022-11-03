@@ -23,20 +23,14 @@ endif()
 
 set(SOURCES
     src/main.cpp
-    #src/parsingFunc.cpp
-    #src/server/server.cpp
     )
 
 set(HEADERS
     src/audio.h
-    #src/parsingFunc.hpp
-    #src/server/server.hpp
     )
 
 add_executable(radio ${SOURCES} ${HEADERS})
 target_link_libraries(radio PRIVATE Threads::Threads)
 target_include_directories(radio PRIVATE 
                                   src
-                                  #src/server
-                                  #src/client
                           )
