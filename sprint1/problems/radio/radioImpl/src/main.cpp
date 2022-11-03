@@ -1,5 +1,4 @@
 #include "audio.h"
-#include "parsingFunc.hpp"
 #include <iostream>
 #include <boost/asio.hpp>
 #include <sstream>
@@ -80,7 +79,7 @@ void RunServer(boost::asio::ip::udp::endpoint endpoint) {
         udp::socket socket(io_context, endpoint);
 
         while (true) {
-            std::array<char, parseF::MAX_BUFFER_SIZE> recvBuf;
+            std::array<char, MAX_BUFFER_SIZE> recvBuf;
             udp::endpoint remote_endpoint;
 
             std::cout << "Waiting message..." << std::endl;
