@@ -21,16 +21,22 @@ if(WIN32)
   add_definitions(-DNOMINMAX)
 endif()
 
-add_executable(radio src/main.cpp src/audio.h)
+set(SOURCES
+    src/main.cpp
+    #src/parsingFunc.cpp
+    #src/server/server.cpp
+    )
+
+set(HEADERS
+    src/audio.h
+    #src/parsingFunc.hpp
+    #src/server/server.hpp
+    )
+
+add_executable(radio ${SOURCES} ${HEADERS})
 target_link_libraries(radio PRIVATE Threads::Threads)
-
-add_executable(radioClient src/client/main.cpp src/audio.h)
-target_include_directories(radioClient PRIVATE src)
-target_link_libraries(radioClient PRIVATE Threads::Threads)
-
-add_executable(radioServer src/server/main.cpp src/audio.h)
-target_include_directories(radioServer PRIVATE src)
-target_link_libraries(radioServer PRIVATE Threads::Threads)
-
-
-
+target_include_directories(radio PRIVATE 
+                                  src
+                                  #src/server
+                                  #src/client
+                          )
