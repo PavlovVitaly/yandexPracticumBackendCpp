@@ -123,12 +123,43 @@ private:
         auto shotCoord = ParseMove(shotCoordStr);
         shotCoordStr.push_back('\n');
         /*Send shot coordinate to enemy*/
+        SendShotCoordToEnemy(socket, shotCoordStr);
+        /*Get result of shot from enemy*/
+        std::string shotResultStr = GetShotResultFromEnemy(socket);
+        /*Mark shot on enemy field*/
+        SeabattleField::ShotResult shotRes = static_cast<SeabattleField::ShotResult>(std::stoi(shotResultStr));
+        MarkShot(other_field_, shotRes, shotCoord);
+        return shotRes != SeabattleField::ShotResult::MISS;
+    };
+
+    bool WaitEnemyShot(tcp::socket& socket){
+        boost::system::error_code ec;
+        /*Show fields*/
+        PrintFields();
+        /*Get shot coordinate from enemy*/
+        std::string shotCoordStr = GetShotCoordFromEnemy(socket);
+        std::cout << "Enemy shot to: "sv << shotCoordStr << std::endl;
+        /*Calculate result of enemy shot*/
+        auto shotCoord = ParseMove(shotCoordStr);
+        auto shotRes = my_field_.Shoot(shotCoord->second, shotCoord->first);
+        /*Send result of enemy shot to enemy*/
+        SendShotCoordToEnemy(socket, shotRes);
+        /*Mark shot on my field*/
+        MarkShot(my_field_, shotRes, shotCoord);
+        return shotRes == SeabattleField::ShotResult::MISS;
+    };
+
+    void SendShotCoordToEnemy(tcp::socket& socket, const std::string shotCoordStr){
+        boost::system::error_code ec;
         socket.write_some(net::buffer(shotCoordStr), ec);
         if (ec) {
             std::cout << "Error sending data"sv << std::endl;
             std::exit(1);
         }
-        /*Get result of shot from enemy*/
+    };
+
+    std::string GetShotResultFromEnemy(tcp::socket& socket){
+        boost::system::error_code ec;
         net::streambuf stream_buf;
         net::read_until(socket, stream_buf, '\n', ec);
         if (ec) {
@@ -143,17 +174,11 @@ private:
             std::cout << "Invalid response"sv << std::endl;
             std::exit(1);
         }
-        /*Mark shot on enemy field*/
-        SeabattleField::ShotResult shotRes = static_cast<SeabattleField::ShotResult>(std::stoi(shotResultStr));
-        MarkShot(other_field_, shotRes, shotCoord);
-        return shotRes != SeabattleField::ShotResult::MISS;
+        return shotResultStr;
     };
 
-    bool WaitEnemyShot(tcp::socket& socket){
+    std::string GetShotCoordFromEnemy(tcp::socket& socket){
         boost::system::error_code ec;
-        /*Show fields*/
-        PrintFields();
-        /*Get shot coordinate from enemy*/
         net::streambuf stream_buf;
         std::cout << "Waiting enemy shot"sv << std::endl;
         net::read_until(socket, stream_buf, '\n', ec);
@@ -163,13 +188,12 @@ private:
         }
         std::string shotCoordStr{std::istreambuf_iterator<char>(&stream_buf),
                                 std::istreambuf_iterator<char>()};
-        /*Formating shot coordinate*/
-        shotCoordStr = shotCoordStr.substr(0, 2);
-        std::cout << "Enemy shot to: "sv << shotCoordStr << std::endl;
-        /*Calculate result of enemy shot*/
-        auto shotCoord = ParseMove(shotCoordStr);
-        auto shotRes = my_field_.Shoot(shotCoord->second, shotCoord->first);
-        /*Send result of enemy shot to enemy*/
+        /*Formating shot coordinate and return*/
+        return shotCoordStr.substr(0, 2);
+    };
+
+    void SendShotCoordToEnemy(tcp::socket& socket, SeabattleField::ShotResult& shotRes){
+        boost::system::error_code ec;
         std::stringstream shotResSS;
         shotResSS << static_cast<int>(shotRes) << "\n";
         socket.write_some(net::buffer(shotResSS.str()), ec);
@@ -177,9 +201,6 @@ private:
             std::cout << "Error sending data"sv << std::endl;
             std::exit(1);
         }
-        /*Mark shot on my field*/
-        MarkShot(my_field_, shotRes, shotCoord);
-        return shotRes == SeabattleField::ShotResult::MISS;
     };
 
     void MarkShot(SeabattleField& field,
