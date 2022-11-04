@@ -111,20 +111,24 @@ private:
     // TODO: добавьте методы по вашему желанию
 
     bool MakeShot(tcp::socket& socket){
-        bool result = false;
         boost::system::error_code ec;
-        PrintFields();
         std::string shotCoordStr;
+        /*Show fields*/
+        PrintFields();
+        /*Enter shot coordinate*/
         std::cout << "Enter shot coordinate"sv << std::endl;
         std::cin >> shotCoordStr;
+        /*Formating shot coordinate*/
         shotCoordStr[0] = std::toupper(shotCoordStr[0]);
         auto shotCoord = ParseMove(shotCoordStr);
         shotCoordStr.push_back('\n');
+        /*Send shot coordinate to enemy*/
         socket.write_some(net::buffer(shotCoordStr), ec);
         if (ec) {
             std::cout << "Error sending data"sv << std::endl;
             std::exit(1);
         }
+        /*Get result of shot from enemy*/
         net::streambuf stream_buf;
         net::read_until(socket, stream_buf, '\n', ec);
         if (ec) {
@@ -133,36 +137,23 @@ private:
         }
         std::string shotResultStr{std::istreambuf_iterator<char>(&stream_buf),
                                 std::istreambuf_iterator<char>()};
+        /*Validate result of shot*/
         if(shotResultStr.length() > 2 and 
             (shotResultStr[0] < 0 or shotResultStr[0] > 2)){
             std::cout << "Invalid response"sv << std::endl;
             std::exit(1);
         }
+        /*Mark shot on enemy field*/
         SeabattleField::ShotResult shotRes = static_cast<SeabattleField::ShotResult>(std::stoi(shotResultStr));
-        switch(shotRes){
-            case SeabattleField::ShotResult::MISS:
-                other_field_.MarkMiss(shotCoord->second, shotCoord->first);
-                result = false;
-                std::cout << "MISS"sv << std::endl;
-                break;
-            case SeabattleField::ShotResult::HIT:
-                other_field_.MarkHit(shotCoord->second, shotCoord->first);
-                result = true;
-                std::cout << "HIT"sv << std::endl;
-                break;
-            case SeabattleField::ShotResult::KILL:
-                other_field_.MarkKill(shotCoord->second, shotCoord->first);
-                result = true;
-                std::cout << "KILL"sv << std::endl;
-                break;
-        }
-        return result;
+        MarkShot(other_field_, shotRes, shotCoord);
+        return shotRes != SeabattleField::ShotResult::MISS;
     };
 
     bool WaitEnemyShot(tcp::socket& socket){
-        bool result = true;
         boost::system::error_code ec;
+        /*Show fields*/
         PrintFields();
+        /*Get shot coordinate from enemy*/
         net::streambuf stream_buf;
         std::cout << "Waiting enemy shot"sv << std::endl;
         net::read_until(socket, stream_buf, '\n', ec);
@@ -172,11 +163,13 @@ private:
         }
         std::string shotCoordStr{std::istreambuf_iterator<char>(&stream_buf),
                                 std::istreambuf_iterator<char>()};
+        /*Formating shot coordinate*/
         shotCoordStr = shotCoordStr.substr(0, 2);
         std::cout << "Enemy shot to: "sv << shotCoordStr << std::endl;
+        /*Calculate result of enemy shot*/
         auto shotCoord = ParseMove(shotCoordStr);
-
         auto shotRes = my_field_.Shoot(shotCoord->second, shotCoord->first);
+        /*Send result of enemy shot to enemy*/
         std::stringstream shotResSS;
         shotResSS << static_cast<int>(shotRes) << "\n";
         socket.write_some(net::buffer(shotResSS.str()), ec);
@@ -184,25 +177,28 @@ private:
             std::cout << "Error sending data"sv << std::endl;
             std::exit(1);
         }
+        /*Mark shot on my field*/
+        MarkShot(my_field_, shotRes, shotCoord);
+        return shotRes == SeabattleField::ShotResult::MISS;
+    };
 
+    void MarkShot(SeabattleField& field,
+                SeabattleField::ShotResult& shotRes,
+                std::optional<std::pair<int, int>>& shotCoord){
         switch(shotRes){
             case SeabattleField::ShotResult::MISS:
-                my_field_.MarkMiss(shotCoord->second, shotCoord->first);
-                result = true;
+                field.MarkMiss(shotCoord->second, shotCoord->first);
                 std::cout << "MISS"sv << std::endl;
                 break;
             case SeabattleField::ShotResult::HIT:
-                my_field_.MarkHit(shotCoord->second, shotCoord->first);
+                field.MarkHit(shotCoord->second, shotCoord->first);
                 std::cout << "HIT"sv << std::endl;
-                result = false;
                 break;
             case SeabattleField::ShotResult::KILL:
-                my_field_.MarkKill(shotCoord->second, shotCoord->first);
+                field.MarkKill(shotCoord->second, shotCoord->first);
                 std::cout << "KILL"sv << std::endl;
-                result = false;
                 break;
         }
-        return result;
     };
 
 private:
