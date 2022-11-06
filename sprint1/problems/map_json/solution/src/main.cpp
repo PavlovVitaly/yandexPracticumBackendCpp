@@ -30,14 +30,14 @@ void RunWorkers(unsigned n, const Fn& fn) {
 }  // namespace
 
 int main(int argc, const char* argv[]) {
-    //if (argc != 2) {
-    //    std::cerr << "Usage: game_server <game-config-json>"sv << std::endl;
-    //    return EXIT_FAILURE;
-    //}
+    if (argc != 2) {
+        std::cerr << "Usage: game_server <game-config-json>"sv << std::endl;
+        return EXIT_FAILURE;
+    }
     try {
         // 1. Загружаем карту из файла и построить модель игры
-        //model::Game game = json_loader::LoadGame(argv[1]);
-        model::Game game = json_loader::LoadGame("../../data/config.json");
+        model::Game game = json_loader::LoadGame(argv[1]);
+        //model::Game game = json_loader::LoadGame("../../data/config.json");
 
         // 2. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();
