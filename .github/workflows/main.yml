@@ -31,8 +31,7 @@ jobs:
 
       - name: Install pkgConfig
         run: |
-          apt-get update
-          apt-get -y install pkg-config
+          apt-get -y install pkg-config=1.8.0
 
       - name: Install dependencies
         run: |
