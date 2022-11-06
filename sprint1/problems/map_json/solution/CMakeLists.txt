@@ -11,6 +11,8 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
 link_libraries(${JSONCPP_LIBRARIES})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
