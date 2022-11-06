@@ -55,7 +55,7 @@ void AddBuildingsToMap(model::Map& map, const json::value& mapItem){
 void AddOfficesToMap(model::Map& map, const json::value& mapItem){
     if(!mapItem.as_object().contains("offices")) return;
     for(auto item : mapItem.as_object().at("offices").as_array()){
-        model::Office::Id idOffice(std::string(mapItem.as_object().at("id").as_string()));
+        model::Office::Id idOffice(std::string(item.as_object().at("id").as_string()));
         model::Coord x{static_cast<int>(item.as_object().at("x").as_int64())};
         model::Coord y{static_cast<int>(item.as_object().at("y").as_int64())};
         model::Coord dx{static_cast<int>(item.as_object().at("offsetX").as_int64())};
