@@ -1,104 +1,110 @@
 #include "json_converter.h"
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <map>
 #include <sstream>
-#include <boost/json.hpp>
+#include <json/json.h>
 
 namespace jsonConverter{
 
-using boost::property_tree::ptree;
-using boost::property_tree::write_json;
-namespace json = boost::json;
-
-std::string PtreeToString(ptree root){
-    std::stringstream jsonString;
-    write_json(jsonString, root);
-    return jsonString.str();    
-}
-
 std::string ConvertMapListToJson(const model::Game& game){
-    std::stringstream result;
-    result << "[";
-    for(auto item = game.GetMaps().begin(); item != game.GetMaps().end(); ++item){
-        result << "{\"id\": \"" << *item->GetId() << "\", \"name\": \"" << item->GetName() << "\"}";
-        if(std::next(item) != game.GetMaps().end()){
-            result << ", ";
-        }
+    Json::Value root;
+    Json::StreamWriterBuilder builder;
+    const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    for(auto item : game.GetMaps()){
+        Json::Value map;
+        map["id"] = (*item.GetId()).c_str();
+        map["name"] = item.GetName().c_str();
+        root.append(std::move(map));
     }
-    result << "]";
-    return result.str();
+    std::stringstream jsonString;
+    writer->write(root, &jsonString);
+    return jsonString.str();
 }
 
-void AddRoadsToJson(const model::Map& map, ptree& root){
-    ptree roads;
+void AddRoadsToJson(const model::Map& map, Json::Value& root){
+    Json::Value roads;
     for(auto item : map.GetRoads()){
-        ptree road;
-        road.add("x0", item.GetStart().x);
-        road.add("y0", item.GetStart().y);
-        if(item.IsVertical()) road.add("y1", item.GetEnd().y);
-        else road.add("x1", item.GetEnd().x);
-        roads.push_back(std::make_pair("", std::move(road)));
+        Json::Value road;
+        road["x0"] = item.GetStart().x;
+        road["y0"] = item.GetStart().y;
+        if(item.IsVertical()) road["y1"] = item.GetEnd().y;
+        else road["x1"] = item.GetEnd().x;
+        roads.append(std::move(road));
     }
-    root.add_child("roads", roads);
+    root["roads"] = roads;
 }
 
-void AddBuildingsToJson(const model::Map& map, ptree& root){
-    ptree buildings;
+void AddBuildingsToJson(const model::Map& map, Json::Value& root){
+    Json::Value buildings;
     for(auto item : map.GetBuildings()){
-        ptree building;
-        building.add("x", item.GetBounds().position.x);
-        building.add("y", item.GetBounds().position.y);
-        building.add("w", item.GetBounds().size.width);
-        building.add("h", item.GetBounds().size.height);
-        buildings.push_back(std::make_pair("", std::move(building)));
+        Json::Value building;
+        building["x"] = item.GetBounds().position.x;
+        building["y"] = item.GetBounds().position.y;
+        building["w"] = item.GetBounds().size.width;
+        building["h"] = item.GetBounds().size.height;
+        buildings.append(std::move(building));
     }
-    root.add_child("buildings", buildings);
+    root["buildings"] = buildings;
 }
 
-void AddOfficesToJson(const model::Map& map, ptree& root){
-    ptree offices;
+void AddOfficesToJson(const model::Map& map, Json::Value& root){
+    Json::Value offices;
     for(auto item : map.GetOffices()){
-        ptree office;
-        office.add("id", *item.GetId());
-        office.add("x", item.GetPosition().x);
-        office.add("y", item.GetPosition().y);
-        office.add("offsetX", item.GetOffset().dx);
-        office.add("offsetY", item.GetOffset().dy);
-        offices.push_back(std::make_pair("", std::move(office)));
+        Json::Value office;
+        office["id"] = (*item.GetId()).c_str();
+        office["x"] = item.GetPosition().x;
+        office["y"] = item.GetPosition().y;
+        office["offsetX"] = item.GetOffset().dx;
+        office["offsetY"] = item.GetOffset().dy;
+        offices.append(std::move(office));
     }
-    root.add_child("offices", offices);
+    root["offices"] = offices;
 }
 
 std::string ConvertMapToJson(const model::Map& map){
-    ptree root, roads, buildings, offices;
-    root.add("id", *map.GetId());
-    root.add("name", map.GetName());
+    Json::Value root;
+    Json::StreamWriterBuilder builder;
+    const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    root["id"] = (*map.GetId()).c_str();
+    root["name"] = map.GetName().c_str();
     AddRoadsToJson(map, root);
     AddBuildingsToJson(map, root);
     AddOfficesToJson(map, root);
-    return PtreeToString(root);
+    std::stringstream jsonString;
+    writer->write(root, &jsonString);
+    return jsonString.str();
 }
 
 std::string CreateMapNotFoundResponse(){
-    ptree root;
-    root.add("code", "mapNotFound");
-    root.add("message", "Map not found");
-    return PtreeToString(root);
+    Json::Value root;
+    Json::StreamWriterBuilder builder;
+    const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    root["code"] = "mapNotFound";
+    root["message"] = "Map not found";
+    std::stringstream jsonString;
+    writer->write(root, &jsonString);
+    return jsonString.str();
 };
 
 std::string CreateBadRequestResponse(){
-    ptree root;
-    root.add("code", "badRequest");
-    root.add("message", "Bad request");
-    return PtreeToString(root);
+    Json::Value root;
+    Json::StreamWriterBuilder builder;
+    const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    root["code"] = "badRequest";
+    root["message"] = "Bad request";
+    std::stringstream jsonString;
+    writer->write(root, &jsonString);
+    return jsonString.str();
 };
 
 std::string CreatePageNotFoundResponse(){
-    ptree root;
-    root.add("code", "pageNotFound");
-    root.add("message", "Page not found");
-    return PtreeToString(root);
+    Json::Value root;
+    Json::StreamWriterBuilder builder;
+    const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    root["code"] = "pageNotFound";
+    root["message"] = "Page not found";
+    std::stringstream jsonString;
+    writer->write(root, &jsonString);
+    return jsonString.str();
 };
 
 }
