@@ -11,6 +11,12 @@ using boost::property_tree::ptree;
 using boost::property_tree::write_json;
 namespace json = boost::json;
 
+std::string PtreeToString(ptree root){
+    std::stringstream jsonString;
+    write_json(jsonString, root);
+    return jsonString.str();    
+}
+
 std::string ConvertMapListToJson(const model::Game& game){
     std::stringstream result;
     result << "[";
@@ -71,10 +77,28 @@ std::string ConvertMapToJson(const model::Map& map){
     AddRoadsToJson(map, root);
     AddBuildingsToJson(map, root);
     AddOfficesToJson(map, root);
-    
-    std::stringstream jsonString;
-    write_json(jsonString, root);
-    return jsonString.str();
+    return PtreeToString(root);
 }
+
+std::string CreateMapNotFoundResponse(){
+    ptree root;
+    root.add("code", "mapNotFound");
+    root.add("message", "Map not found");
+    return PtreeToString(root);
+};
+
+std::string CreateBadRequestResponse(){
+    ptree root;
+    root.add("code", "badRequest");
+    root.add("message", "Bad request");
+    return PtreeToString(root);
+};
+
+std::string CreatePageNotFoundResponse(){
+    ptree root;
+    root.add("code", "pageNotFound");
+    root.add("message", "Page not found");
+    return PtreeToString(root);
+};
 
 }

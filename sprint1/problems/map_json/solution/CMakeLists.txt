@@ -31,8 +31,6 @@ add_executable(game_server
 	src/json_converter.h
 	src/responce_storage.cpp
 	src/responce_storage.h
-	src/responder.h
-	src/response_command_chain.h
 )
 target_link_libraries(game_server PRIVATE Threads::Threads)
 # Boost.Beast будет использовать std::string_view вместо boost::string_view
