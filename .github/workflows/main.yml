@@ -31,7 +31,7 @@ jobs:
 
       - name: Install pkgConfig
         run: |
-          apt-get install pkg-config
+          apt-get -y install pkg-config
 
       - name: Install dependencies
         run: |
