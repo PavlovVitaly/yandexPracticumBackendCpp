@@ -29,6 +29,10 @@ jobs:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
 
+	- name: Install 
+        run: |
+          apt-get install pkg-config
+
       - name: Install dependencies
         run: |
           cp -R /home/forconan/.conan /github/home/.conan
