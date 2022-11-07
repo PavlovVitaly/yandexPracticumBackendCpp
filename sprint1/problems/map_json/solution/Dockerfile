@@ -14,3 +14,9 @@ RUN apt update && \
 COPY ./src /app/src
 COPY ./data /app/data
 COPY CMakeLists.txt conanfile.txt /app/
+
+# новая команда для сборки сервера:
+RUN mkdir /app/build && cd /app/build && \
+    conan install .. --build=missing && \
+    cmake -DCMAKE_BUILD_TYPE=Release .. && \
+    cmake --build . 
