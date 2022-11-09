@@ -22,7 +22,6 @@ add_executable(game_server
 	src/model.h
 	src/model.cpp
 	src/tagged.h
-	src/boost_json.cpp
 	src/json_loader.h
 	src/json_loader.cpp
 	src/request_handler.cpp
