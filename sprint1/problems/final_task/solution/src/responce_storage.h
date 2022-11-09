@@ -1,3 +1,6 @@
+/*
+# Условия в активаторах выглядят так себе, но мне кажется это несколько проще для восприятия, чем при использовании регулярок.
+*/
 #pragma once
 #include "model.h"
 #include "json_converter.h"
@@ -13,7 +16,7 @@ using StringResponse = http::response<http::string_body>;
 std::vector<std::string_view> SplitUrl(std::string_view str);
 
 template <typename Body, typename Allocator>
-bool MakeGetMapListResponseActivator(
+bool UseGetMapListActivator(
         const http::request<Body, http::basic_fields<Allocator>>& req,
         const model::Game& game){
     return req.target() == "/api/v1/maps" or req.target() == "/api/v1/maps/";
@@ -32,7 +35,7 @@ StringResponse MakeGetMapListResponse(
 }
 
 template <typename Body, typename Allocator>
-bool MakeGetMapByIdResponseActivator(
+bool UseGetMapByIdActivator(
         const http::request<Body, http::basic_fields<Allocator>>& req,
         const model::Game& game){
     auto url = SplitUrl(req.target());
@@ -58,7 +61,7 @@ StringResponse MakeGetMapByIdResponse(
 
 
 template <typename Body, typename Allocator>
-bool MakeBadRequestResponseActivator(
+bool UseBadRequestActivator(
         const http::request<Body, http::basic_fields<Allocator>>& req,
         const model::Game& game){
     auto url = SplitUrl(req.target());
@@ -85,7 +88,7 @@ StringResponse MakeBadRequestResponse(
 };
 
 template <typename Body, typename Allocator>
-bool MakeMapNotFoundResponseActivator(
+bool UseMapNotFoundActivator(
         const http::request<Body, http::basic_fields<Allocator>>& req,
         const model::Game& game){
     auto url = SplitUrl(req.target());

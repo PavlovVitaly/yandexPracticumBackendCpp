@@ -1,9 +1,7 @@
 #pragma once
 #include "http_server.h"
 #include "model.h"
-//#include "responder.h"
 #include "responce_storage.h"
-//#include "response_command_chain.h"
 namespace http_handler {
 
 namespace beast = boost::beast;
@@ -19,18 +17,21 @@ public:
     RequestHandler(const RequestHandler&) = delete;
     RequestHandler& operator=(const RequestHandler&) = delete;
 
+    /*
+    # Обработчик отвратительный, есть идея как сделать его более гибким, но из-за шаблонов другая реализация пока не взлетела (надо обсудить).
+    */
     template <typename Body, typename Allocator, typename Send>
     void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {// 
         // Обработать запрос request и отправить ответ, используя send
-        if(responceStorage::MakeBadRequestResponseActivator(req, game_)){
+        if(responceStorage::UseBadRequestActivator(req, game_)){
             send(responceStorage::MakeBadRequestResponse(req, game_));
-        }else if(responceStorage::MakeGetMapListResponseActivator(req, game_)){
+        }else if(responceStorage::UseGetMapListActivator(req, game_)){
             if(req.method() == http::verb::get) send(responceStorage::MakeGetMapListResponse(req, game_));
             else send(responceStorage::MakeBadRequestResponse(req, game_));
-        }else if(responceStorage::MakeMapNotFoundResponseActivator(req, game_)){
+        }else if(responceStorage::UseMapNotFoundActivator(req, game_)){
             if(req.method() == http::verb::get) send(responceStorage::MakeMapNotFoundResponse(req, game_));
             else send(responceStorage::MakeBadRequestResponse(req, game_));
-        }else if(responceStorage::MakeGetMapByIdResponseActivator(req, game_)){
+        }else if(responceStorage::UseGetMapByIdActivator(req, game_)){
             if(req.method() == http::verb::get) send(responceStorage::MakeGetMapByIdResponse(req, game_));
             else send(responceStorage::MakeBadRequestResponse(req, game_));
         }else{
