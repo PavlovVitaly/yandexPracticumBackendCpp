@@ -3,7 +3,7 @@
 #include <string>
 
 
-namespace jsonConverter{
+namespace json_converter{
 
 std::string ConvertMapListToJson(const model::Game& game);
 std::string ConvertMapToJson(const model::Map& map);

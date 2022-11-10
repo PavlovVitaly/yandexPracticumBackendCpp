@@ -1,6 +1,6 @@
 #include "responce_storage.h"
 
-namespace responceStorage{
+namespace responce_storage{
 
 std::vector<std::string_view> SplitUrl(std::string_view str){
     std::vector<std::string_view> result;
