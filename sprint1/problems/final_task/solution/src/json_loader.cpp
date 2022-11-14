@@ -12,9 +12,9 @@ using namespace Json;
 # jsoncpp из conan собран под cxx11, а проект на cxx20, поэтому парсинг и работа со строками напрямую через std::string не работает.
 # Решить данную проблему можно либо собрав по jsoncpp под cxx20, сделать из него conan пакет и выложить в репозиторий, либо собирать jsoncpp вместе с основным проектом.
 */
-Value ReadFile(const std::filesystem::path& json_path){
+Value ReadFile(const std::filesystem::path& json_path) {
     std::ifstream file(json_path);
-    if (!file.is_open()){
+    if (!file.is_open()) {
         std::cout << "Error: Can't open file." << std::endl;    // todo: handler.
         std::exit(1);
     }
@@ -24,20 +24,20 @@ Value ReadFile(const std::filesystem::path& json_path){
 };
 
 /* Temp handler, after logger implementation it will need rework. */
-void CheckElementExisting(Value& node, const std::string& name){
-    if (!node.find(&name[0], &name[name.size()])){
+void CheckElementExisting(Value& node, const std::string& name) {
+    if (!node.find(&name[0], &name[name.size()])) {
         std::cout << "Error: Element: " << name << "doesn't exist." << std::endl;
         std::exit(1);
     }
 }
 
-bool HasElement(Value& node, const std::string& name){
+bool HasElement(Value& node, const std::string& name) {
     return node.find(&name[0], &name[name.size()]);
 }
 
-void AddRoadsToMap(model::Map& map, Value& map_item){
+void AddRoadsToMap(model::Map& map, Value& map_item) {
     CheckElementExisting(map_item, json_keys::ROADS);
-    for(auto item : map_item[json_keys::ROADS]){
+    for(auto item : map_item[json_keys::ROADS]) {
         CheckElementExisting(item, json_keys::ROAD_XO);
         model::Coord x{item[json_keys::ROAD_XO].asInt()};
 
@@ -45,10 +45,10 @@ void AddRoadsToMap(model::Map& map, Value& map_item){
         model::Coord y{item[json_keys::ROAD_YO].asInt()};
 
         model::Point start_point(x, y);
-        if(HasElement(item, json_keys::ROAD_X1)){
+        if(HasElement(item, json_keys::ROAD_X1)) {
             model::Coord end{item[json_keys::ROAD_X1].asInt()};
             map.AddRoad(model::Road(model::Road::HORIZONTAL, start_point, end));  
-        }else{
+        } else {
             CheckElementExisting(item, json_keys::ROAD_Y1);
             model::Coord end{item[json_keys::ROAD_Y1].asInt()};
             map.AddRoad(model::Road(model::Road::VERTICAL, start_point, end));
@@ -56,9 +56,9 @@ void AddRoadsToMap(model::Map& map, Value& map_item){
     }
 };
 
-void AddBuildingsToMap(model::Map& map, Value& map_item){
+void AddBuildingsToMap(model::Map& map, Value& map_item) {
     CheckElementExisting(map_item, json_keys::BUILDINGS);
-    for(auto item : map_item[json_keys::BUILDINGS]){
+    for(auto item : map_item[json_keys::BUILDINGS]) {
         CheckElementExisting(item, json_keys::BUILDING_X);
         model::Coord x{item[json_keys::BUILDING_X].asInt()};
 
@@ -76,9 +76,9 @@ void AddBuildingsToMap(model::Map& map, Value& map_item){
     }
 };
 
-void AddOfficesToMap(model::Map& map, Value& map_item){
+void AddOfficesToMap(model::Map& map, Value& map_item) {
     CheckElementExisting(map_item, json_keys::OFFICES);
-    for(auto item : map_item[json_keys::OFFICES]){
+    for(auto item : map_item[json_keys::OFFICES]) {
         CheckElementExisting(item, json_keys::OFFICE_ID);
         model::Office::Id id_office(item[json_keys::OFFICE_ID].asCString());
 
@@ -108,7 +108,7 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
     model::Game game;
 
     CheckElementExisting(map_json, json_keys::MAPS);
-    for(auto map_item : map_json[json_keys::MAPS]){
+    for(auto map_item : map_json[json_keys::MAPS]) {
         CheckElementExisting(map_item, json_keys::MAP_ID);
         std::string id(map_item[json_keys::MAP_ID].asCString());
 

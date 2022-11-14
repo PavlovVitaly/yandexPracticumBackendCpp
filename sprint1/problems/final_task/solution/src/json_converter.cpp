@@ -6,11 +6,11 @@
 
 namespace json_converter{
 
-std::string ConvertMapListToJson(const model::Game& game){
+std::string ConvertMapListToJson(const model::Game& game) {
     Json::Value root;
     Json::StreamWriterBuilder builder;
     const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-    for(auto item : game.GetMaps()){
+    for(auto item : game.GetMaps()) {
         Json::Value map;
         map[json_keys::MAP_ID] = (*item.GetId()).c_str();
         map[json_keys::MAP_NAME] = item.GetName().c_str();
@@ -21,16 +21,15 @@ std::string ConvertMapListToJson(const model::Game& game){
     return json_string.str();
 }
 
-void AddRoadsToJson(const model::Map& map, Json::Value& root){
+void AddRoadsToJson(const model::Map& map, Json::Value& root) {
     Json::Value roads;
-    for(auto item : map.GetRoads()){
+    for(auto item : map.GetRoads()) {
         Json::Value road;
         road[json_keys::ROAD_XO] = item.GetStart().x;
         road[json_keys::ROAD_YO] = item.GetStart().y;
-        if(item.IsVertical()){
+        if(item.IsVertical()) {
             road[json_keys::ROAD_Y1] = item.GetEnd().y;
-        }
-        else{
+        } else {
             road[json_keys::ROAD_X1] = item.GetEnd().x;
         }
         roads.append(std::move(road));
@@ -38,9 +37,9 @@ void AddRoadsToJson(const model::Map& map, Json::Value& root){
     root[json_keys::ROADS] = roads;
 }
 
-void AddBuildingsToJson(const model::Map& map, Json::Value& root){
+void AddBuildingsToJson(const model::Map& map, Json::Value& root) {
     Json::Value buildings;
-    for(auto item : map.GetBuildings()){
+    for(auto item : map.GetBuildings()) {
         Json::Value building;
         building[json_keys::BUILDING_X] = item.GetBounds().position.x;
         building[json_keys::BUILDING_Y] = item.GetBounds().position.y;
@@ -51,9 +50,9 @@ void AddBuildingsToJson(const model::Map& map, Json::Value& root){
     root[json_keys::BUILDINGS] = buildings;
 }
 
-void AddOfficesToJson(const model::Map& map, Json::Value& root){
+void AddOfficesToJson(const model::Map& map, Json::Value& root) {
     Json::Value offices;
-    for(auto item : map.GetOffices()){
+    for(auto item : map.GetOffices()) {
         Json::Value office;
         office[json_keys::OFFICE_ID] = (*item.GetId()).c_str();
         office[json_keys::OFFICE_X] = item.GetPosition().x;
@@ -65,7 +64,7 @@ void AddOfficesToJson(const model::Map& map, Json::Value& root){
     root[json_keys::OFFICES] = offices;
 }
 
-std::string ConvertMapToJson(const model::Map& map){
+std::string ConvertMapToJson(const model::Map& map) {
     Json::Value root;
     Json::StreamWriterBuilder builder;
     const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
@@ -79,7 +78,7 @@ std::string ConvertMapToJson(const model::Map& map){
     return json_string.str();
 }
 
-std::string CreateMapNotFoundResponse(){
+std::string CreateMapNotFoundResponse() {
     Json::Value root;
     Json::StreamWriterBuilder builder;
     const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
@@ -90,7 +89,7 @@ std::string CreateMapNotFoundResponse(){
     return json_string.str();
 };
 
-std::string CreateBadRequestResponse(){
+std::string CreateBadRequestResponse() {
     Json::Value root;
     Json::StreamWriterBuilder builder;
     const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
@@ -101,7 +100,7 @@ std::string CreateBadRequestResponse(){
     return json_string.str();
 };
 
-std::string CreatePageNotFoundResponse(){
+std::string CreatePageNotFoundResponse() {
     Json::Value root;
     Json::StreamWriterBuilder builder;
     const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());

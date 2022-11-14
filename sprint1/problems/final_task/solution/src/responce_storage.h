@@ -22,14 +22,14 @@ std::vector<std::string_view> SplitUrl(std::string_view str);
 template <typename Body, typename Allocator>
 bool UseGetMapListActivator(
         const http::request<Body, http::basic_fields<Allocator>>& req,
-        const model::Game& game){
+        const model::Game& game) {
     return req.target() == "/api/v1/maps" || req.target() == "/api/v1/maps/";
 }
 
 template <typename Body, typename Allocator>
 StringResponse MakeGetMapListResponse(
         const http::request<Body, http::basic_fields<Allocator>>& req,
-        const model::Game& game){
+        const model::Game& game) {
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, "application/json");
     response.body() = json_converter::ConvertMapListToJson(game);
@@ -41,7 +41,7 @@ StringResponse MakeGetMapListResponse(
 template <typename Body, typename Allocator>
 bool UseGetMapByIdActivator(
         const http::request<Body, http::basic_fields<Allocator>>& req,
-        const model::Game& game){
+        const model::Game& game) {
     auto url = SplitUrl(req.target());
     return url.size() == SIZE_OF_FOUR_SEGMENT_URL &&
             url[0] == "api" &&
@@ -53,7 +53,7 @@ bool UseGetMapByIdActivator(
 template <typename Body, typename Allocator>
 StringResponse MakeGetMapByIdResponse(
         const http::request<Body, http::basic_fields<Allocator>>& req,
-        const model::Game& game){
+        const model::Game& game) {
     http::response<http::string_body> response(http::status::ok, req.version());
     auto id = SplitUrl(req.target())[3];
     response.set(http::field::content_type, "application/json");
@@ -67,7 +67,7 @@ StringResponse MakeGetMapByIdResponse(
 template <typename Body, typename Allocator>
 bool UseBadRequestActivator(
         const http::request<Body, http::basic_fields<Allocator>>& req,
-        const model::Game& game){
+        const model::Game& game) {
     auto url = SplitUrl(req.target());
     return !url.empty() &&
             url[0] == "api" &&
@@ -84,7 +84,7 @@ bool UseBadRequestActivator(
 template <typename Body, typename Allocator>
 StringResponse MakeBadRequestResponse(
         const http::request<Body, http::basic_fields<Allocator>>& req,
-        const model::Game& game){
+        const model::Game& game) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, "application/json");
     response.body() = json_converter::CreateBadRequestResponse();
@@ -96,7 +96,7 @@ StringResponse MakeBadRequestResponse(
 template <typename Body, typename Allocator>
 bool UseMapNotFoundActivator(
         const http::request<Body, http::basic_fields<Allocator>>& req,
-        const model::Game& game){
+        const model::Game& game) {
     auto url = SplitUrl(req.target());
     return url.size() == SIZE_OF_FOUR_SEGMENT_URL &&
             url[0] == "api" &&
@@ -108,7 +108,7 @@ bool UseMapNotFoundActivator(
 template <typename Body, typename Allocator>
 StringResponse MakeMapNotFoundResponse(
         const http::request<Body, http::basic_fields<Allocator>>& req,
-        const model::Game& game){
+        const model::Game& game)                                                                                                                                                                          {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, "application/json");
     response.body() = json_converter::CreateMapNotFoundResponse();
@@ -120,7 +120,7 @@ StringResponse MakeMapNotFoundResponse(
 template <typename Body, typename Allocator>
 StringResponse MakePageNotFoundResponse(
         const http::request<Body, http::basic_fields<Allocator>>& req,
-        const model::Game& game){
+        const model::Game& game) {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, "application/json");
     response.body() = json_converter::CreatePageNotFoundResponse();

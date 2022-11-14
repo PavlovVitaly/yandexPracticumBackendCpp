@@ -6,7 +6,7 @@ namespace http_server {
 
 using namespace std::literals;
 
-void ReportError(beast::error_code ec, std::string_view where){
+void ReportError(beast::error_code ec, std::string_view where) {
     std::cout << where << " : " << ec.what() << std::endl;
 }
 
