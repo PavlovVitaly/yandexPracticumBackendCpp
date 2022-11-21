@@ -32,18 +32,18 @@ void RunWorkers(size_t n, const Fn& fn) {
 }  // namespace
 
 int main(int argc, const char* argv[]) {
-    //if (argc != 3) {
-    //    std::cerr << "Usage: game_server <game-config-json>"sv << std::endl;
-    //    return EXIT_FAILURE;
-    //}
+    if (argc != 3) {
+        std::cerr << "Usage: game_server <game-config-json>"sv << std::endl;
+        return EXIT_FAILURE;
+    }
     try {
         // 1. Загружаем карту из файла и построить модель игры
-        //model::Game game = json_loader::LoadGame(argv[1]);
-        model::Game game = json_loader::LoadGame("../../data/config.json"); // for debug
+        model::Game game = json_loader::LoadGame(argv[1]);
+        //model::Game game = json_loader::LoadGame("../../data/config.json"); // for debug
 
         // 2. Устанавливаем путь до статического контента.
-        //fs::path sc_root_path{argv[1]};
-        fs::path sc_root_path{"../../static"};
+        fs::path sc_root_path{argv[2]};
+        //fs::path sc_root_path{"../../static"};
 
         // 3. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();
