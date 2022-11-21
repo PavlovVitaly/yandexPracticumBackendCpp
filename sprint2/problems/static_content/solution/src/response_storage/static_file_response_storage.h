@@ -114,9 +114,14 @@ http::response<http::file_body> MakeGetStaticContentFileResponse(
     res.result(http::status::ok);
 
     fs::path static_content{static_content_root};
-    std::string_view pathStr = req.target().substr(1, req.target().size() - 1);
-    fs::path rel_path{pathStr};
-    static_content = fs::weakly_canonical(static_content / rel_path);
+    if(req.target().empty() || req.target() == "/") {
+        fs::path rel_path{INDEX_FILE_NAME};
+        static_content = fs::weakly_canonical(static_content / rel_path);
+    } else {
+        std::string_view pathStr = req.target().substr(1, req.target().size() - 1);
+        fs::path rel_path{pathStr};
+        static_content = fs::weakly_canonical(static_content / rel_path);
+    }
     if(EXTENSION_FILE_TO_CONTENT_TYPE.contains(static_content.extension())) {
         res.insert(http::field::content_type, EXTENSION_FILE_TO_CONTENT_TYPE.at(static_content.extension()));
     } else {
