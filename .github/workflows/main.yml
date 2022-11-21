@@ -12,10 +12,7 @@ jobs:
       image: praktikumcpp/practicum_cpp_backend:latest
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
-        - /usr/bin/perf:/usr/bin/perf
-        - /usr/lib/linux-tools:/usr/lib/linux-tools
-        - /usr/lib/linux-azure-tools-5.15.0-1022:/usr/lib/linux-azure-tools-5.15.0-1022
-      options: --privileged --name main-container
+      options: --name main-container
     steps:
       - name: get docker network
         run: echo "DOCKER_NETWORK=$(docker inspect main-container -f '{{range $k, $v := .NetworkSettings.Networks}}{{printf "%s" $k}}{{end}}')" >> $GITHUB_ENV
@@ -41,6 +38,9 @@ jobs:
           conan install ..
           cmake ..
           cmake --build .
+          echo "COMMAND_RUN=${DELIVERY_APP}" >> $GITHUB_ENV
+        env:
+          DELIVERY_APP: ${{ github.workspace }}/sprint1/problems/sync_server/solution/build/bin/hello
 
       - name: run tests sprint1 sync_server
         run: pytest --junitxml=sync_server.xml cpp-backend-tests-practicum/tests/test_l02_hello_beast.py
@@ -79,6 +79,9 @@ jobs:
           conan install ..
           cmake ..
           cmake --build .
+          echo "COMMAND_RUN=${DELIVERY_APP}" >> $GITHUB_ENV
+        env:
+          DELIVERY_APP: ${{ github.workspace }}/sprint1/problems/async_server/solution/build/bin/hello_async
 
       - name: run tests sprint1 async_server
         run: pytest --junitxml=async_server.xml cpp-backend-tests-practicum/tests/test_l03_hello_async.py
@@ -93,9 +96,20 @@ jobs:
           conan install ..
           cmake ..
           cmake --build .
+          echo "COMMAND_RUN=${DELIVERY_APP} ${CONFIG_PATH}" >> $GITHUB_ENV
+        env:
+          DELIVERY_APP: ${{ github.workspace }}/sprint1/problems/map_json/solution/build/bin/game_server
+          CONFIG_PATH: ${{ github.workspace }}/sprint1/problems/map_json/solution/data/config.json
+
+      - name: Save map_json binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: game_server
+          path: ${{ github.workspace }}/sprint1/problems/map_json/solution/build/bin/game_server
+          retention-days: 1
 
       - name: run tests sprint1 map_json
-        run: pytest --junitxml=hello_async.xml cpp-backend-tests-practicum/tests/test_l04_map_json.py
+        run: pytest --junitxml=map_json.xml cpp-backend-tests-practicum/tests/test_l04_map_json.py
         env:
           DELIVERY_APP: ${{ github.workspace }}/sprint1/problems/map_json/solution/build/bin/game_server
           CONFIG_PATH: ${{ github.workspace }}/sprint1/problems/map_json/solution/data/config.json
@@ -103,13 +117,14 @@ jobs:
       - name: build tests sprint1 final_task
         run: |
           cd sprint1/problems/final_task/solution
-          docker build -t my_http_server .
-          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 my_http_server" >> $GITHUB_ENV
+          docker build -t final_task .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 final_task" >> $GITHUB_ENV
 
       - name: run tests sprint1 final_task
         run: pytest --junitxml=final_task.xml cpp-backend-tests-practicum/tests/test_l05_final_task.py
         env:
           SERVER_DOMAIN: cppserver
+          CONFIG_PATH: ${{ github.workspace }}/sprint1/problems/final_task/solution/data/config.json
 
       - name: build tests sprint2 static_content
         run: |
@@ -119,13 +134,19 @@ jobs:
           conan install ..
           cmake ..
           cmake --build .
-
-      - name: run tests sprint2 static_content
-        run: pytest --junitxml=results.xml cpp-backend-tests-practicum/tests/test_s02_static_content.py
+          echo "COMMAND_RUN=${DELIVERY_APP} ${CONFIG_PATH} ${DATA_PATH}" >> $GITHUB_ENV
         env:
           DELIVERY_APP: ${{ github.workspace }}/sprint2/problems/static_content/solution/build/bin/game_server
           CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/static_content/solution/data/config.json
           DATA_PATH: ${{ github.workspace }}/sprint2/problems/static_content/solution/static/
+
+      - name: run tests sprint2 static_content
+        run: pytest --junitxml=static_content.xml cpp-backend-tests-practicum/tests/test_s02_static_content.py
+        env:
+          DELIVERY_APP: ${{ github.workspace }}/sprint2/problems/static_content/solution/build/bin/game_server
+          CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/static_content/solution/data/config.json
+          DATA_PATH: ${{ github.workspace }}/sprint2/problems/static_content/solution/static/
+
 
       - name: build tests sprint2 logger
         run: |
@@ -143,13 +164,14 @@ jobs:
       - name: build tests sprint2 server_logging
         run: |
           cd sprint2/problems/server_logging/solution
-          docker build -t my_http_server .
-          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 my_http_server" >> $GITHUB_ENV
+          docker build -t server_logging .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 server_logging" >> $GITHUB_ENV
 
       - name: run tests sprint2 server_logging
         run: pytest --junitxml=server_logging.xml cpp-backend-tests-practicum/tests/test_s02_server_logging.py
         env:
           SERVER_DOMAIN: cppserver
+          CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/server_logging/solution/data/config.json
 
       - name: build tests sprint2 join_game
         run: |
@@ -161,6 +183,7 @@ jobs:
         run: pytest --junitxml=join_game.xml cpp-backend-tests-practicum/tests/test_s02_join_game.py
         env:
           SERVER_DOMAIN: cppserver
+          CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/join_game/solution/data/config.json
 
       - name: build tests sprint2 game_state
         run: |
@@ -172,28 +195,31 @@ jobs:
         run: pytest --junitxml=game_state.xml cpp-backend-tests-practicum/tests/test_s02_game_state.py
         env:
           SERVER_DOMAIN: cppserver
+          CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/game_state/solution/data/config.json
 
       - name: build tests sprint2 move_players
         run: |
           cd sprint2/problems/move_players/solution
-          docker build -t my_http_server .
-          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 my_http_server" >> $GITHUB_ENV
+          docker build -t move_players .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 move_players" >> $GITHUB_ENV
 
       - name: run tests sprint2 move_players
         run: pytest --junitxml=move_players.xml cpp-backend-tests-practicum/tests/test_s02_move_players.py
         env:
           SERVER_DOMAIN: cppserver
+          CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/move_players/solution/data/config.json
 
       - name: build tests sprint2 time_control
         run: |
           cd sprint2/problems/time_control/solution
           docker build -t time_control .
-          echo "COMMAND_RUN=docker run --rm --entrypoint /app/game_server --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 time_control --config-file /app/data/config.json --www-root /app/static/" >> $GITHUB_ENV
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 time_control" >> $GITHUB_ENV
 
       - name: run tests sprint2 time_control
         run: pytest --junitxml=time_control.xml cpp-backend-tests-practicum/tests/test_s02_time_control.py
         env:
           SERVER_DOMAIN: cppserver
+          CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/time_control/solution/data/config.json
 
       - name: build tests sprint2 command_line
         run: |
@@ -205,18 +231,69 @@ jobs:
         run: pytest --junitxml=command_line.xml cpp-backend-tests-practicum/tests/test_s02_command_line.py
         env:
           SERVER_DOMAIN: cppserver
+          CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/command_line/solution/data/config.json
 
       - name: build tests sprint3 instrumentation
         run: |
-          cd sprint3/problems/instrumentation/solution/v2
+          cd sprint3/problems/instrumentation/solution
           g++ -O3 *.cpp -o event2dot
 
       - name: run tests sprint3 instrumentation
         run: pytest --junitxml=instrumentation.xml cpp-backend-tests-practicum/tests/test_s03_instrumentation.py
         env:
           REPORT_PATH: ${{ github.workspace }}/sprint3/problems/instrumentation/solution/report
-          BINARY_PATH: ${{ github.workspace }}/sprint3/problems/instrumentation/solution/v2/event2dot
-          ARG: ${{ github.workspace }}/sprint3/problems/instrumentation/solution/v2/inputs
+          BINARY_PATH: ${{ github.workspace }}/sprint3/problems/instrumentation/solution/event2dot
+          ARG: ${{ github.workspace }}/sprint3/problems/instrumentation/solution/inputs
+
+      - name: build tests sprint3 gen_objects
+        run: |
+          cd sprint3/problems/gen_objects/solution
+          docker build -t gen_objects .
+          echo "COMMAND_RUN=docker run --rm --entrypoint /app/game_server --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 gen_objects --config-file /app/data/config.json --www-root /app/static/" >> $GITHUB_ENV
+
+
+      - name: run tests sprint3 gen_objects
+        run: pytest --junitxml=gen_objects.xml cpp-backend-tests-practicum/tests/test_s03_gen_objects.py
+        env:
+          SERVER_DOMAIN: cppserver
+          CONFIG_PATH: ${{ github.workspace }}/sprint3/problems/gen_objects/solution/data/config.json
+
+
+      - name: Publish XML reports
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: ${{ github.workspace }}/*.xml
+
+  flamegraph:
+    runs-on: ubuntu-22.04
+    needs: tests
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo pip3 install --no-cache-dir \
+            pytest==7.1.2 \
+            pytest-xprocess==0.20.0 \
+            pytest-quickcheck==0.9.0 \
+            conan==1.53.0 \
+            gprof2dot==2022.7.29
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Load tests
+        uses: actions/checkout@v2
+        with:
+          repository: 'cpppracticum/cpp-backend-tests-practicum'
+          path: 'cpp-backend-tests-practicum'
+
+      - name: Load map_json binary
+        uses: actions/download-artifact@v3
+        with:
+          name: game_server
+          path: ${{ github.workspace }}/sprint1/problems/map_json/solution/build/bin
+
+      - run: chmod +x ${GITHUB_WORKSPACE}/sprint1/problems/map_json/solution/build/bin/game_server
 
       - name: Load FlameGraph
         uses: actions/checkout@v2
@@ -227,9 +304,10 @@ jobs:
       - name: run tests sprint3 flamegraph
         run: |
           cd sprint3/problems/flamegraph/solution
-          python3 shoot.py "${GITHUB_WORKSPACE}/sprint1/problems/map_json/solution/build/bin/game_server ${GITHUB_WORKSPACE}/sprint1/problems/map_json/solution/data/config.json" || true
+          sudo python3 shoot.py "${GITHUB_WORKSPACE}/sprint1/problems/map_json/solution/build/bin/game_server ${GITHUB_WORKSPACE}/sprint1/problems/map_json/solution/data/config.json"
+          sudo chown -R runner:docker ${GITHUB_WORKSPACE}/sprint3/problems/flamegraph/solution
           ls -l
-#          pytest --junitxml=flamegraph.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s03_flamegraph.py
+          pytest --junitxml=flamegraph.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s03_flamegraph.py
         env:
           DIRECTORY: ${{ github.workspace }}/sprint3/problems/flamegraph/solution
 
@@ -237,4 +315,54 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()
         with:
-          files: ./*.xml
+          files: ${{ github.workspace }}/*.xml
+
+  with_server:
+    runs-on: ubuntu-22.04
+    container:
+      image: praktikumcpp/practicum_cpp_backend_server:latest
+      options: --privileged
+    services:
+      cppserver:
+        image: praktikumcpp/game_server:latest
+        ports:
+          - 8080:8080
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Load tests
+        uses: actions/checkout@v3
+        with:
+          repository: 'cpppracticum/cpp-backend-tests-practicum'
+          path: 'cpp-backend-tests-practicum'
+
+      - name: run tests sprint3 ammo
+        run: |
+          cd sprint3/problems/ammo/solution
+          yandex-tank -c ${GITHUB_WORKSPACE}/sprint3/problems/ammo/solution/load.yaml ${GITHUB_WORKSPACE}/sprint3/problems/ammo/solution/ammo.txt
+          pytest --junitxml=${GITHUB_WORKSPACE}/ammo.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s03_ammo.py
+        env:
+          DIRECTORY: ${{ github.workspace }}/sprint3/problems/ammo/solution/logs
+
+      - name: run tests sprint3 load
+        run: |
+          cd sprint3/problems/load/solution
+          yandex-tank -c ${GITHUB_WORKSPACE}/sprint3/problems/load/solution/load.yaml ${GITHUB_WORKSPACE}/sprint3/problems/load/solution/ammo.txt
+          pytest --junitxml=${GITHUB_WORKSPACE}/load.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s03_load.py
+        env:
+          DIRECTORY: ${{ github.workspace }}/sprint3/problems/load/solution/logs
+
+#      - name: run tests sprint3 stress
+#        run: |
+#          cd sprint3/problems/stress/solution
+#          yandex-tank -c ${GITHUB_WORKSPACE}/sprint3/problems/stress/solution/load.yaml ${GITHUB_WORKSPACE}/sprint3/problems/stress/solution/ammo.txt
+#          pytest --junitxml=${GITHUB_WORKSPACE}/stress.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s03_stress.py
+#        env:
+#          DIRECTORY: ${{ github.workspace }}/sprint3/problems/stress/solution/logs
+
+      - name: Publish XML reports
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: ${{ github.workspace }}/*.xml
