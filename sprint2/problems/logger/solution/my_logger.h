@@ -44,7 +44,6 @@ class Logger {
 
     Logger(){
         std::string log_file = LOG_DIRECTORY + "sample_log_" + GetFileTimeStamp() + LOG_EXTENSION;
-        //std::string log_file = "./sample_log_" + GetFileTimeStamp();
         log_file_.open(log_file, std::ios::app);
     };
     Logger(const Logger&) = delete;
@@ -82,6 +81,7 @@ public:
 
 private:
     const std::string LOG_DIRECTORY{"/var/log/"};
+    //const std::string LOG_DIRECTORY{"./logs/"};
     const std::string LOG_EXTENSION{".log"};
     std::optional<std::chrono::system_clock::time_point> manual_ts_;
     mutable std::shared_mutex mtx_;
