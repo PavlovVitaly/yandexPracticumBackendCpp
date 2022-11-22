@@ -18,7 +18,6 @@ using namespace std::literals;
 
 class Logger {
     auto GetTime() const {
-        std::shared_lock guard(mtx_);
         if (manual_ts_) {
             return *manual_ts_;
         }
@@ -59,6 +58,7 @@ public:
     // Выведите в поток все аргументы.
     template<class... Ts>
     void Log(const Ts&... args){
+        std::shared_lock guard(mtx_);
         log_file_ << GetTimeStamp() << ": "sv;
         ((log_file_ << args), ...);
         log_file_ << std::endl;
@@ -70,6 +70,10 @@ public:
     void SetTimestamp(std::chrono::system_clock::time_point ts){
         std::lock_guard guard(mtx_);
         manual_ts_ = ts;
+        log_file_.close();
+        std::string log_file = LOG_DIRECTORY + "sample_log_" + GetFileTimeStamp() + LOG_EXTENSION;
+        log_file_.open(log_file, std::ios::app);
+
     };
 
     ~Logger(){
