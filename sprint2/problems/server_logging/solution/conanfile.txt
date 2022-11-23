@@ -1,5 +1,5 @@
 [requires]
-boost/1.80.0
+boost/1.78.0
 jsoncpp/1.9.5
 
 [generators]
