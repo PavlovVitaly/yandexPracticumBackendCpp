@@ -24,6 +24,4 @@ std::string CreateLogMessage(std::string_view msg, T&& data) {
     return json::serialize(json::value_from(LogMessage<T>(std::forward<T>(data), msg)));
 };
 
-void LogFormatter(logging::record_view const& rec, logging::formatting_ostream& strm);
-
 }
