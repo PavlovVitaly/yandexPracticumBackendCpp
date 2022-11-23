@@ -48,8 +48,7 @@ target_include_directories(game_server PRIVATE
 	src/utils
 	src/logging
 )
-target_link_libraries(game_server PRIVATE Threads::Threads jsoncpp ${Boost_LIBRARIES})
+target_link_libraries(game_server PRIVATE Threads::Threads jsoncpp Boost::log Boost::log_setup)
 
 # Boost.Beast будет использовать std::string_view вместо boost::string_view
 add_compile_definitions(BOOST_BEAST_USE_STD_STRING_VIEW)
-#add_compile_definitions(BOOST_LOG_DYN_LINK)
