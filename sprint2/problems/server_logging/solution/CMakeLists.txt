@@ -52,3 +52,4 @@ target_link_libraries(game_server PRIVATE Threads::Threads jsoncpp Boost::log Bo
 
 # Boost.Beast будет использовать std::string_view вместо boost::string_view
 add_compile_definitions(BOOST_BEAST_USE_STD_STRING_VIEW)
+add_compile_definitions(BOOST_LOG_USE_WCHAR_T)
