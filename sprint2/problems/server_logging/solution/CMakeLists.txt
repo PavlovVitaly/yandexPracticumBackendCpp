@@ -7,12 +7,10 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 find_package(Boost 1.78.0 REQUIRED)
+find_package(Boost 1.78.0 COMPONENTS log log_setup)
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif()
-
-find_package(Boost 1.78.0 COMPONENTS log log_setup)
-include_directories(${BOOST_INCLUDE_DIRS})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -50,6 +48,7 @@ target_include_directories(game_server PRIVATE
 	src/utils
 	src/logging
 )
-target_link_libraries(game_server PRIVATE Threads::Threads jsoncpp Boost::log Boost::log_setup)
+#target_link_libraries(game_server PRIVATE Threads::Threads jsoncpp Boost::log Boost::log_setup)
+target_link_libraries(game_server PRIVATE Threads::Threads jsoncpp CONAN_PKG::boost)
 # Boost.Beast будет использовать std::string_view вместо boost::string_view
 add_compile_definitions(BOOST_BEAST_USE_STD_STRING_VIEW)
