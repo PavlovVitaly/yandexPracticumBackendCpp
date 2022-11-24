@@ -34,7 +34,7 @@ void RunWorkers(size_t n, const Fn& fn) {
 
 int main(int argc, const char* argv[]) {
     // 0. Инициализация логгера.
-    logware::InitLogger();
+    //logware::InitLogger();
     if (argc != 3) {
         BOOST_LOG_TRIVIAL(error) << logware::CreateLogMessage("Usage: game_server <game-config-json>"sv,
                                                                 logware::ExitCodeLogData(EXIT_FAILURE));
@@ -77,7 +77,7 @@ int main(int argc, const char* argv[]) {
         std::cout << "Server has started..."sv << std::endl;
         //BOOST_LOG_TRIVIAL(info) << logware::CreateLogMessage("server started"sv,
         //                                                        logware::ServerAddressLogData(address.to_string(), port));
-
+        logware::InitLogger();
         // 7. Запускаем обработку асинхронных операций
         RunWorkers(std::max(1u, num_threads), [&ioc] {
             ioc.run();
