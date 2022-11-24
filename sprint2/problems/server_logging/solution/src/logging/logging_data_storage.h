@@ -93,13 +93,13 @@ void tag_invoke(boost::json::value_from_tag, boost::json::value& jv, ExitCodeLog
 
 template <class T>
 struct LogMessage{
-    LogMessage(T&& custom_data, std::string_view msg):
-        data(custom_data), message(msg){
+    LogMessage(std::string_view msg, T&& custom_data):
+        message(msg), data(custom_data){
         timestamp = boost::posix_time::to_iso_extended_string(boost::posix_time::microsec_clock::local_time());
     };
     
-    T data;
     std::string_view message;
+    T data;
     std::string timestamp;
 };
 

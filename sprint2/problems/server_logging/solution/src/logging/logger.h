@@ -14,12 +14,10 @@ namespace json = boost::json;
 using namespace std::literals;
 
 void InitLogger();
-void MyFormatter(logging::record_view const& rec, logging::formatting_ostream& strm);
-
 
 template <class T>
 std::string CreateLogMessage(std::string_view msg, T&& data) {
-    return json::serialize(json::value_from(LogMessage<T>(std::forward<T>(data), msg)));
+    return json::serialize(json::value_from(LogMessage<T>(msg, std::forward<T>(data))));
 };
 
 }
