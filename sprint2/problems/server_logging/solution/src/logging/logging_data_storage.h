@@ -16,7 +16,7 @@ using namespace std::literals;
 
 
 const std::string IP = "ip";
-const std::string URL = "url";
+const std::string URL = "URI";
 const std::string METHOD = "method";
 const std::string RESPONSE_TIME = "response_time";
 const std::string CODE = "code";
