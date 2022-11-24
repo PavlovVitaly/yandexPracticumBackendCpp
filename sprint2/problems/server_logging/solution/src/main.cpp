@@ -74,7 +74,7 @@ int main(int argc, const char* argv[]) {
         });
         
         // Эта надпись сообщает тестам о том, что сервер запущен и готов обрабатывать запросы
-        BOOST_LOG_TRIVIAL(info) << "Server has started..."sv << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "Server has started..."sv;
         BOOST_LOG_TRIVIAL(info) << logware::CreateLogMessage("server started"sv,
                                                                 logware::ServerAddressLogData(address.to_string(), port));
 
