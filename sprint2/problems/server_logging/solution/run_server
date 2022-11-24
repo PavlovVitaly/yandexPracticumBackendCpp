@@ -1,1 +1,1 @@
-./build/bin/game_server data/config.json
+./build/bin/game_server data/config.json ./static
