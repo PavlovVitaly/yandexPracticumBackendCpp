@@ -14,6 +14,8 @@ namespace json = boost::json;
 using namespace std::literals;
 
 void InitLogger();
+void MyFormatter(logging::record_view const& rec, logging::formatting_ostream& strm);
+
 
 template <class T>
 std::string CreateLogMessage(std::string_view msg, T&& data) {
