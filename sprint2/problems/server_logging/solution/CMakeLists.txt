@@ -20,9 +20,9 @@ add_executable(game_server
 	src/http_server.cpp
 	src/http_server.h
 	src/sdk.h
-	src/model.h
-	src/model.cpp
-	src/tagged.h
+	src/model/model.h
+	src/model/model.cpp
+	src/model/tagged.h
 	src/request_handler.cpp
 	src/request_handler.h
 	src/json/json_loader.h
@@ -47,6 +47,7 @@ target_include_directories(game_server PRIVATE
 	src/response_storage
 	src/utils
 	src/logging
+	src/model
 )
 target_link_libraries(game_server PRIVATE Threads::Threads jsoncpp Boost::log Boost::log_setup)
 

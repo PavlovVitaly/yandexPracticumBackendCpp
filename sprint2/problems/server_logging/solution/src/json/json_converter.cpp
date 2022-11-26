@@ -3,6 +3,9 @@
 #include <map>
 #include <sstream>
 #include <json/json.h>
+#include <boost/json/array.hpp>
+
+#include <boost/json.hpp>
 
 namespace json_converter{
 
@@ -87,6 +90,9 @@ std::string CreateMapNotFoundResponse() {
     std::stringstream json_string;
     writer->write(root, &json_string);
     return json_string.str();
+    //boost::json::value lol = {{"Helllllo", "world"}};
+    //boost::json::array arr = {lol};
+    //return boost::json::serialize(arr);
 };
 
 std::string CreateBadRequestResponse() {

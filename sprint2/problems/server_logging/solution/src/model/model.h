@@ -1,14 +1,16 @@
 #pragma once
+#include "tagged.h"
+
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-#include "tagged.h"
+#include <boost/json.hpp>
 
 namespace model {
 
 using Dimension = int;
 using Coord = Dimension;
+namespace json = boost::json;
 
 struct Point {
     Coord x, y;
@@ -71,6 +73,9 @@ private:
     Point end_;
 };
 
+void tag_invoke(json::value_from_tag, json::value& jv, const Road& road);
+Road tag_invoke(json::value_to_tag<Road>, json::value& jv);
+
 class Building {
 public:
     explicit Building(Rectangle bounds) noexcept
@@ -84,6 +89,9 @@ public:
 private:
     Rectangle bounds_;
 };
+
+void tag_invoke(json::value_from_tag, json::value& jv, const Building& building);
+Building tag_invoke(json::value_to_tag<Building>, json::value& jv);
 
 class Office {
 public:
@@ -112,6 +120,9 @@ private:
     Point position_;
     Offset offset_;
 };
+
+void tag_invoke(json::value_from_tag, json::value& jv, const Office& office);
+Office tag_invoke(json::value_to_tag<Office>, json::value& jv);
 
 class Map {
 public:
@@ -166,6 +177,9 @@ private:
     OfficeIdToIndex warehouse_id_to_index_;
     Offices offices_;
 };
+
+void tag_invoke(json::value_from_tag, json::value& jv, const Map& map);
+Map tag_invoke(json::value_to_tag<Map>, json::value& jv);
 
 class Game {
 public:
