@@ -19,9 +19,9 @@ add_executable(game_server
 	src/main.cpp
 	src/http_server.cpp
 	src/model/model.cpp
-	src/request_handler.cpp
 	src/json/json_loader.cpp
 	src/json/json_converter.cpp
+	src/request_handlers/request_handler.cpp
 	src/request_handlers/request_handlers_utility.cpp
 	src/utils/filesystem_utils.cpp
 	src/boost_json.cpp
