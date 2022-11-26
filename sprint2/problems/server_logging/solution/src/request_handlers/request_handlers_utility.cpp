@@ -1,6 +1,7 @@
-#include "api_v1_responce_storage.h"
+#include "request_handlers_utility.h"
+#include <string>
 
-namespace responce_storage{
+namespace rh_storage{
 
 std::vector<std::string_view> SplitUrl(std::string_view str) {
     std::vector<std::string_view> result;

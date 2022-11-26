@@ -1,9 +1,11 @@
 #pragma once
 #include "http_server.h"
 #include "model.h"
-#include "api_v1_responce_storage.h"
-#include "static_file_response_storage.h"
+#include "api_v1_request_handlers_executor.h"
+#include "static_file_request_handlers_executor.h"
+
 #include <filesystem>
+
 namespace http_handler {
 
 namespace beast = boost::beast;
@@ -26,61 +28,16 @@ public:
     template <typename Body, typename Allocator, typename Send>
     void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {// 
         // Обработать запрос request и отправить ответ, используя send
-        if(responce_storage::UseBadRequestActivator(req, game_)) {
-            auto response = responce_storage::MakeBadRequestResponse(req, game_);
-            send(response);
-        } else if(responce_storage::UseGetMapListActivator(req, game_)) {
-            if(req.method() == http::verb::get) {
-                auto response = responce_storage::MakeGetMapListResponse(req, game_);
-                send(response);
-            } else {
-                auto response = responce_storage::MakeBadRequestResponse(req, game_);
-                send(response);
-            }
-        } else if(responce_storage::UseMapNotFoundActivator(req, game_)) {
-            if(req.method() == http::verb::get) {
-                auto response = responce_storage::MakeMapNotFoundResponse(req, game_);
-                send(response);
-            } else {
-                auto response = responce_storage::MakeBadRequestResponse(req, game_);
-                send(response);
-            }
-        } else if(responce_storage::UseGetMapByIdActivator(req, game_)) {
-            if(req.method() == http::verb::get) {
-                auto response = responce_storage::MakeGetMapByIdResponse(req, game_);
-                send(response);
-            } else {
-                auto response = responce_storage::MakeBadRequestResponse(req, game_);
-                send(response);
-            }
-        } else if(responce_storage::UseStaticContentFileNotFoundActivator(req, static_content_root_path_)) {       // static content
-            if(req.method() == http::verb::get || req.method() == http::verb::head) {
-                auto response = responce_storage::MakeStaticContentFileNotFoundResponse(req, static_content_root_path_);
-                send(response);
-            } else {
-                auto response = responce_storage::MakeBadRequestResponse(req, game_);
-                send(response);
-            }
-        } else if(responce_storage::UseLeaveStaticContentRootDirActivator(req, static_content_root_path_)) {
-            if(req.method() == http::verb::get || req.method() == http::verb::head) {
-                auto response = responce_storage::MakeLeaveStaticContentRootDirResponse(req, static_content_root_path_);
-                send(response);
-            } else {
-                auto response = responce_storage::MakeBadRequestResponse(req, game_);
-                send(response);
-            }
-        }else if(responce_storage::UseGetStaticContentFileActivator(req, static_content_root_path_)) {
-            if(req.method() == http::verb::get || req.method() == http::verb::head) {
-                auto response = responce_storage::MakeGetStaticContentFileResponse(req, static_content_root_path_);
-                send(response);
-            } else {
-                auto response = responce_storage::MakeBadRequestResponse(req, game_);
-                send(response);
-            }
-        } else {
-            auto response = responce_storage::MakePageNotFoundResponse(req, game_);
-            send(response);
-        }
+        if(rh_storage::ApiV1RequestHandlerExecutor<http::request<Body, http::basic_fields<Allocator>>, Send>
+            ::GetInstance()
+            .Execute(req, game_, std::move(send))) {
+            return;
+        } else if(rh_storage::StaticFileRequestHandlerExecutor<http::request<Body, http::basic_fields<Allocator>>, Send>
+            ::GetInstance()
+            .Execute(req, static_content_root_path_, std::move(send))) {
+            return;
+        };
+        rh_storage::PageNotFoundHandler(req, game_, send);
     }
 
 private:

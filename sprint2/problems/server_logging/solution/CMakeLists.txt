@@ -18,33 +18,20 @@ find_package(Threads REQUIRED)
 add_executable(game_server
 	src/main.cpp
 	src/http_server.cpp
-	src/http_server.h
-	src/sdk.h
-	src/model/model.h
 	src/model/model.cpp
-	src/model/tagged.h
 	src/request_handler.cpp
-	src/request_handler.h
-	src/json/json_loader.h
 	src/json/json_loader.cpp
 	src/json/json_converter.cpp
-	src/json/json_converter.h
-	src/response_storage/api_v1_responce_storage.cpp
-	src/response_storage/api_v1_responce_storage.h
-	src/response_storage/static_file_response_storage.cpp
-	src/response_storage/static_file_response_storage.h
+	src/request_handlers/request_handlers_utility.cpp
 	src/utils/filesystem_utils.cpp
-	src/utils/filesystem_utils.h
 	src/boost_json.cpp
 	src/logging/logging_data_storage.cpp
-	src/logging/logging_data_storage.h
 	src/logging/logger.cpp
-	src/logging/logger.h
 )
 target_include_directories(game_server PRIVATE
 	src
 	src/json
-	src/response_storage
+	src/request_handlers
 	src/utils
 	src/logging
 	src/model

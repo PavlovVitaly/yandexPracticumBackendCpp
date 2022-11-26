@@ -8,7 +8,7 @@
 #include <string>
 #include <iostream>
 
-namespace responce_storage{
+namespace rh_storage{
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -42,9 +42,9 @@ const std::unordered_map<std::string, std::string> EXTENSION_FILE_TO_CONTENT_TYP
 const std::string INDEX_FILE_NAME{"index.html"};
 
 
-template <typename Body, typename Allocator>
-bool UseStaticContentFileNotFoundActivator(
-        const http::request<Body, http::basic_fields<Allocator>>& req,
+template <typename Request>
+bool StaticContentFileNotFoundActivator(
+        const Request& req,
         const fs::path& static_content_root) {
     fs::path static_content{static_content_root};
     if(req.target().empty() || req.target() == "/") {
@@ -62,22 +62,23 @@ bool UseStaticContentFileNotFoundActivator(
     return !fs::exists(static_content);
 };
 
-template <typename Body, typename Allocator>
-StringResponse MakeStaticContentFileNotFoundResponse(
-        const http::request<Body, http::basic_fields<Allocator>>& req,
-        const fs::path& static_content_root) {
+template <typename Request, typename Send>
+void StaticContentFileNotFoundHandler(
+        const Request& req,
+        const fs::path& static_content_root,
+        Send&& send) {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, "text/plain");
     response.body() = "Static content file not found.";
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
-    return response;
+    send(response);
 };
 
 
-template <typename Body, typename Allocator>
-bool UseLeaveStaticContentRootDirActivator(
-        const http::request<Body, http::basic_fields<Allocator>>& req,
+template <typename Request>
+bool LeaveStaticContentRootDirActivator(
+        const Request& req,
         const fs::path& static_content_root) {
     fs::path static_content{static_content_root};
     std::string_view pathStr = req.target().substr(1, req.target().size() - 1);
@@ -86,33 +87,35 @@ bool UseLeaveStaticContentRootDirActivator(
     return !fs_utils::IsSubPath(static_content, static_content_root);
 };
 
-template <typename Body, typename Allocator>
-StringResponse MakeLeaveStaticContentRootDirResponse(
-        const http::request<Body, http::basic_fields<Allocator>>& req,
-        const fs::path& static_content_root) {
+template <typename Request, typename Send>
+void LeaveStaticContentRootDirHandler(
+        const Request& req,
+        const fs::path& static_content_root,
+        Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, "text/plain");
     response.body() = "Try to leave static content root directory.";
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
-    return response;
+    send(response);
 };
 
 
-template <typename Body, typename Allocator>
-bool UseGetStaticContentFileActivator(
-        const http::request<Body, http::basic_fields<Allocator>>& req,
+template <typename Request>
+bool GetStaticContentFileActivator(
+        const Request& req,
         const fs::path& static_content_root) {
     return true;
 };
 
-template <typename Body, typename Allocator>
-http::response<http::file_body> MakeGetStaticContentFileResponse(
-        const http::request<Body, http::basic_fields<Allocator>>& req,
-        const fs::path& static_content_root) {
-    http::response<http::file_body> res;
-    res.version(11);  // HTTP/1.1
-    res.result(http::status::ok);
+template <typename Request, typename Send>
+void GetStaticContentFileHandler(
+        const Request& req,
+        const fs::path& static_content_root,
+        Send&& send) {
+    http::response<http::file_body> response;
+    response.version(11);  // HTTP/1.1
+    response.result(http::status::ok);
 
     fs::path static_content{static_content_root};
     if(req.target().empty() || req.target() == "/") {
@@ -124,9 +127,9 @@ http::response<http::file_body> MakeGetStaticContentFileResponse(
         static_content = fs::weakly_canonical(static_content / rel_path);
     }
     if(EXTENSION_FILE_TO_CONTENT_TYPE.contains(static_content.extension())) {
-        res.insert(http::field::content_type, EXTENSION_FILE_TO_CONTENT_TYPE.at(static_content.extension()));
+        response.insert(http::field::content_type, EXTENSION_FILE_TO_CONTENT_TYPE.at(static_content.extension()));
     } else {
-        res.insert(http::field::content_type, "application/octet-stream");
+        response.insert(http::field::content_type, "application/octet-stream");
     }
     
     http::file_body::value_type file;
@@ -137,13 +140,13 @@ http::response<http::file_body> MakeGetStaticContentFileResponse(
                                             "Failed to open static content file "sv,
                                             ec.what()));
     } else {
-        res.body() = std::move(file);
+        response.body() = std::move(file);
     }
 
     // Метод prepare_payload заполняет заголовки Content-Length и Transfer-Encoding
     // в зависимости от свойств тела сообщения
-    res.prepare_payload();
-    return res;
+    response.prepare_payload();
+    send(response);
 };
 
 }
