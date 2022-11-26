@@ -74,7 +74,7 @@ private:
 };
 
 void tag_invoke(json::value_from_tag, json::value& jv, const Road& road);
-Road tag_invoke(json::value_to_tag<Road>, json::value& jv);
+Road tag_invoke(json::value_to_tag<Road>, const json::value& jv);
 
 class Building {
 public:
@@ -91,7 +91,7 @@ private:
 };
 
 void tag_invoke(json::value_from_tag, json::value& jv, const Building& building);
-Building tag_invoke(json::value_to_tag<Building>, json::value& jv);
+Building tag_invoke(json::value_to_tag<Building>, const json::value& jv);
 
 class Office {
 public:
@@ -122,7 +122,7 @@ private:
 };
 
 void tag_invoke(json::value_from_tag, json::value& jv, const Office& office);
-Office tag_invoke(json::value_to_tag<Office>, json::value& jv);
+Office tag_invoke(json::value_to_tag<Office>, const json::value& jv);
 
 class Map {
 public:
@@ -160,11 +160,29 @@ public:
         roads_.emplace_back(road);
     }
 
+    void AddRoads(Roads& roads){
+        for(auto item : roads){
+            AddRoad(item);
+        }
+    }
+
     void AddBuilding(const Building& building) {
         buildings_.emplace_back(building);
     }
 
+    void AddBuildings(Buildings& buildings){
+        for(auto item : buildings){
+            AddBuilding(item);
+        }
+    }
+
     void AddOffice(Office office);
+
+    void AddOffices(Offices& offices){
+        for(auto item : offices){
+            AddOffice(item);
+        }
+    }
 
 private:
     using OfficeIdToIndex = std::unordered_map<Office::Id, size_t, util::TaggedHasher<Office::Id>>;
@@ -179,13 +197,15 @@ private:
 };
 
 void tag_invoke(json::value_from_tag, json::value& jv, const Map& map);
-Map tag_invoke(json::value_to_tag<Map>, json::value& jv);
+Map tag_invoke(json::value_to_tag<Map>, const json::value& jv);
 
 class Game {
 public:
     using Maps = std::vector<Map>;
 
     void AddMap(Map map);
+
+    void AddMaps(Maps& maps);
 
     const Maps& GetMaps() const noexcept {
         return maps_;

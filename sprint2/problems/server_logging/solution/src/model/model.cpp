@@ -36,6 +36,11 @@ void Game::AddMap(Map map) {
     }
 }
 
+void Game::AddMaps(Maps& maps){
+    for(auto item : maps){
+        AddMap(item);
+    }
+};
 
 void tag_invoke(json::value_from_tag, json::value& jv, const Road& road) {
     if(road.IsHorizontal()) {
@@ -49,17 +54,18 @@ void tag_invoke(json::value_from_tag, json::value& jv, const Road& road) {
     }
 };
 
-Road tag_invoke(json::value_to_tag<Road>, json::value& jv) {
+Road tag_invoke(json::value_to_tag<Road>, const json::value& jv) {
     Point start;
     start.x = json::value_to<int>(jv.as_object().at(ROAD_XO));
     start.y = json::value_to<int>(jv.as_object().at(ROAD_YO));
     Coord end;
-    if(jv.as_object().at(ROAD_X1).if_int64()) {
+    try {
         end = json::value_to<int>(jv.as_object().at(ROAD_X1));
         return Road(Road::HORIZONTAL, start, end);
+    } catch (...) {
+        end = json::value_to<int>(jv.as_object().at(ROAD_Y1));
+        return Road(Road::VERTICAL, start, end);
     }
-    end = json::value_to<int>(jv.as_object().at(ROAD_Y1));
-    return Road(Road::VERTICAL, start, end);
 };
 
 
@@ -70,7 +76,7 @@ void tag_invoke(json::value_from_tag, json::value& jv, const Building& building)
             {BUILDING_HEIGHT, json::value_from(building.GetBounds().size.height)}};
 };
 
-Building tag_invoke(json::value_to_tag<Building>, json::value& jv) {
+Building tag_invoke(json::value_to_tag<Building>, const json::value& jv) {
     Point point;
     point.x = json::value_to<int>(jv.as_object().at(BUILDING_X));
     point.y = json::value_to<int>(jv.as_object().at(BUILDING_Y));
@@ -89,7 +95,7 @@ void tag_invoke(json::value_from_tag, json::value& jv, const Office& office) {
             {OFFICE_OFFSET_Y, json::value_from(office.GetOffset().dy)}};
 };
 
-Office tag_invoke(json::value_to_tag<Office>, json::value& jv) {
+Office tag_invoke(json::value_to_tag<Office>, const json::value& jv) {
     Office::Id id{json::value_to<std::string>(jv.as_object().at(OFFICE_ID))};
     Point position;
     position.x = json::value_to<int>(jv.as_object().at(OFFICE_X));
@@ -109,25 +115,16 @@ void tag_invoke(json::value_from_tag, json::value& jv, const Map& map) {
             {OFFICES, json::value_from(map.GetOffices())}};
 };
 
-Map tag_invoke(json::value_to_tag<Map>, json::value& jv) {
+Map tag_invoke(json::value_to_tag<Map>, const json::value& jv) {
     Map::Id id{json::value_to<std::string>(jv.as_object().at(MAP_ID))};
     std::string name = json::value_to<std::string>(jv.as_object().at(MAP_NAME));
     Map map(id, name);
-    json::array roads = jv.as_object().at(ROADS).as_array();
-    json::value elem = roads[1];
-    Road road = json::value_to<Road>(elem);
-    //std::vector<Road> roads = json::value_to< std::vector<Road> >(jv.as_object().at(ROADS));
-    //for(auto item : roads) {
-    //    map.AddRoad(item);
-    //}
-    //std::vector<Building> buildings = json::value_to<std::vector<Building>>(jv.as_object().at(BUILDINGS));
-    //for(auto item : buildings) {
-    //    map.AddBuilding(item);
-    //}
-    //std::vector<Office> offices = json::value_to<std::vector<Office>>(jv.as_object().at(OFFICES));
-    //for(auto item : offices) {
-    //    map.AddOffice(item);
-    //}
+    std::vector<Road> roads = json::value_to< std::vector<Road> >(jv.as_object().at(ROADS));
+    map.AddRoads(roads);
+    std::vector<Building> buildings = json::value_to<std::vector<Building>>(jv.as_object().at(BUILDINGS));
+    map.AddBuildings(buildings);
+    std::vector<Office> offices = json::value_to<std::vector<Office>>(jv.as_object().at(OFFICES));
+    map.AddOffices(offices);
     return map;
 };
 
