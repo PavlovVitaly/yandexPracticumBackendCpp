@@ -14,7 +14,7 @@ std::string ConvertMapListToJson(const model::Game::Maps& maps) {
     json::array mapsArr;
     for(auto map : maps) {
         json::value item = {{model::MAP_ID, *(map->GetId())},
-                                    {model::MAP_NAME, map->GetName()}};
+                            {model::MAP_NAME, map->GetName()}};
         mapsArr.push_back(item);
     }
     return json::serialize(mapsArr);
@@ -26,32 +26,50 @@ std::string ConvertMapToJson(const model::Map& map) {
 
 std::string CreateMapNotFoundResponse() {
     json::value msg = {{json_keys::RESPONSE_CODE, "mapNotFound"},
-                                {json_keys::RESPONSE_MESSAGE, "Map not found"}};
+                        {json_keys::RESPONSE_MESSAGE, "Map not found"}};
     return json::serialize(msg);
 };
 
 std::string CreateBadRequestResponse() {
     json::value msg = {{json_keys::RESPONSE_CODE, "badRequest"},
-                                {json_keys::RESPONSE_MESSAGE, "Bad request"}};
+                        {json_keys::RESPONSE_MESSAGE, "Bad request"}};
     return json::serialize(msg);
 };
 
 std::string CreatePageNotFoundResponse() {
     json::value msg = {{json_keys::RESPONSE_CODE, "pageNotFound"},
-                                {json_keys::RESPONSE_MESSAGE, "Page not found"}};
+                        {json_keys::RESPONSE_MESSAGE, "Page not found"}};
     return json::serialize(msg);
 };
 
 std::string CreateOnlyPostMethodAllowedResponse(){
     json::value msg = {{json_keys::RESPONSE_CODE, "invalidMethod"},
-                                {json_keys::RESPONSE_MESSAGE, "Only POST method is expected"}};
+                        {json_keys::RESPONSE_MESSAGE, "Only POST method is expected"}};
+    return json::serialize(msg);
+};
+
+std::string CreateJoinToGameInvalidArgumentResponse(){
+    json::value msg = {{json_keys::RESPONSE_CODE, "invalidArgument"},
+                        {json_keys::RESPONSE_MESSAGE, "Join game request parse error"}};
+    return json::serialize(msg);
+};
+
+std::string CreateJoinToGameMapNotFoundResponse() {
+    json::value msg = {{json_keys::RESPONSE_CODE, "mapNotFound"},
+                        {json_keys::RESPONSE_MESSAGE, "Map not found"}};
+    return json::serialize(msg);
+};
+
+std::string CreateJoinToGameEmptyPlayerNameResponse(){
+    json::value msg = {{json_keys::RESPONSE_CODE, "invalidArgument"},
+                        {json_keys::RESPONSE_MESSAGE, "Invalid name"}};
     return json::serialize(msg);
 };
 
 
 std::string CreateJoinToGameResponse(const std::string& token, size_t player_id) {
     json::value msg = {{json_keys::RESPONSE_AUTHORISATION_TOKEN, token},
-                                {json_keys::RESPONSE_PLAYER_ID, player_id}};
+                        {json_keys::RESPONSE_PLAYER_ID, player_id}};
     return json::serialize(msg);
 };
 

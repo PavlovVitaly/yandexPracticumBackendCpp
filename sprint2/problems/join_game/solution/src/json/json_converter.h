@@ -13,6 +13,10 @@ std::string CreateMapNotFoundResponse();
 std::string CreateBadRequestResponse();
 std::string CreatePageNotFoundResponse();
 std::string CreateOnlyPostMethodAllowedResponse();
+std::string CreateJoinToGameInvalidArgumentResponse();
+std::string CreateJoinToGameMapNotFoundResponse();
+std::string CreateJoinToGameEmptyPlayerNameResponse();
+
 
 std::string CreateJoinToGameResponse(const std::string& token, size_t player_id);
 std::optional< std::tuple<std::string, model::Map::Id> > ParseJoinToGameRequest(const std::string& msg);

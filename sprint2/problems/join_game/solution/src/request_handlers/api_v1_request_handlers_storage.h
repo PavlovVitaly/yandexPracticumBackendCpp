@@ -126,6 +126,77 @@ void MapNotFoundHandler(
 
 
 template <typename Request>
+bool JoinToGameInvalidJsonReqActivator(
+        const Request& req,
+        app::Application& application) {
+    return (req.target() == "/api/v1/game/join" || req.target() == "/api/v1/game/join/") &&
+        !json_converter::ParseJoinToGameRequest(req.body());
+}
+
+template <typename Request, typename Send>
+void JoinToGameInvalidJsonReqHandler(
+        const Request& req,
+        app::Application& application,
+        Send&& send) {
+    StringResponse response(http::status::bad_request, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.body() = json_converter::CreateJoinToGameInvalidArgumentResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+}
+
+
+template <typename Request>
+bool JoinToGameMapNotFoundActivator(
+        const Request& req,
+        app::Application& application) {
+    auto [player_name, map_id] = json_converter::ParseJoinToGameRequest(req.body()).value();
+    return (req.target() == "/api/v1/game/join" || req.target() == "/api/v1/game/join/") &&
+        application.FindMap(map_id) == nullptr;
+}
+
+template <typename Request, typename Send>
+void JoinToGameMapNotFoundHandler(
+        const Request& req,
+        app::Application& application,
+        Send&& send) {
+    StringResponse response(http::status::not_found, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.body() = json_converter::CreateJoinToGameMapNotFoundResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+}
+
+
+template <typename Request>
+bool JoinToGameEmptyPlayerNameActivator(
+        const Request& req,
+        app::Application& application) {
+    auto [player_name, map_id] = json_converter::ParseJoinToGameRequest(req.body()).value();
+    return (req.target() == "/api/v1/game/join" || req.target() == "/api/v1/game/join/") &&
+        player_name.empty();
+}
+
+template <typename Request, typename Send>
+void JoinToGameEmptyPlayerNameHandler(
+        const Request& req,
+        app::Application& application,
+        Send&& send) {
+    StringResponse response(http::status::bad_request, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.body() = json_converter::CreateJoinToGameEmptyPlayerNameResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+}
+
+
+template <typename Request>
 bool JoinToGameActivator(
         const Request& req,
         app::Application& application) {
@@ -141,6 +212,7 @@ void JoinToGameHandler(
     auto [token, player_id] = application.JoinGame(player_name, map_id);
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
     response.body() = json_converter::CreateJoinToGameResponse(*token, *player_id);
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
@@ -154,6 +226,8 @@ void OnlyPostMethodAllowedHandler(
         Send&& send) {
     StringResponse response(http::status::method_not_allowed, req.version());
     response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.set(http::field::allow, "POST");
     response.body() = json_converter::CreateOnlyPostMethodAllowedResponse();
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
