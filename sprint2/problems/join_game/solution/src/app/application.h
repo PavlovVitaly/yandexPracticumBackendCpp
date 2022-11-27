@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <memory>
+#include <tuple>
 
 namespace app {
 
@@ -19,7 +20,7 @@ public:
 
     const model::Game::Maps& ListMap() const noexcept;
     const std::shared_ptr<model::Map> FindMap(const model::Map::Id& id) const noexcept;
-    authentication::Token JoinGame(const model::Map::Id& id, const std::string& player_name);
+    std::tuple<authentication::Token, model::Player::Id> JoinGame(const std::string& player_name, const model::Map::Id& id);
 private:
     model::Game game_;
     std::vector< std::shared_ptr<model::Player> > players_;

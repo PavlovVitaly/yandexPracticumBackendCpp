@@ -17,17 +17,18 @@ const size_t SIZE_OF_TWO_SEGMENT_URL = 2;
 const size_t SIZE_OF_THREE_SEGMENT_URL = 3;
 const size_t SIZE_OF_FOUR_SEGMENT_URL = 4;
 
+
 template <typename Request>
 bool GetMapListActivator(
         const Request& req,
-        const app::Application& application) {
+        app::Application& application) {
     return req.target() == "/api/v1/maps" || req.target() == "/api/v1/maps/";
 }
 
 template <typename Request, typename Send>
 void GetMapListHandler(
         const Request& req,
-        const app::Application& application,
+        app::Application& application,
         Send&& send) {
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, "application/json");
@@ -37,10 +38,11 @@ void GetMapListHandler(
     send(response);
 }
 
+
 template <typename Request>
 bool GetMapByIdActivator(
         const Request& req,
-        const app::Application& application) {
+        app::Application& application) {
     auto url = SplitUrl(req.target());
     return url.size() == SIZE_OF_FOUR_SEGMENT_URL &&
             url[0] == "api" &&
@@ -52,7 +54,7 @@ bool GetMapByIdActivator(
 template <typename Request, typename Send>
 void GetMapByIdHandler(
         const Request& req,
-        const app::Application& application,
+        app::Application& application,
         Send&& send) {
     http::response<http::string_body> response(http::status::ok, req.version());
     auto id = SplitUrl(req.target())[3];
@@ -67,7 +69,7 @@ void GetMapByIdHandler(
 template <typename Request>
 bool BadRequestActivator(
         const Request& req,
-        const app::Application& application) {
+        app::Application& application) {
     auto url = SplitUrl(req.target());
     return !url.empty() &&
             url[0] == "api" &&
@@ -77,14 +79,16 @@ bool BadRequestActivator(
                 (url.size() >= SIZE_OF_TWO_SEGMENT_URL && 
                     url[1] != "v1") ||
                 (url.size() >= SIZE_OF_THREE_SEGMENT_URL &&
-                    url[2] != "maps")
+                    url[2] != "maps" &&
+                    url[2] != "game" &&
+                    url[3] != "join")
             );
 };
 
 template <typename Request, typename Send>
 void BadRequestHandler(
         const Request& req,
-        const app::Application& application,
+        app::Application& application,
         Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, "application/json");
@@ -94,10 +98,11 @@ void BadRequestHandler(
     send(response);
 };
 
+
 template <typename Request>
 bool MapNotFoundActivator(
         const Request& req,
-        const app::Application& application) {
+        app::Application& application) {
     auto url = SplitUrl(req.target());
     return url.size() == SIZE_OF_FOUR_SEGMENT_URL &&
             url[0] == "api" &&
@@ -109,7 +114,7 @@ bool MapNotFoundActivator(
 template <typename Request, typename Send>
 void MapNotFoundHandler(
         const Request& req,
-        const app::Application& application,
+        app::Application& application,
         Send&& send)                                                                                                                                                                          {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, "application/json");
@@ -119,10 +124,46 @@ void MapNotFoundHandler(
     send(response);
 };
 
+
+template <typename Request>
+bool JoinToGameActivator(
+        const Request& req,
+        app::Application& application) {
+    return (req.target() == "/api/v1/game/join" || req.target() == "/api/v1/game/join/");
+}
+
+template <typename Request, typename Send>
+void JoinToGameHandler(
+        const Request& req,
+        app::Application& application,
+        Send&& send) {
+    auto [player_name, map_id] = json_converter::ParseJoinToGameRequest(req.body()).value();
+    auto [token, player_id] = application.JoinGame(player_name, map_id);
+    StringResponse response(http::status::ok, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.body() = json_converter::CreateJoinToGameResponse(*token, *player_id);
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+}
+
+template <typename Request, typename Send>
+void OnlyPostMethodAllowedHandler(
+        const Request& req,
+        app::Application& application,
+        Send&& send) {
+    StringResponse response(http::status::method_not_allowed, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.body() = json_converter::CreateOnlyPostMethodAllowedResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+};
+
 template <typename Request, typename Send>
 void PageNotFoundHandler(
         const Request& req,
-        const app::Application& application,
+        app::Application& application,
         Send&& send) {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, "application/json");

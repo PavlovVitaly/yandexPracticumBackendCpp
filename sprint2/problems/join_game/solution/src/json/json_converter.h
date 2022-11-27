@@ -1,7 +1,9 @@
 #pragma once
-#include "game.h"
-#include <string>
+#include "application.h"
 
+#include <string>
+#include <tuple>
+#include <optional>
 
 namespace json_converter{
 
@@ -10,5 +12,9 @@ std::string ConvertMapToJson(const model::Map& map);
 std::string CreateMapNotFoundResponse();
 std::string CreateBadRequestResponse();
 std::string CreatePageNotFoundResponse();
+std::string CreateOnlyPostMethodAllowedResponse();
+
+std::string CreateJoinToGameResponse(const std::string& token, size_t player_id);
+std::optional< std::tuple<std::string, model::Map::Id> > ParseJoinToGameRequest(const std::string& msg);
 
 }

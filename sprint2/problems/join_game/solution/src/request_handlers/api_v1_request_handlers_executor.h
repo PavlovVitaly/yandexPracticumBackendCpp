@@ -9,8 +9,8 @@ namespace rh_storage{
 
 template<typename Request, typename Send>
 class ApiV1RequestHandlerExecutor{
-    using ActivatorType = bool(*)(const Request&, const app::Application&);
-    using HandlerType = void(*)(const Request&, const app::Application&, Send&&);
+    using ActivatorType = bool(*)(const Request&, app::Application&);
+    using HandlerType = void(*)(const Request&, app::Application&, Send&&);
 public:
     // убираем конструктор копирования
     ApiV1RequestHandlerExecutor(const ApiV1RequestHandlerExecutor&) = delete;
@@ -24,7 +24,7 @@ public:
         return obj;
     };
 
-    bool Execute(const Request& req, const app::Application& application, Send&& send) {
+    bool Execute(const Request& req, app::Application& application, Send&& send) {
         for(auto item : rh_storage_) {
             if(item.GetActivator()(req, application)){
                 item.GetHandler(req.method())(req, application, std::move(send));
@@ -48,7 +48,10 @@ private:
                                                         BadRequestHandler),
         RequestHandlerNode<ActivatorType, HandlerType>(GetMapByIdActivator,
                                                         {{http::verb::get, GetMapByIdHandler}},
-                                                        BadRequestHandler)
+                                                        BadRequestHandler),
+        RequestHandlerNode<ActivatorType, HandlerType>(JoinToGameActivator,
+                                                        {{http::verb::post, JoinToGameHandler}},
+                                                        OnlyPostMethodAllowedHandler)
     };
 
     ApiV1RequestHandlerExecutor() = default;
