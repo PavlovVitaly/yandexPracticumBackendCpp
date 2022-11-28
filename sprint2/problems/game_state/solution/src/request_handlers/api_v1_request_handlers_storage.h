@@ -250,22 +250,13 @@ void OnlyPostMethodAllowedHandler(
 
 
 template <typename Request>
-bool GetPlayersListEmptyAuthorizationActivator(
+bool EmptyAuthorizationActivator(
         const Request& req,
         app::Application& application) {
-    return (req.target() == "/api/v1/game/players" ||
-            req.target() == "/api/v1/game/players/") &&
-            (req[http::field::authorization].empty() ||
-            GetTokenString(req[http::field::authorization]).empty());
-}
-
-/* todo: need rework, code dublication. May be write template specialization with constant value*/
-template <typename Request>
-bool GetGameStateEmptyAuthorizationActivator(
-        const Request& req,
-        app::Application& application) {
-    return (req.target() == "/api/v1/game/state" ||
-            req.target() == "/api/v1/game/state/") &&
+    return ((req.target() == "/api/v1/game/players" ||
+            req.target() == "/api/v1/game/players/") ||
+            (req.target() == "/api/v1/game/state" ||
+            req.target() == "/api/v1/game/state/")) && // todo: need rework
             (req[http::field::authorization].empty() ||
             GetTokenString(req[http::field::authorization]).empty());
 }
@@ -285,22 +276,11 @@ void EmptyAuthorizationHandler(
 }
 
 template <typename Request>
-bool GetPlayersListUnknownTokenActivator(
+bool UnknownTokenActivator(
         const Request& req,
         app::Application& application) {
-    if(req.target() == "/api/v1/game/players" || req.target() == "/api/v1/game/players/") {
-        authentication::Token token{GetTokenString(req[http::field::authorization])};
-        return !application.IsExistPlayer(token);
-    }
-    return false;
-}
-
-/* todo: need rework, code dublication. May be write template specialization with constant value*/
-template <typename Request>
-bool GetGameStateUnknownTokenActivator(
-        const Request& req,
-        app::Application& application) {
-    if(req.target() == "/api/v1/game/state" || req.target() == "/api/v1/game/state/") {
+    if((req.target() == "/api/v1/game/players" || req.target() == "/api/v1/game/players/") ||
+        (req.target() == "/api/v1/game/state" || req.target() == "/api/v1/game/state/")) {  //  todo: need rework
         authentication::Token token{GetTokenString(req[http::field::authorization])};
         return !application.IsExistPlayer(token);
     }
