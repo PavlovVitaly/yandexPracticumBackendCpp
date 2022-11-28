@@ -50,8 +50,8 @@ protected:
         auto self = GetSharedThis();
         http::async_write(stream_, *safe_response,
                           [safe_response, self](beast::error_code ec, std::size_t bytes_written) {
-                                //self->OnWrite(safe_response->need_eof(), ec, bytes_written);
-                                self->OnWrite(true, ec, bytes_written); // todo: write close
+                                self->OnWrite(safe_response->need_eof(), ec, bytes_written);
+                                //self->OnWrite(true, ec, bytes_written); // todo: write close
                                 BOOST_LOG_TRIVIAL(info) << logware::CreateLogMessage("response sent"sv,
                                                                 logware::ResponseLogData<Body, Fields>(self->GetRemoteIp(),
                                                                     self->GetDurationFromTimeReceivedRequest_ms(boost::posix_time::microsec_clock::local_time()),
