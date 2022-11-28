@@ -53,4 +53,8 @@ bool Application::IsExistPlayer(authentication::Token token) {
     return !player_tokens_.FindPlayerBy(token).expired();
 };
 
+std::shared_ptr<Application::AppStrand> Application::GetStrand() {
+    return strand_;
+};
+
 }

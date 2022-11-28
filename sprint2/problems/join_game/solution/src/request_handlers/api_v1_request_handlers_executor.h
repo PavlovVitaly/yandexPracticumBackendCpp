@@ -7,6 +7,8 @@
 
 namespace rh_storage{
 
+namespace net = boost::asio;
+
 template<typename Request, typename Send>
 class ApiV1RequestHandlerExecutor{
     using ActivatorType = bool(*)(const Request&, app::Application&);
@@ -27,7 +29,9 @@ public:
     bool Execute(const Request& req, app::Application& application, Send&& send) {
         for(auto item : rh_storage_) {
             if(item.GetActivator()(req, application)){
-                item.GetHandler(req.method())(req, application, std::move(send));
+                net::dispatch(*application.GetStrand(), [&item, &req, &application, &send]{
+                   item.GetHandler(req.method())(req, application, std::move(send)); 
+                });
                 return true;
             }
         }
