@@ -2,7 +2,7 @@
 #include "application.h"
 #include "player_tokens.h"
 #include "json_converter.h"
-#include "request_handlers_utility.h"
+#include "request_handlers_utils.h"
 
 #include <vector>
 #include <boost/beast/http.hpp>
@@ -81,7 +81,8 @@ bool BadRequestActivator(
                 (url.size() >= SIZE_OF_THREE_SEGMENT_URL &&
                     url[2] != "maps" &&
                     url[2] != "game" &&
-                    url[3] != "join")
+                    url[3] != "join"&&
+                    url[3] != "players")
             );
 };
 
@@ -245,6 +246,31 @@ void OnlyPostMethodAllowedHandler(
     response.keep_alive(req.keep_alive());
     send(response);
 };
+
+
+template <typename Request>
+bool GetPlayersListActivator(
+        const Request& req,
+        app::Application& application) {
+    return (req.target() == "/api/v1/game/players" || req.target() == "/api/v1/game/players/");
+}
+
+template <typename Request, typename Send>
+void GetPlayersListHandler(
+        const Request& req,
+        app::Application& application,
+        Send&& send) {
+    authentication::Token token{GetTokenString(req[http::field::authorization])};
+    auto players = application.GetPlayersFromGameSession(token);
+    StringResponse response(http::status::ok, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.body() = json_converter::CreatePlayersListOnMapResponse(players);
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+}
+
 
 template <typename Request, typename Send>
 void PageNotFoundHandler(

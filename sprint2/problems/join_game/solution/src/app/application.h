@@ -2,16 +2,22 @@
 #include "game.h"
 #include "player.h"
 #include "player_tokens.h"
+#include "tagged.h"
 
 #include <vector>
 #include <memory>
 #include <tuple>
+#include <unordered_map>
 
 namespace app {
 
+namespace net = boost::asio;
+
 class Application {
 public:
-    Application(model::Game game) : game_(std::move(game)) {};
+    Application(model::Game game, net::io_context& ioc) :
+        game_(std::move(game)),
+        ioc_(ioc) {};
     Application(const Application& other) = delete;
     Application(Application&& other) = delete;
     Application& operator = (const Application& other) = delete;
@@ -21,12 +27,22 @@ public:
     const model::Game::Maps& ListMap() const noexcept;
     const std::shared_ptr<model::Map> FindMap(const model::Map::Id& id) const noexcept;
     std::tuple<authentication::Token, model::Player::Id> JoinGame(const std::string& player_name, const model::Map::Id& id);
+    const std::vector< std::weak_ptr<model::Player> >& GetPlayersFromGameSession(authentication::Token token);
 private:
+    using GameSessionIdHasher = util::TaggedHasher<model::GameSession::Id>;
+    using GameSessionIdToIndex = std::unordered_map<model::GameSession::Id,
+                                                    std::vector< std::weak_ptr<model::Player> >,
+                                                    GameSessionIdHasher>;
+
     model::Game game_;
     std::vector< std::shared_ptr<model::Player> > players_;
+    GameSessionIdToIndex session_id_to_players_;
     authentication::PlayerTokens player_tokens_;
+    net::io_context& ioc_;
 
     std::shared_ptr<model::Player> CreatePlayer(const std::string& player_name);
+    void BoundPlayerAndGameSession(std::shared_ptr<model::Player> player,
+                                    std::shared_ptr<model::GameSession> session);
 };
 
 }

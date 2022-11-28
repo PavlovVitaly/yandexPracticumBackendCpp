@@ -136,9 +136,6 @@ public:
         , name_(std::move(name)) {
     }
 
-    //Map(Map&& other) = default;
-    //Map(const Map& other) = default;
-
     const Id& GetId() const noexcept {
         return id_;
     }

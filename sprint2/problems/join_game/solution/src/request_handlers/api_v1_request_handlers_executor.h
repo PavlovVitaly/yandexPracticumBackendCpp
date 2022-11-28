@@ -60,7 +60,10 @@ private:
                                                         OnlyPostMethodAllowedHandler),
         RequestHandlerNode<ActivatorType, HandlerType>(JoinToGameActivator,
                                                         {{http::verb::post, JoinToGameHandler}},
-                                                        OnlyPostMethodAllowedHandler)
+                                                        OnlyPostMethodAllowedHandler),
+        RequestHandlerNode<ActivatorType, HandlerType>(GetPlayersListActivator,
+                                                        {{http::verb::get, GetPlayersListHandler}},
+                                                        BadRequestHandler)
     };
 
     ApiV1RequestHandlerExecutor() = default;

@@ -43,7 +43,7 @@ int main(int argc, const char* argv[]) {
     }
     try {
         // 1. Загружаем карту из файла и построить модель игры
-        app::Application application(json_loader::LoadGame(argv[1]));
+        model::Game game = json_loader::LoadGame(argv[1]);
         //model::Game game = json_loader::LoadGame("../../data/config.json"); // for debug
 
         // 2. Устанавливаем путь до статического контента.
@@ -53,6 +53,8 @@ int main(int argc, const char* argv[]) {
         // 3. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();
         net::io_context ioc(num_threads);
+
+        app::Application application(std::move(game), ioc);
 
         // 4. Добавляем асинхронный обработчик сигналов SIGINT и SIGTERM
         net::signal_set signals(ioc, SIGINT, SIGTERM);

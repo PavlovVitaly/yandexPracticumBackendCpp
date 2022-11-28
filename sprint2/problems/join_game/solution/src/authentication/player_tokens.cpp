@@ -8,7 +8,9 @@ Token PlayerTokens::AddPlayer(std::weak_ptr<model::Player> player) {
     std::stringstream ss;
     ss << std::hex << generator1_();
     ss << std::hex << generator2_();
-    return Token{ss.str()};
+    Token token{ss.str()};
+    tokenToPalyer_[token] = player;
+    return token;
 };
 
 std::weak_ptr<model::Player> PlayerTokens::FindPlayerBy(Token token) {

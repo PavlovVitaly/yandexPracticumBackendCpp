@@ -2,6 +2,10 @@
 
 namespace model {
 
+const GameSession::Id& GameSession::GetId() const noexcept {
+    return id_;
+}
+
 const std::shared_ptr<Map> GameSession::GetMap() {
     return map_;
 };

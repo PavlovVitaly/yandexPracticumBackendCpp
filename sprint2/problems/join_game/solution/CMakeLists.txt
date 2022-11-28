@@ -26,7 +26,7 @@ add_executable(game_server
 	src/json/json_loader.cpp
 	src/json/json_converter.cpp
 	src/request_handlers/request_handler.cpp
-	src/request_handlers/request_handlers_utility.cpp
+	src/utils/request_handlers_utils.cpp
 	src/utils/filesystem_utils.cpp
 	src/boost_json.cpp
 	src/logging/logging_data_storage.cpp

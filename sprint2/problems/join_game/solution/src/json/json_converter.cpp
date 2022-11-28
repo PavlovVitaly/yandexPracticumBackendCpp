@@ -66,6 +66,19 @@ std::string CreateJoinToGameEmptyPlayerNameResponse(){
     return json::serialize(msg);
 };
 
+std::string CreatePlayersListOnMapResponse(const std::vector< std::weak_ptr<model::Player> >& players){
+    json::value jv;
+    json::object& obj = jv.emplace_object();  
+    for(auto item : players) {
+        auto player = item.lock();
+        std::stringstream ss;
+        ss << *(player->GetId());
+        json::value jv_item = {{json_keys::RESPONSE_PLAYER_NAME, player->GetName()}};
+        obj[ss.str()] = jv_item;
+    }
+    return json::serialize(jv);
+};
+
 
 std::string CreateJoinToGameResponse(const std::string& token, size_t player_id) {
     json::value msg = {{json_keys::RESPONSE_AUTHORISATION_TOKEN, token},
