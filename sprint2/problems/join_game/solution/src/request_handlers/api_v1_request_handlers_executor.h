@@ -27,16 +27,15 @@ public:
     };
 
     bool Execute(const Request& req, app::Application& application, Send&& send) {
-        bool result{false};
         for(auto item : rh_storage_) {
-            net::dispatch(*application.GetStrand(), [&result, &item, &req, &application, &send]{
-                if(item.GetActivator()(req, application)){
-                    item.GetHandler(req.method())(req, application, std::move(send)); 
-                    result = true;
-                }
-            });
+            if(item.GetActivator()(req, application)){
+                net::dispatch(*application.GetStrand(), [&item, &req, &application, &send]{
+                   item.GetHandler(req.method())(req, application, std::move(send)); 
+                });
+                return true;
+            }
         }
-        return result;
+        return false;
     };
 
 private:
