@@ -28,6 +28,7 @@ public:
     const std::shared_ptr<model::Map> FindMap(const model::Map::Id& id) const noexcept;
     std::tuple<authentication::Token, model::Player::Id> JoinGame(const std::string& player_name, const model::Map::Id& id);
     const std::vector< std::weak_ptr<model::Player> >& GetPlayersFromGameSession(authentication::Token token);
+    bool IsExistPlayer(authentication::Token token);
 private:
     using GameSessionIdHasher = util::TaggedHasher<model::GameSession::Id>;
     using GameSessionIdToIndex = std::unordered_map<model::GameSession::Id,

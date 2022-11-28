@@ -49,4 +49,8 @@ const std::vector< std::weak_ptr<model::Player> >& Application::GetPlayersFromGa
     return session_id_to_players_[session_id];
 };
 
+bool Application::IsExistPlayer(authentication::Token token) {
+    return !player_tokens_.FindPlayerBy(token).expired();
+};
+
 }

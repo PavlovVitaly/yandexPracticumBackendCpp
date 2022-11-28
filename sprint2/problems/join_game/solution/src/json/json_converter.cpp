@@ -85,6 +85,18 @@ std::string CreateInvalidMethodResponse() {
     return json::serialize(msg);
 };
 
+std::string CreateGetPlayersListEmptyAuthorizationResponse(){
+    json::value msg = {{json_keys::RESPONSE_CODE, "invalidToken"},
+                        {json_keys::RESPONSE_MESSAGE, "Authorization header is missing"}};
+    return json::serialize(msg);
+};
+
+std::string CreateGetPlayersListUnknownTokenResponse() {
+    json::value msg = {{json_keys::RESPONSE_CODE, "unknownToken"},
+                        {json_keys::RESPONSE_MESSAGE, "Player token has not been found"}};
+    return json::serialize(msg);
+};
+
 std::string CreateJoinToGameResponse(const std::string& token, size_t player_id) {
     json::value msg = {{json_keys::RESPONSE_AUTHORISATION_TOKEN, token},
                         {json_keys::RESPONSE_PLAYER_ID, player_id}};

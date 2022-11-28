@@ -249,6 +249,55 @@ void OnlyPostMethodAllowedHandler(
 
 
 template <typename Request>
+bool GetPlayersListEmptyAuthorizationActivator(
+        const Request& req,
+        app::Application& application) {
+    return (req.target() == "/api/v1/game/players" ||
+            req.target() == "/api/v1/game/players/") &&
+            (req[http::field::authorization].empty() ||
+            GetTokenString(req[http::field::authorization]).empty());
+}
+
+template <typename Request, typename Send>
+void GetPlayersListEmptyAuthorizationHandler(
+        const Request& req,
+        app::Application& application,
+        Send&& send) {
+    StringResponse response(http::status::unauthorized, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.body() = json_converter::CreateGetPlayersListEmptyAuthorizationResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+}
+
+template <typename Request>
+bool GetPlayersListUnknownTokenActivator(
+        const Request& req,
+        app::Application& application) {
+    if(req.target() == "/api/v1/game/players" || req.target() == "/api/v1/game/players/") {
+        authentication::Token token{GetTokenString(req[http::field::authorization])};
+        return !application.IsExistPlayer(token);
+    }
+    return false;
+}
+
+template <typename Request, typename Send>
+void GetPlayersListUnknownTokenHandler(
+        const Request& req,
+        app::Application& application,
+        Send&& send) {
+    StringResponse response(http::status::unauthorized, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.body() = json_converter::CreateGetPlayersListUnknownTokenResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+}
+
+template <typename Request>
 bool GetPlayersListActivator(
         const Request& req,
         app::Application& application) {
