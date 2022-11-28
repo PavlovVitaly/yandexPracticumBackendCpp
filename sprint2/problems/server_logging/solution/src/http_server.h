@@ -27,13 +27,17 @@ public:
     SessionBase(const SessionBase&) = delete;
     SessionBase& operator=(const SessionBase&) = delete;
     void Run();
-    std::string GetRemoteIp(){
-        return stream_
-                .socket()
-                .remote_endpoint()
-                .address()
-                .to_string();
+    void WriteCurrentRemoteIp(){
+        current_remote_ip_ =  stream_
+                                .socket()
+                                .remote_endpoint()
+                                .address()
+                                .to_string();
     };
+
+    const std::string& GetCurrentRemoteIp() const {
+        return current_remote_ip_;
+    }
 protected:
     explicit SessionBase(tcp::socket&& socket)
         : stream_(std::move(socket)) {
@@ -51,9 +55,9 @@ protected:
         http::async_write(stream_, *safe_response,
                           [safe_response, self](beast::error_code ec, std::size_t bytes_written) {
                                 //self->OnWrite(safe_response->need_eof(), ec, bytes_written);
-                                self->OnWrite(true, ec, bytes_written);	// todo: write close condition
+                                self->OnWrite(true, ec, bytes_written); // todo: write close
                                 BOOST_LOG_TRIVIAL(info) << logware::CreateLogMessage("response sent"sv,
-                                                                logware::ResponseLogData<Body, Fields>(self->GetRemoteIp(),
+                                                                logware::ResponseLogData<Body, Fields>(self->GetCurrentRemoteIp(),
                                                                     self->GetDurationFromTimeReceivedRequest_ms(boost::posix_time::microsec_clock::local_time()),
                                                                     *safe_response));
                           });
@@ -74,6 +78,7 @@ private:
     beast::flat_buffer buffer_;
     HttpRequest request_;
     boost::posix_time::ptime received_request_moment_;
+    std::string current_remote_ip_;
 
     void Read();
 
@@ -106,9 +111,10 @@ private:
     };
 
     void HandleRequest(HttpRequest&& request) override {
+        WriteCurrentRemoteIp();
         SetReceivedRequestTime(boost::posix_time::microsec_clock::local_time());
         BOOST_LOG_TRIVIAL(info) << logware::CreateLogMessage("request received"sv,
-                                                                logware::RequestLogData(GetRemoteIp(), request));
+                                                                logware::RequestLogData(GetCurrentRemoteIp(), request));
         // Захватываем умный указатель на текущий объект Session в лямбде,
         // чтобы продлить время жизни сессии до вызова лямбды.
         // Используется generic-лямбда функция, способная принять response произвольного типа
@@ -196,3 +202,4 @@ void ServeHttp(net::io_context& ioc, const tcp::endpoint& endpoint, RequestHandl
 }
 
 }  // namespace http_server
+
