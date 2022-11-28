@@ -79,6 +79,11 @@ std::string CreatePlayersListOnMapResponse(const std::vector< std::weak_ptr<mode
     return json::serialize(jv);
 };
 
+std::string CreateInvalidMethodResponse() {
+    json::value msg = {{json_keys::RESPONSE_CODE, "invalidMethod"},
+                        {json_keys::RESPONSE_MESSAGE, "Invalid method"}};
+    return json::serialize(msg);
+};
 
 std::string CreateJoinToGameResponse(const std::string& token, size_t player_id) {
     json::value msg = {{json_keys::RESPONSE_AUTHORISATION_TOKEN, token},

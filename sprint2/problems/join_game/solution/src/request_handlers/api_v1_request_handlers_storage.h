@@ -271,6 +271,21 @@ void GetPlayersListHandler(
     send(response);
 }
 
+template <typename Request, typename Send>
+void InvalidMethodHandler(
+        const Request& req,
+        app::Application& application,
+        Send&& send) {
+    StringResponse response(http::status::method_not_allowed, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.set(http::field::allow, "GET, HEAD");
+    response.body() = json_converter::CreateInvalidMethodResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+};
+
 
 template <typename Request, typename Send>
 void PageNotFoundHandler(

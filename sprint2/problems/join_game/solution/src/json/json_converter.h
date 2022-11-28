@@ -17,6 +17,7 @@ std::string CreateJoinToGameInvalidArgumentResponse();
 std::string CreateJoinToGameMapNotFoundResponse();
 std::string CreateJoinToGameEmptyPlayerNameResponse();
 std::string CreatePlayersListOnMapResponse(const std::vector< std::weak_ptr<model::Player> >& players);
+std::string CreateInvalidMethodResponse();
 
 
 std::string CreateJoinToGameResponse(const std::string& token, size_t player_id);

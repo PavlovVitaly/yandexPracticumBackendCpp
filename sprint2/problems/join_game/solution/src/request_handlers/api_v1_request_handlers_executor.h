@@ -62,8 +62,9 @@ private:
                                                         {{http::verb::post, JoinToGameHandler}},
                                                         OnlyPostMethodAllowedHandler),
         RequestHandlerNode<ActivatorType, HandlerType>(GetPlayersListActivator,
-                                                        {{http::verb::get, GetPlayersListHandler}},
-                                                        BadRequestHandler)
+                                                        {{http::verb::get, GetPlayersListHandler},
+                                                        {http::verb::head, GetPlayersListHandler}},
+                                                        InvalidMethodHandler)
     };
 
     ApiV1RequestHandlerExecutor() = default;
