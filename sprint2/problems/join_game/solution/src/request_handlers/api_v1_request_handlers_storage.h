@@ -152,9 +152,15 @@ template <typename Request>
 bool JoinToGameMapNotFoundActivator(
         const Request& req,
         app::Application& application) {
-    auto [player_name, map_id] = json_converter::ParseJoinToGameRequest(req.body()).value();
-    return (req.target() == "/api/v1/game/join" || req.target() == "/api/v1/game/join/") &&
-        application.FindMap(map_id) == nullptr;
+    if((req.target() == "/api/v1/game/join" || req.target() == "/api/v1/game/join/")) {
+        auto res = json_converter::ParseJoinToGameRequest(req.body());
+        if(!res) {
+            return false;
+        }
+        auto [player_name, map_id] = res.value();
+        return application.FindMap(map_id) == nullptr;
+    }
+    return false;
 }
 
 template <typename Request, typename Send>
@@ -176,9 +182,15 @@ template <typename Request>
 bool JoinToGameEmptyPlayerNameActivator(
         const Request& req,
         app::Application& application) {
-    auto [player_name, map_id] = json_converter::ParseJoinToGameRequest(req.body()).value();
-    return (req.target() == "/api/v1/game/join" || req.target() == "/api/v1/game/join/") &&
-        player_name.empty();
+    if((req.target() == "/api/v1/game/join" || req.target() == "/api/v1/game/join/")) {
+        auto res = json_converter::ParseJoinToGameRequest(req.body());
+        if(!res) {
+            return false;
+        }
+        auto [player_name, map_id] = res.value();
+        return player_name.empty();
+    }
+    return false;
 }
 
 template <typename Request, typename Send>
