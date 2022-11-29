@@ -4,6 +4,7 @@
 #include "player.h"
 
 #include <memory>
+#include <chrono>
 
 namespace model {
 
@@ -17,7 +18,6 @@ public:
     const std::shared_ptr<Map> FindMap(const Map::Id& id) const noexcept;
     void AddGameSession(std::shared_ptr<GameSession> session);
     std::shared_ptr<GameSession> FindGameSessionBy(const Map::Id& id) const noexcept;
-
     void SetDefaultDogVelocity(double velocity);
     double GetDefaultDogVelocity() const noexcept;
 

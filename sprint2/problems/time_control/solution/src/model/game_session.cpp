@@ -18,7 +18,7 @@ std::shared_ptr<GameSession::SessionStrand> GameSession::GetStrand() {
 std::shared_ptr<Dog> GameSession::CreateDog(const std::string& dog_name){
     auto dog = std::make_shared<Dog>(dog_name);
     dogs_.push_back(dog);
-    LocateDogInRandomPositionOnMap(dog);
+    //LocateDogInRandomPositionOnMap(dog);  // todo: commented for testing. Later should be uncommented.
     return dog;
 };
 

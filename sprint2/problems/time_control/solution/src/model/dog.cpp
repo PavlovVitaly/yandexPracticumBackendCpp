@@ -34,7 +34,7 @@ const Velocity& Dog::GetVelocity() const {
     return velocity_;
 };
 
-void Dog::Move(Direction direction, double velocity) {
+void Dog::SetAction(Direction direction, double velocity) {
     switch(direction){
         case Direction::NORTH: {
             SetDirection(direction);
@@ -61,6 +61,14 @@ void Dog::Move(Direction direction, double velocity) {
             break;
         }
     }
+};
+
+Position Dog::CalculateNewPosition(const std::chrono::milliseconds& delta_time) {
+    Position position = GetPosition();
+    const Velocity& velocity = GetVelocity();
+    position.x += velocity.vx * delta_time.count();
+    position.y += velocity.vy * delta_time.count();
+    return position;
 };
 
 }

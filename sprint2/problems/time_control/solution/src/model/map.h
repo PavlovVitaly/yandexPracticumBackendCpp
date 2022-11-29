@@ -1,5 +1,6 @@
 #pragma once
 #include "tagged.h"
+#include "dog.h"
 
 #include <cmath>
 #include <string>
@@ -139,61 +140,20 @@ public:
         , name_(std::move(name)) {
     }
 
-    const Id& GetId() const noexcept {
-        return id_;
-    }
-
-    const std::string& GetName() const noexcept {
-        return name_;
-    }
-
-    const Buildings& GetBuildings() const noexcept {
-        return buildings_;
-    }
-
-    const Roads& GetRoads() const noexcept {
-        return roads_;
-    }
-
-    const Offices& GetOffices() const noexcept {
-        return offices_;
-    }
-
-    void AddRoad(const Road& road) {
-        roads_.emplace_back(road);
-    }
-
-    void AddRoads(Roads& roads){
-        for(auto item : roads){
-            AddRoad(item);
-        }
-    }
-
-    void AddBuilding(const Building& building) {
-        buildings_.emplace_back(building);
-    }
-
-    void AddBuildings(Buildings& buildings){
-        for(auto item : buildings){
-            AddBuilding(item);
-        }
-    }
-
+    const Id& GetId() const noexcept;
+    const std::string& GetName() const noexcept;
+    const Buildings& GetBuildings() const noexcept;
+    const Roads& GetRoads() const noexcept;
+    const Offices& GetOffices() const noexcept;
+    void AddRoad(const Road& road);
+    void AddRoads(Roads& roads);
+    void AddBuilding(const Building& building);
+    void AddBuildings(Buildings& buildings);
     void AddOffice(Office office);
-
-    void AddOffices(Offices& offices){
-        for(auto item : offices){
-            AddOffice(item);
-        }
-    }
-    
-    void SetDogVelocity(double velocity) {
-        dog_velocity_ = std::abs(velocity);
-    };
-
-    double GetDogVelocity() const noexcept {
-        return dog_velocity_;
-    };
+    void AddOffices(Offices& offices);
+    void SetDogVelocity(double velocity);
+    double GetDogVelocity() const noexcept;
+    bool IsValidPosition(Position position);
 
 private:
     using OfficeIdToIndex = std::unordered_map<Office::Id, size_t, util::TaggedHasher<Office::Id>>;

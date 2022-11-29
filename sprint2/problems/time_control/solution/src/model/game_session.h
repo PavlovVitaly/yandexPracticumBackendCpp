@@ -3,6 +3,7 @@
 #include "dog.h"
 #include "tagged.h"
 
+#include <chrono>
 #include <vector>
 #include <memory>
 #include <boost/asio/ip/tcp.hpp>
@@ -26,7 +27,6 @@ public:
     const std::shared_ptr<Map> GetMap();
     std::shared_ptr<SessionStrand> GetStrand();
     std::shared_ptr<Dog> CreateDog(const std::string& dog_name);
-
 private:
     std::shared_ptr<Map> map_;
     std::shared_ptr<SessionStrand> strand_;

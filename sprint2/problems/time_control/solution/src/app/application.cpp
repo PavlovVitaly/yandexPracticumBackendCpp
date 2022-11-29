@@ -53,11 +53,17 @@ bool Application::IsExistPlayer(const authentication::Token& token) {
     return !player_tokens_.FindPlayerBy(token).expired();
 };
 
-void Application::MovePlayer(const authentication::Token& token, model::Direction direction) {
+void Application::SetPlayerAction(const authentication::Token& token, model::Direction direction) {
     auto player = player_tokens_.FindPlayerBy(token).lock();
     auto dog = player->GetDog().lock();
     double velocity = player->GetGameSession().lock()->GetMap()->GetDogVelocity();
-    dog->Move(direction, velocity);
+    dog->SetAction(direction, velocity);
+};
+
+void Application::UpdateGameState(const std::chrono::milliseconds& delta_time) {
+    for(auto player : players_) {
+        player->MoveDog(delta_time);
+    }
 };
 
 std::shared_ptr<Application::AppStrand> Application::GetStrand() {

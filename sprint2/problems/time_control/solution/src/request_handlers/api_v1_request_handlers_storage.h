@@ -8,6 +8,8 @@
 #include <optional>
 #include <boost/beast/http.hpp>
 
+#include <chrono> //todo: for testing
+
 namespace rh_storage{
 
 namespace beast = boost::beast;
@@ -389,7 +391,7 @@ std::optional<size_t> PlayerActionHandler(
         return 0;
     }
     std::string directionStr = json_converter::ParsePlayerActionRequest(req.body()).value();
-    application.MovePlayer(token, model::STRING_TO_DIRECTION.at(directionStr));
+    application.SetPlayerAction(token, model::STRING_TO_DIRECTION.at(directionStr));
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, "application/json");
     response.set(http::field::cache_control, "no-cache");
@@ -470,7 +472,8 @@ std::optional<size_t> SetDeltaTimeHandler(
         app::Application& application,
         Send& send) {
     int delta_time = json_converter::ParseSetDeltaTimeRequest(req.body()).value();
-    // todo: Add implementation
+    std::chrono::milliseconds dtime(delta_time);
+    application.UpdateGameState(dtime);
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, "application/json");
     response.set(http::field::cache_control, "no-cache");

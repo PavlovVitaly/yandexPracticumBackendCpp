@@ -32,8 +32,10 @@ public:
     std::tuple<authentication::Token, model::Player::Id> JoinGame(const std::string& player_name, const model::Map::Id& id);
     const std::vector< std::weak_ptr<model::Player> >& GetPlayersFromGameSession(const authentication::Token& token);
     bool IsExistPlayer(const authentication::Token& token);
-    void MovePlayer(const authentication::Token& token, model::Direction direction);
+    void SetPlayerAction(const authentication::Token& token, model::Direction direction);
     std::shared_ptr<AppStrand> GetStrand();
+
+    void UpdateGameState(const std::chrono::milliseconds& delta_time);
 private:
     using GameSessionIdHasher = util::TaggedHasher<model::GameSession::Id>;
     using GameSessionIdToIndex = std::unordered_map<model::GameSession::Id,

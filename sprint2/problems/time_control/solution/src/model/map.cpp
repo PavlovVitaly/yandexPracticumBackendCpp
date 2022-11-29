@@ -6,6 +6,47 @@
 namespace model {
 using namespace std::literals;
 
+
+const Map::Id& Map::GetId() const noexcept {
+    return id_;
+}
+
+const std::string& Map::GetName() const noexcept {
+    return name_;
+}
+
+const Map::Buildings& Map::GetBuildings() const noexcept {
+    return buildings_;
+}
+
+const Map::Roads& Map::GetRoads() const noexcept {
+    return roads_;
+}
+
+const Map::Offices& Map::GetOffices() const noexcept {
+    return offices_;
+}
+
+void Map::AddRoad(const Road& road) {
+    roads_.emplace_back(road);
+}
+
+void Map::AddRoads(Roads& roads){
+    for(auto item : roads){
+        AddRoad(item);
+    }
+}
+
+void Map::AddBuilding(const Building& building) {
+    buildings_.emplace_back(building);
+}
+
+void Map::AddBuildings(Buildings& buildings){
+    for(auto item : buildings){
+        AddBuilding(item);
+    }
+}
+
 void Map::AddOffice(Office office) {
     if (warehouse_id_to_index_.contains(office.GetId())) {
         throw std::invalid_argument("Duplicate warehouse");
@@ -21,6 +62,24 @@ void Map::AddOffice(Office office) {
         throw;
     }
 }
+
+void Map::AddOffices(Offices& offices){
+    for(auto item : offices){
+        AddOffice(item);
+    }
+}
+    
+void Map::SetDogVelocity(double velocity) {
+    dog_velocity_ = std::abs(velocity);
+};
+
+double Map::GetDogVelocity() const noexcept {
+    return dog_velocity_;
+};
+
+bool Map::IsValidPosition(Position position) {
+    return false;
+};
 
 
 void tag_invoke(json::value_from_tag, json::value& jv, const Road& road) {

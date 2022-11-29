@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <chrono>
 
 namespace model {
 
@@ -66,7 +67,8 @@ public:
     void SetVelocity(Velocity velocity);
     const Velocity& GetVelocity() const;
     
-    void Move(Direction direction, double velocity);
+    void SetAction(Direction direction, double velocity);
+    Position CalculateNewPosition(const std::chrono::milliseconds& delta_time);
 private:
     Id id_;
     std::string name_;

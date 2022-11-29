@@ -29,7 +29,7 @@ public:
     void SetGameSession(std::weak_ptr<GameSession> session);
     std::weak_ptr<Dog> GetDog();
     void SetDog(std::weak_ptr<Dog> dog);
-
+    void MoveDog(const std::chrono::milliseconds& delta_time);
 private:
     Id id_;
     std::string name_;
