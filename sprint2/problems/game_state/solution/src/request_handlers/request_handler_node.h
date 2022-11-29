@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <boost/beast/http.hpp>
+#include <vector>
 
 namespace rh_storage{
 
@@ -13,10 +14,12 @@ class RequestHandlerNode {
 public:
     RequestHandlerNode(Activator activator,
                         std::unordered_map<http::verb, Handler> handlers,
-                        Handler fault_handler) :
+                        Handler not_found_handler,
+                        std::vector<Handler>&& emerge_handlers = std::vector<Handler>()) :
         activator_(std::move(activator)),
         handlers_(std::move(handlers)),
-        fault_handler_(fault_handler) {};
+        not_found_handler_(not_found_handler),
+        emerge_handlers_(std::move(emerge_handlers)) {};
 
     RequestHandlerNode(const RequestHandlerNode& other) = default;
     RequestHandlerNode(RequestHandlerNode&& other) = default;
@@ -28,8 +31,15 @@ public:
         if(handlers_.contains(method)) {
             return handlers_[method];
         } else {
-            return fault_handler_;
+            return not_found_handler_;
         }
+    };
+
+    Handler GetEmergeHandlerByIndex(size_t index) {
+        if(index < emerge_handlers_.size()) {
+            return emerge_handlers_[index];
+        }
+        return nullptr;
     };
 
     Activator& GetActivator() {
@@ -39,7 +49,8 @@ public:
 private:
     Activator activator_;
     std::unordered_map<http::verb, Handler> handlers_;
-    Handler fault_handler_;
+    Handler not_found_handler_;
+    std::vector<Handler> emerge_handlers_;
 };
 
 }

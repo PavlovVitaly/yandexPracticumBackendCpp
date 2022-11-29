@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <vector>
+#include <optional>
 
 namespace rh_storage{
 
@@ -11,8 +12,8 @@ namespace net = boost::asio;
 
 template<typename Request, typename Send>
 class ApiV1RequestHandlerExecutor{
-    using ActivatorType = bool(*)(const Request&, app::Application&);
-    using HandlerType = void(*)(const Request&, app::Application&, Send&&);
+    using ActivatorType = bool(*)(const Request&);
+    using HandlerType = std::optional<size_t>(*)(const Request&, app::Application&, Send&);
 public:
     // убираем конструктор копирования
     ApiV1RequestHandlerExecutor(const ApiV1RequestHandlerExecutor&) = delete;
@@ -28,9 +29,12 @@ public:
 
     bool Execute(const Request& req, app::Application& application, Send&& send) {
         for(auto item : rh_storage_) {
-            if(item.GetActivator()(req, application)){
+            if(item.GetActivator()(req)){
                 net::dispatch(*application.GetStrand(), [&item, &req, &application, &send]{
-                   item.GetHandler(req.method())(req, application, std::move(send)); 
+                    auto res = item.GetHandler(req.method())(req, application, send);
+                    while(res.has_value()){
+                        res = item.GetEmergeHandlerByIndex(res.value())(req, application, send);
+                    }
                 });
                 return true;
             }
@@ -47,40 +51,34 @@ private:
         RequestHandlerNode<ActivatorType, HandlerType>(GetMapListActivator,
                                                         {{http::verb::get, GetMapListHandler}},
                                                         BadRequestHandler),
-        RequestHandlerNode<ActivatorType, HandlerType>(MapNotFoundActivator,
-                                                        {{http::verb::get, MapNotFoundHandler}},
-                                                        BadRequestHandler),
         RequestHandlerNode<ActivatorType, HandlerType>(GetMapByIdActivator,
                                                         {{http::verb::get, GetMapByIdHandler}},
-                                                        BadRequestHandler),
+                                                        BadRequestHandler,
+                                                        {MapNotFoundHandler}),
         RequestHandlerNode<ActivatorType, HandlerType>(JoinToGameInvalidJsonReqActivator,
                                                         {{http::verb::post, JoinToGameInvalidJsonReqHandler}},
                                                         OnlyPostMethodAllowedHandler),
         RequestHandlerNode<ActivatorType, HandlerType>(JoinToGameEmptyPlayerNameActivator,
                                                         {{http::verb::post, JoinToGameEmptyPlayerNameHandler}},
                                                         OnlyPostMethodAllowedHandler),
-        RequestHandlerNode<ActivatorType, HandlerType>(JoinToGameMapNotFoundActivator,
-                                                        {{http::verb::post, JoinToGameMapNotFoundHandler}},
-                                                        OnlyPostMethodAllowedHandler),
         RequestHandlerNode<ActivatorType, HandlerType>(JoinToGameActivator,
                                                         {{http::verb::post, JoinToGameHandler}},
-                                                        OnlyPostMethodAllowedHandler),
+                                                        OnlyPostMethodAllowedHandler,
+                                                        {JoinToGameMapNotFoundHandler}),
         RequestHandlerNode<ActivatorType, HandlerType>(EmptyAuthorizationActivator,
                                                         {{http::verb::get, EmptyAuthorizationHandler},
                                                         {http::verb::head, EmptyAuthorizationHandler}},
                                                         InvalidMethodHandler),
-        RequestHandlerNode<ActivatorType, HandlerType>(UnknownTokenActivator,
-                                                        {{http::verb::get, UnknownTokenHandler},
-                                                        {http::verb::head, UnknownTokenHandler}},
-                                                        InvalidMethodHandler),
         RequestHandlerNode<ActivatorType, HandlerType>(GetPlayersListActivator,
                                                         {{http::verb::get, GetPlayersListHandler},
                                                         {http::verb::head, GetPlayersListHandler}},
-                                                        InvalidMethodHandler),
+                                                        InvalidMethodHandler,
+                                                        {UnknownTokenHandler}),
         RequestHandlerNode<ActivatorType, HandlerType>(GetGameStateActivator,
                                                         {{http::verb::get, GetGameStateHandler},
                                                         {http::verb::head, GetGameStateHandler}},
-                                                        InvalidMethodHandler)
+                                                        InvalidMethodHandler,
+                                                        {UnknownTokenHandler})
     };
 
     ApiV1RequestHandlerExecutor() = default;
