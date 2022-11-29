@@ -91,7 +91,7 @@ Office tag_invoke(json::value_to_tag<Office>, const json::value& jv) {
 void tag_invoke(json::value_from_tag, json::value& jv, const Map& map) {
     jv = {{MAP_ID, json::value_from(*(map.GetId()))},
             {MAP_NAME, json::value_from(map.GetName())},
-            //{MAP_DOG_VELOCITY, json::value_from(map.GetDogVelocity())}, // todo: need?
+            {MAP_DOG_VELOCITY, json::value_from(map.GetDogVelocity())},
             {ROADS, json::value_from(map.GetRoads())},
             {BUILDINGS, json::value_from(map.GetBuildings())},
             {OFFICES, json::value_from(map.GetOffices())}};
