@@ -165,6 +165,9 @@ std::optional<std::string> ParsePlayerActionRequest(const std::string& msg) {
 std::optional<int> ParseSetDeltaTimeRequest(const std::string& msg) {
     try {
         json::value jv = json::parse(msg);
+        if(!jv.as_object().at(json_keys::REQUEST_TIME_DELTA).is_int64()) {
+            return std::nullopt;
+        }
         int time_delta = json::value_to<int>(jv.as_object().at(json_keys::REQUEST_TIME_DELTA));
         return time_delta;
     } catch(...) {
