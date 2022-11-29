@@ -49,6 +49,7 @@ private:
     std::shared_ptr<model::Player> CreatePlayer(const std::string& player_name);
     void BoundPlayerAndGameSession(std::shared_ptr<model::Player> player,
                                     std::shared_ptr<model::GameSession> session);
+
 };
 
 }

@@ -28,6 +28,7 @@ add_executable(game_server
 	src/request_handlers/request_handler.cpp
 	src/utils/request_handlers_utils.cpp
 	src/utils/filesystem_utils.cpp
+	src/utils/random_generators.cpp
 	src/boost_json.cpp
 	src/logging/logging_data_storage.cpp
 	src/logging/logger.cpp

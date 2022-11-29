@@ -32,6 +32,8 @@ private:
     std::shared_ptr<SessionStrand> strand_;
     Id id_;
     std::vector< std::shared_ptr<Dog> > dogs_;
+
+    void LocateDogInRandomPositionOnMap(std::shared_ptr<Dog> dog);
 };
 
 }
