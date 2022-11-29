@@ -88,7 +88,14 @@ private:
         RequestHandlerNode<ActivatorType, HandlerType>(PlayerActionActivator,
                                                         {{http::verb::post, PlayerActionHandler}},
                                                         InvalidMethodHandler,
-                                                        {UnknownTokenHandler})
+                                                        {UnknownTokenHandler}),
+        
+        RequestHandlerNode<ActivatorType, HandlerType>(SetDeltaTimeInvalidMsgActivator,
+                                                        {{http::verb::post, SetDeltaTimeInvalidMsgHandler}},
+                                                        InvalidMethodHandler),
+        RequestHandlerNode<ActivatorType, HandlerType>(SetDeltaTimeActivator,
+                                                        {{http::verb::post, SetDeltaTimeHandler}},
+                                                        InvalidMethodHandler)
     };
 
     ApiV1RequestHandlerExecutor() = default;

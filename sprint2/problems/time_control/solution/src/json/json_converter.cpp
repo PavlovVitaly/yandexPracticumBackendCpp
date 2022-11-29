@@ -162,4 +162,20 @@ std::optional<std::string> ParsePlayerActionRequest(const std::string& msg) {
     }
 };
 
+std::optional<int> ParseSetDeltaTimeRequest(const std::string& msg) {
+    try {
+        json::value jv = json::parse(msg);
+        int time_delta = json::value_to<int>(jv.as_object().at(json_keys::REQUEST_TIME_DELTA));
+        return time_delta;
+    } catch(...) {
+        return std::nullopt;
+    }
+};
+
+std::string CreateSetDeltaTimeInvalidMsgResponse() {
+    json::value msg = {{json_keys::RESPONSE_CODE, "invalidArgument"},
+                        {json_keys::RESPONSE_MESSAGE, "Failed to parse tick request JSON"}};
+    return json::serialize(msg);
+};
+
 }

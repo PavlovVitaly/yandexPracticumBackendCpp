@@ -28,4 +28,7 @@ std::string CreateGameStateResponse(const std::vector< std::weak_ptr<model::Play
 std::string CreateJoinToGameResponse(const std::string& token, size_t player_id);
 std::optional< std::tuple<std::string, model::Map::Id> > ParseJoinToGameRequest(const std::string& msg);
 std::optional<std::string> ParsePlayerActionRequest(const std::string& msg);
+
+std::optional<int> ParseSetDeltaTimeRequest(const std::string& msg);
+std::string CreateSetDeltaTimeInvalidMsgResponse();
 }

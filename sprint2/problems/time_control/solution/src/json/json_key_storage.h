@@ -16,4 +16,6 @@ const std::string REQUEST_PLAYER_NAME   = "userName";
 const std::string REQUEST_MAP_ID        = "mapId";
 const std::string REQUEST_PLAYER_MOVE   = "move";
 
+const std::string REQUEST_TIME_DELTA = "timeDelta";
+
 }

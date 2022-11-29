@@ -36,6 +36,7 @@ bool BadRequestActivator(const Request& req) {
                     url[3] != "players" &&
                     url[3] != "state" &&
                     url[3] != "player" &&
+                    url[3] != "tick" &&     // todo: temp url
                     (url.size() == SIZE_OF_FIVE_SEGMENT_URL && url[4] != "action"))
             );
 };
@@ -429,5 +430,56 @@ std::optional<size_t> PageNotFoundHandler(
     send(response);
     return std::nullopt;
 };
+
+
+
+
+template <typename Request>
+bool SetDeltaTimeInvalidMsgActivator(const Request& req) {
+    if((req.target() == "/api/v1/game/tick" || req.target() == "/api/v1/game/tick/")) {
+        auto res = json_converter::ParseSetDeltaTimeRequest(req.body());
+        return !res.has_value();
+    }
+    return false;
+}
+
+template <typename Request, typename Send>
+std::optional<size_t> SetDeltaTimeInvalidMsgHandler(
+        const Request& req,
+        app::Application& application,
+        Send& send) {
+    StringResponse response(http::status::bad_request, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.body() = json_converter::CreateSetDeltaTimeInvalidMsgResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+    return std::nullopt;
+}
+
+
+template <typename Request>
+bool SetDeltaTimeActivator(const Request& req) {
+    return (req.target() == "/api/v1/game/tick" || req.target() == "/api/v1/game/tick");
+}
+
+template <typename Request, typename Send>
+std::optional<size_t> SetDeltaTimeHandler(
+        const Request& req,
+        app::Application& application,
+        Send& send) {
+    int delta_time = json_converter::ParseSetDeltaTimeRequest(req.body()).value();
+    // todo: Add implementation
+    StringResponse response(http::status::ok, req.version());
+    response.set(http::field::content_type, "application/json");
+    response.set(http::field::cache_control, "no-cache");
+    response.body() = json_converter::CreatePlayerActionResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+    return std::nullopt;
+}
+
 
 }
