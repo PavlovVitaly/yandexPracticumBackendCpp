@@ -52,15 +52,13 @@ private:
 
     Id id_;
     std::string name_;
-    Roads roads_;
+    Roadmap roadmap_;
     Buildings buildings_;
 
     OfficeIdToIndex warehouse_id_to_index_;
     Offices offices_;
 
     double dog_velocity_{INITIAL_DOG_VELOCITY};
-
-    std::shared_ptr<Roadmap> roadmap_;
 };
 
 void tag_invoke(json::value_from_tag, json::value& jv, const Map& map);

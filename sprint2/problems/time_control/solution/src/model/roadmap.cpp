@@ -8,23 +8,50 @@ namespace model {
 
 const double OFFSET = 0.4;
 
-Roadmap::Roadmap(Roads& roads): roads_(roads) {
-    for(size_t i = 0; i < roads.size(); ++i) {
-        auto& road = roads[i];
-        if(road.IsHorizontal()) {
-            int step = (road.GetStart().x < road.GetEnd().x) ? 1 : -1;
-            for(int x = road.GetStart().x; x <= road.GetEnd().x; x += step) {
-                matrix_map_[x][road.GetStart().y].insert(i);
-                matrix_map_[x][road.GetStart().y + 1].insert(i);
-            }
-        } else {
-            int step = (road.GetStart().y < road.GetEnd().y) ? 1 : -1;
-            for(int y = road.GetStart().y; y <= road.GetEnd().y; y += step) {
-                matrix_map_[road.GetStart().x][y].insert(i);
-                matrix_map_[road.GetStart().x + 1][y].insert(i);
-            }
+Roadmap::Roadmap(const Roadmap& other) {
+    CopyContent(other.roads_);
+};
+
+Roadmap::Roadmap(Roadmap&& other) {
+    matrix_map_ = std::move(other.matrix_map_);
+    roads_ = std::move(other.roads_);
+};
+
+Roadmap& Roadmap::operator = (const Roadmap& other) {
+    if(this != &other) {
+        CopyContent(other.roads_);
+    }
+    return *this;
+};
+
+Roadmap& Roadmap::operator = (Roadmap&& other) {
+    if(this != &other) {
+        matrix_map_ = std::move(other.matrix_map_);
+        roads_ = std::move(other.roads_);
+    }
+    return *this;
+};
+
+void Roadmap::AddRoad(const Road& road) {
+    size_t index = roads_.size();
+    roads_.emplace_back(road);
+    if(road.IsHorizontal()) {
+        int step = (road.GetStart().x < road.GetEnd().x) ? 1 : -1;
+        for(int x = road.GetStart().x; x <= road.GetEnd().x; x += step) {
+            matrix_map_[x][road.GetStart().y].insert(index);
+            matrix_map_[x][road.GetStart().y + 1].insert(index);
+        }
+    } else {
+        int step = (road.GetStart().y < road.GetEnd().y) ? 1 : -1;
+        for(int y = road.GetStart().y; y <= road.GetEnd().y; y += step) {
+            matrix_map_[road.GetStart().x][y].insert(index);
+            matrix_map_[road.GetStart().x + 1][y].insert(index);
         }
     }
+};
+
+const Roadmap::Roads& Roadmap::GetRoads() const noexcept {
+    return roads_;
 };
 
 bool Roadmap::IsValidPosition(const Position& position) {
@@ -41,7 +68,6 @@ bool Roadmap::IsValidPosition(const Position& position) {
     }
     return false;
 };
-
 
 bool Roadmap::IsValidPositionOnRoad(const Road& road, const Position& position) {
     double start_x, end_x, start_y, end_y;
@@ -64,6 +90,12 @@ bool Roadmap::IsValidPositionOnRoad(const Road& road, const Position& position) 
     }
     return (position.x >= start_x && position.x <= end_x) &&
             (position.y >= start_y && position.y <= end_y);
+};
+
+void Roadmap::CopyContent(const Roadmap::Roads& roads) {
+    for(auto& road : roads) {
+        AddRoad(road);
+    }
 };
 
 }

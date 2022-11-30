@@ -20,7 +20,7 @@ const Map::Buildings& Map::GetBuildings() const noexcept {
 }
 
 const Map::Roads& Map::GetRoads() const noexcept {
-    return roads_;
+    return roadmap_.GetRoads();
 }
 
 const Map::Offices& Map::GetOffices() const noexcept {
@@ -28,14 +28,13 @@ const Map::Offices& Map::GetOffices() const noexcept {
 }
 
 void Map::AddRoad(const Road& road) {
-    roads_.emplace_back(road);
+    roadmap_.AddRoad(road);
 }
 
 void Map::AddRoads(Roads& roads){
     for(auto item : roads){
         AddRoad(item);
     }
-    roadmap_ = std::make_shared<Roadmap>(roads_);
 }
 
 void Map::AddBuilding(const Building& building) {
@@ -79,7 +78,7 @@ double Map::GetDogVelocity() const noexcept {
 };
 
 bool Map::IsValidPosition(const Position& position) {
-    return roadmap_->IsValidPosition(position);
+    return roadmap_.IsValidPosition(position);
 };
 
 
