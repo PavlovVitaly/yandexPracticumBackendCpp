@@ -1,5 +1,6 @@
 #pragma once
 #include "tagged.h"
+#include "support_types.h"
 
 #include <string>
 #include <unordered_map>
@@ -7,37 +8,6 @@
 
 namespace model {
 
-enum class Direction {
-    NORTH,
-    SOUTH,
-    WEST,
-    EAST,
-    NONE
-};
-
-const std::unordered_map<Direction, std::string> DIRECTION_TO_STRING = {
-    {Direction::NORTH, "U"},
-    {Direction::SOUTH, "D"},
-    {Direction::WEST,  "L"},
-    {Direction::EAST,  "R"},
-    {Direction::NONE,  ""}
-};
-
-const std::unordered_map<std::string, Direction> STRING_TO_DIRECTION = {
-    {"U", Direction::NORTH},
-    {"D", Direction::SOUTH},
-    {"L", Direction::WEST},
-    {"R", Direction::EAST},
-    {"", Direction::NONE}
-};
-
-struct Position {
-    double x, y;
-};
-
-struct Velocity {
-    double vx, vy;
-};
 
 class Dog {
     inline static size_t max_id_cont_ = 0;

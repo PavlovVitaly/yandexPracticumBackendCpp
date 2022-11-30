@@ -22,7 +22,11 @@ add_executable(game_server
 	src/model/game.cpp
 	src/model/player.cpp
 	src/model/dog.cpp
+	src/model/road.cpp
+	src/model/office.cpp
+	src/model/building.cpp
 	src/model/game_session.cpp
+	src/model/roadmap.cpp
 	src/json/json_loader.cpp
 	src/json/json_converter.cpp
 	src/request_handlers/request_handler.cpp

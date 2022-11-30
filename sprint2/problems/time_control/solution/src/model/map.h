@@ -1,132 +1,24 @@
 #pragma once
 #include "tagged.h"
-#include "dog.h"
+#include "road.h"
+#include "building.h"
+#include "office.h"
+#include "roadmap.h"
+#include "support_types.h"
+
 
 #include <cmath>
 #include <string>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 #include <boost/json.hpp>
 
 namespace model {
 
-using Dimension = int;
-using Coord = Dimension;
 namespace json = boost::json;
 
 const double INITIAL_DOG_VELOCITY = 1.0;
-
-struct Point {
-    Coord x, y;
-};
-
-struct Size {
-    Dimension width, height;
-};
-
-struct Rectangle {
-    Point position;
-    Size size;
-};
-
-struct Offset {
-    Dimension dx, dy;
-};
-
-class Road {
-    struct HorizontalTag {
-        explicit HorizontalTag() = default;
-    };
-
-    struct VerticalTag {
-        explicit VerticalTag() = default;
-    };
-
-public:
-    constexpr static HorizontalTag HORIZONTAL{};
-    constexpr static VerticalTag VERTICAL{};
-
-    Road(HorizontalTag, Point start, Coord end_x) noexcept
-        : start_{start}
-        , end_{end_x, start.y} {
-    }
-
-    Road(VerticalTag, Point start, Coord end_y) noexcept
-        : start_{start}
-        , end_{start.x, end_y} {
-    }
-
-    bool IsHorizontal() const noexcept {
-        return start_.y == end_.y;
-    }
-
-    bool IsVertical() const noexcept {
-        return start_.x == end_.x;
-    }
-
-    Point GetStart() const noexcept {
-        return start_;
-    }
-
-    Point GetEnd() const noexcept {
-        return end_;
-    }
-
-private:
-    Point start_;
-    Point end_;
-};
-
-void tag_invoke(json::value_from_tag, json::value& jv, const Road& road);
-Road tag_invoke(json::value_to_tag<Road>, const json::value& jv);
-
-class Building {
-public:
-    explicit Building(Rectangle bounds) noexcept
-        : bounds_{bounds} {
-    }
-
-    const Rectangle& GetBounds() const noexcept {
-        return bounds_;
-    }
-
-private:
-    Rectangle bounds_;
-};
-
-void tag_invoke(json::value_from_tag, json::value& jv, const Building& building);
-Building tag_invoke(json::value_to_tag<Building>, const json::value& jv);
-
-class Office {
-public:
-    using Id = util::Tagged<std::string, Office>;
-
-    Office(Id id, Point position, Offset offset) noexcept
-        : id_{std::move(id)}
-        , position_{position}
-        , offset_{offset} {
-    }
-
-    const Id& GetId() const noexcept {
-        return id_;
-    }
-
-    Point GetPosition() const noexcept {
-        return position_;
-    }
-
-    Offset GetOffset() const noexcept {
-        return offset_;
-    }
-
-private:
-    Id id_;
-    Point position_;
-    Offset offset_;
-};
-
-void tag_invoke(json::value_from_tag, json::value& jv, const Office& office);
-Office tag_invoke(json::value_to_tag<Office>, const json::value& jv);
 
 class Map {
 public:
@@ -153,7 +45,7 @@ public:
     void AddOffices(Offices& offices);
     void SetDogVelocity(double velocity);
     double GetDogVelocity() const noexcept;
-    bool IsValidPosition(Position position);
+    bool IsValidPosition(const Position& position);
 
 private:
     using OfficeIdToIndex = std::unordered_map<Office::Id, size_t, util::TaggedHasher<Office::Id>>;
@@ -167,6 +59,8 @@ private:
     Offices offices_;
 
     double dog_velocity_{INITIAL_DOG_VELOCITY};
+
+    std::shared_ptr<Roadmap> roadmap_;
 };
 
 void tag_invoke(json::value_from_tag, json::value& jv, const Map& map);
