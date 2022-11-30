@@ -477,7 +477,7 @@ std::optional<size_t> SetDeltaTimeHandler(
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, "application/json");
     response.set(http::field::cache_control, "no-cache");
-    response.body() = json_converter::CreatePlayerActionResponse();
+    response.body() = json_converter::CreateSetDeltaTimeResponse();
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
     send(response);

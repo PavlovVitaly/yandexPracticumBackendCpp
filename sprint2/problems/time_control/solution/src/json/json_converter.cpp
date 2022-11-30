@@ -87,7 +87,7 @@ std::string CreateUnknownTokenResponse() {
 };
 
 std::string CreatePlayerActionResponse() {
-    json::value msg = {{}};
+    json::object msg = {};
     return json::serialize(msg);
 };
 
@@ -141,6 +141,17 @@ std::string CreateJoinToGameResponse(const std::string& token, size_t player_id)
     return json::serialize(msg);
 };
 
+std::string CreateSetDeltaTimeResponse() {
+    json::object msg = {};
+    return json::serialize(msg);
+};
+
+std::string CreateSetDeltaTimeInvalidMsgResponse() {
+    json::value msg = {{json_keys::RESPONSE_CODE, "invalidArgument"},
+                        {json_keys::RESPONSE_MESSAGE, "Failed to parse tick request JSON"}};
+    return json::serialize(msg);
+};
+
 std::optional< std::tuple<std::string, model::Map::Id> > ParseJoinToGameRequest(const std::string& msg) {
     try {
         json::value jv = json::parse(msg);
@@ -175,10 +186,5 @@ std::optional<int> ParseSetDeltaTimeRequest(const std::string& msg) {
     }
 };
 
-std::string CreateSetDeltaTimeInvalidMsgResponse() {
-    json::value msg = {{json_keys::RESPONSE_CODE, "invalidArgument"},
-                        {json_keys::RESPONSE_MESSAGE, "Failed to parse tick request JSON"}};
-    return json::serialize(msg);
-};
 
 }
