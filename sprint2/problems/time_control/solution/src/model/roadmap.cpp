@@ -71,39 +71,22 @@ bool Roadmap::IsValidPosition(const Position& position) {
 
 bool Roadmap::IsValidPositionOnRoad(const Road& road, const Position& position) {
     double start_x, end_x, start_y, end_y;
-    /*if(road.IsHorizontal()) {
-        start_x = (road.GetStart().x < road.GetEnd().x) ? (road.GetStart().x + OFFSET) : (road.GetEnd().x + OFFSET);
-        end_x = (road.GetStart().x < road.GetEnd().x) ? (road.GetEnd().x - OFFSET) : (road.GetStart().x - OFFSET);
-        start_y = road.GetStart().y - OFFSET;
-        end_y = road.GetStart().y + OFFSET;
-
-        start_y = (start_y < 0) ? 0 : start_y;
-        end_y = (end_y < 0) ? 0 : end_y;
-    } else {
-        start_y = (road.GetStart().y < road.GetEnd().y) ? (road.GetStart().y + OFFSET) : (road.GetEnd().y + OFFSET);
-        end_y = (road.GetStart().y < road.GetEnd().y) ? (road.GetEnd().y - OFFSET) : (road.GetStart().y - OFFSET);
-        start_x = road.GetStart().x - OFFSET;
-        end_x = road.GetStart().x + OFFSET;
-
-        start_x = (start_x < 0) ? 0 : start_x;
-        end_x = (end_x < 0) ? 0 : end_x;
-    }*/
     if(road.IsHorizontal()) {
         start_x = (road.GetStart().x < road.GetEnd().x) ? (road.GetStart().x) : (road.GetEnd().x);
         end_x = (road.GetStart().x < road.GetEnd().x) ? (road.GetEnd().x) : (road.GetStart().x);
         start_y = road.GetStart().y - OFFSET;
         end_y = road.GetStart().y + OFFSET;
 
-        start_y = (start_y < 0) ? 0 : start_y;
-        end_y = (end_y < 0) ? 0 : end_y;
+        start_x -= OFFSET;
+        end_x += OFFSET;
     } else {
         start_y = (road.GetStart().y < road.GetEnd().y) ? (road.GetStart().y) : (road.GetEnd().y);
         end_y = (road.GetStart().y < road.GetEnd().y) ? (road.GetEnd().y) : (road.GetStart().y);
         start_x = road.GetStart().x - OFFSET;
         end_x = road.GetStart().x + OFFSET;
 
-        start_x = (start_x < 0) ? 0 : start_x;
-        end_x = (end_x < 0) ? 0 : end_x;
+        start_y -= OFFSET;
+        end_y += OFFSET;
     }
     return (position.x >= start_x && position.x <= end_x) &&
             (position.y >= start_y && position.y <= end_y);

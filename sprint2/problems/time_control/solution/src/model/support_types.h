@@ -8,6 +8,7 @@ namespace model {
 using Dimension = int;
 using Coord = Dimension;
 
+const double MILLISECONDS_IN_SECOND = 1000.0;
 
 struct Point {
     Coord x, y;

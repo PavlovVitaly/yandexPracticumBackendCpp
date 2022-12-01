@@ -66,8 +66,8 @@ void Dog::SetAction(Direction direction, double velocity) {
 Position Dog::CalculateNewPosition(const std::chrono::milliseconds& delta_time) {
     Position position = GetPosition();
     const Velocity& velocity = GetVelocity();
-    position.x += velocity.vx * delta_time.count()/1000;
-    position.y += velocity.vy * delta_time.count()/1000;
+    position.x += velocity.vx * delta_time.count() / MILLISECONDS_IN_SECOND;
+    position.y += velocity.vy * delta_time.count() / MILLISECONDS_IN_SECOND;
     return position;
 };
 
