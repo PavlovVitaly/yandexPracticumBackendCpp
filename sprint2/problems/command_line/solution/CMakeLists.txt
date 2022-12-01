@@ -7,7 +7,7 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo_multi.cmake)
 conan_basic_setup()
 
 find_package(Boost 1.78.0 REQUIRED)
-find_package(Boost 1.78.0 COMPONENTS log log_setup)
+find_package(Boost 1.78.0 COMPONENTS log log_setup program_options)
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif()
@@ -56,7 +56,7 @@ target_include_directories(game_server PRIVATE
 	src/time_management
 	src/error_handling
 )
-target_link_libraries(game_server PRIVATE Threads::Threads Boost::log Boost::log_setup boost_program_options)
+target_link_libraries(game_server PRIVATE Threads::Threads Boost::log Boost::log_setup Boost::program_options)
 
 # Boost.Beast будет использовать std::string_view вместо boost::string_view
 add_compile_definitions(BOOST_BEAST_USE_STD_STRING_VIEW)
