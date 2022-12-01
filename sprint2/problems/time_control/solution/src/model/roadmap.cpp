@@ -55,6 +55,9 @@ const Roadmap::Roads& Roadmap::GetRoads() const noexcept {
 };
 
 bool Roadmap::IsValidPosition(const Position& position) {
+    if(position.x < -OFFSET || position.y < -OFFSET) {
+        return false;
+    }
     size_t x_index = std::floor(position.x);
     size_t y_index = std::floor(position.y);
     if(matrix_map_.contains(x_index)) {
