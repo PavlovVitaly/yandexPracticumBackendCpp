@@ -30,7 +30,9 @@ private:
         size_t x;
         size_t y;
 
-        auto operator <=> (const MatrixMapCoord&) const = default;
+        bool operator == (const MatrixMapCoord& other) const {
+            return (x == other.x) && (y == other.y); 
+        };
     };
     using MatrixMap = std::map< size_t, std::map<size_t, std::unordered_set<size_t> > >;
     MatrixMap matrix_map_;
