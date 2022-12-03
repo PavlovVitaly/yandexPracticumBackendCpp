@@ -128,11 +128,11 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
 };
 
 std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetCoordinatesOfPosition(const Position& position) {
-    //if(position.x < -OFFSET || position.y < -OFFSET) {
-    //    return std::nullopt;
-    //}
-    size_t x_index = std::floor(position.x);
-    size_t y_index = std::floor(position.y);
+    if(position.x < -OFFSET || position.y < -OFFSET) {
+        return std::nullopt;
+    }
+    size_t x_index = std::floor(std::abs(position.x));
+    size_t y_index = std::floor(std::abs(position.y));
     if(matrix_map_.contains(x_index)) {
         if(matrix_map_[x_index].contains(y_index)) {
             return MatrixMapCoord{x_index, y_index};
