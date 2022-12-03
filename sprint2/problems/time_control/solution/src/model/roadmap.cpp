@@ -65,6 +65,8 @@ std::tuple<Position, Velocity> Roadmap::GetValidMove(const Position& old_positio
         if(!IsValidPosition(matrix_map_[end_roads.value().x][end_roads.value().y], potential_new_position)) {
             end_roads = std::nullopt;
             velocity = {0, 0};
+        } else if(start_roads == end_roads) {
+            return std::tie(potential_new_position, velocity);
         }
     } else {
         velocity = {0, 0};
@@ -85,7 +87,7 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
         int direction = std::signbit(old_velocity.vx) ? -1 : 1;
         const MatrixMapCoord end_coord = end ? end.value() :
                 (direction > 0 ? MatrixMapCoord{SIZE_MAX, SIZE_MAX} : MatrixMapCoord{0, 0});
-        size_t end_x = direction ? (end_coord.x != SIZE_MAX ? end_coord.x + 1 : SIZE_MAX) :
+        size_t end_x = (direction > 0) ? (end_coord.x != SIZE_MAX ? end_coord.x + 1 : SIZE_MAX) :
                                     (end_coord.x != 0 ? end_coord.x - 1 : 0);
         size_t ind{0};
         for(ind = start_coord.x; ind != end_x; ind += direction) {
@@ -106,7 +108,7 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
         int direction = std::signbit(old_velocity.vy) ? -1 : 1;
         const MatrixMapCoord end_coord = end ? end.value() :
                 (direction > 0 ? MatrixMapCoord{SIZE_MAX, SIZE_MAX} : MatrixMapCoord{0, 0});
-        size_t end_y = direction ? (end_coord.y != SIZE_MAX ? end_coord.y + 1 : SIZE_MAX) :
+        size_t end_y = (direction > 0) ? (end_coord.y != SIZE_MAX ? end_coord.y + 1 : SIZE_MAX) :
                                     (end_coord.y != 0 ? end_coord.y - 1 : 0);
         size_t ind{0};
         for(ind = start_coord.y; ind != end_y; ind += direction) {
