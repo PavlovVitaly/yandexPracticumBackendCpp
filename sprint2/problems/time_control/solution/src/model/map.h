@@ -7,6 +7,7 @@
 #include "support_types.h"
 
 
+#include <tuple>
 #include <cmath>
 #include <string>
 #include <memory>
@@ -45,7 +46,9 @@ public:
     void AddOffices(Offices& offices);
     void SetDogVelocity(double velocity);
     double GetDogVelocity() const noexcept;
-    bool IsValidPosition(const Position& position);
+    std::tuple<Position, Velocity> GetValidMove(const Position& old_position,
+                            const Position& potential_new_position,
+                            const Velocity& old_velocity);
 
 private:
     using OfficeIdToIndex = std::unordered_map<Office::Id, size_t, util::TaggedHasher<Office::Id>>;

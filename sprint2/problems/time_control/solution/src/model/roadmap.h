@@ -2,9 +2,10 @@
 #include "road.h"
 #include "support_types.h"
 
-#include <unordered_map>
+#include <map>
 #include <unordered_set>
 #include <tuple>
+#include <optional>
 
 namespace model {
 
@@ -21,12 +22,31 @@ public:
 
     void AddRoad(const Road& road);
     const Roads& GetRoads() const noexcept;
-    bool IsValidPosition(const Position& position);
+    std::tuple<Position, Velocity> GetValidMove(const Position& old_position,
+                            const Position& potential_new_position,
+                            const Velocity& old_velocity);
 private:
-    using MatrixMap = std::unordered_map< size_t, std::unordered_map<size_t, std::unordered_set<size_t> > >;
+    struct MatrixMapCoord {
+        size_t x;
+        size_t y;
+    };
+    using MatrixMap = std::map< size_t, std::map<size_t, std::unordered_set<size_t> > >;
     MatrixMap matrix_map_;
     Roads roads_;
 
+    std::optional<const std::unordered_set<size_t>> GetDestinationRoadsOfRoute(std::optional<const MatrixMapCoord> start,
+                                    std::optional<const MatrixMapCoord> end,
+                                    const Velocity& old_velocity);
+    std::optional<const MatrixMapCoord> GetCoordinatesOfPosition(const Position& position);
+    bool IsCrossedSets(const std::unordered_set<size_t>& lhs,
+                        const std::unordered_set<size_t>& rhs);
+    bool ValidateCoordinates(const MatrixMapCoord& coordinates);
+    const Position GetFarestpoinOfRoute(const std::unordered_set<size_t>& roads,
+                                    const Position invalid_position,
+                                    const Velocity& old_velocity);
+    bool IsValidPosition(const std::unordered_set<size_t>& roads_ind,
+                        const Position& position);
+    
     bool IsValidPositionOnRoad(const Road& road, const Position& position);
     void CopyContent(const Roads& roads);
 };

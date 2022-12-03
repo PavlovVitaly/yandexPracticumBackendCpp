@@ -32,10 +32,12 @@ void Player::SetDog(std::weak_ptr<Dog> dog) {
 
 void Player::MoveDog(const std::chrono::milliseconds& delta_time) {
     auto dog = dog_.lock();
-    Position potentional_posotion = dog->CalculateNewPosition(delta_time);
-    if(session_.lock()->GetMap()->IsValidPosition(potentional_posotion)) {
-        dog->SetPosition(potentional_posotion);
-    };
+    auto [new_position, new_velocity] = session_.lock()->GetMap()->GetValidMove(
+                dog->GetPosition(),
+                dog->CalculateNewPosition(delta_time),
+                dog->GetVelocity());
+    dog->SetPosition(new_position);
+    dog->SetVelocity(new_velocity);
 };
 
 }

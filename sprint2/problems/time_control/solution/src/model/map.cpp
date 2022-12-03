@@ -77,8 +77,10 @@ double Map::GetDogVelocity() const noexcept {
     return dog_velocity_;
 };
 
-bool Map::IsValidPosition(const Position& position) {
-    return roadmap_.IsValidPosition(position);
+std::tuple<Position, Velocity> Map::GetValidMove(const Position& old_position,
+                                                const Position& potential_new_position,
+                                                const Velocity& old_velocity) {
+    return roadmap_.GetValidMove(old_position, potential_new_position, old_velocity);
 };
 
 
