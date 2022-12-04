@@ -72,9 +72,9 @@ std::tuple<Position, Velocity> Roadmap::GetValidMove(const Position& old_positio
         velocity = {0, 0};
     }
     auto dest = GetDestinationRoadsOfRoute(start_roads, end_roads, old_velocity);
-    Position position = dest ?
-            GetFarestpoinOfRoute(dest.value(), potential_new_position, old_velocity) :
-            potential_new_position;
+    Position position = (dest && IsValidPosition(dest.value(), potential_new_position)) ?
+            potential_new_position:
+            GetFarestpoinOfRoute(dest.value(), potential_new_position, old_velocity);
     return std::tie(position, velocity);
 };
 
