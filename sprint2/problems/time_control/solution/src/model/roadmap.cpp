@@ -97,13 +97,11 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
                                 matrix_map_[index][start_coord.y])) {
                 current_roads =  matrix_map_[index][start_coord.y];
             } else {
-                break;
+                if(current_roads.empty()) {
+                    return std::nullopt; 
+                }
+                return current_roads;
             }
-        }
-        if(ind == end_x) {
-            return std::nullopt;
-        } else {
-            return current_roads;
         }
     } else if(old_velocity.vy != 0) {
         int direction = std::signbit(old_velocity.vy) ? -1 : 1;
@@ -119,13 +117,11 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
                                 matrix_map_[start_coord.x][index])) {
                 current_roads =  matrix_map_[start_coord.x][index];
             } else {
-                break;
+                if(current_roads.empty()) {
+                    return std::nullopt; 
+                }
+                return current_roads;
             }
-        }
-        if(ind == end_y) {
-            return std::nullopt;
-        } else {
-            return current_roads;
         }
     }
     return std::nullopt;
