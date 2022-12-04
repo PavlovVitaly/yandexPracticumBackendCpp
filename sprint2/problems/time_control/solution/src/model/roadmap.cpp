@@ -221,8 +221,10 @@ bool Roadmap::IsValidPositionOnRoad(const Road& road, const Position& position) 
         start_y -= OFFSET;
         end_y += OFFSET;
     }
-    return (position.x >= start_x && position.x <= end_x) &&
-            (position.y >= start_y && position.y <= end_y);
+    return ((position.x > start_x) || (std::abs(position.x - start_x) <= 0.001)) &&
+            ((position.x < end_x) || (std::abs(position.x - end_x) <= 0.001)) &&
+            ((position.y > start_y) || (std::abs(position.y - start_y) <= 0.001)) &&
+            ((position.y < end_y) || (std::abs(position.y - end_y) <= 0.001));
 };
 
 void Roadmap::CopyContent(const Roadmap::Roads& roads) {
