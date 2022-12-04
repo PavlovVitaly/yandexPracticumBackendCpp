@@ -85,10 +85,13 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
     std::unordered_set<size_t> current_roads;
     if(old_velocity.vx != 0) {
         int direction = std::signbit(old_velocity.vx) ? -1 : 1;
-        const MatrixMapCoord end_coord = end ? end.value() :
-                (direction > 0 ? MatrixMapCoord{LLONG_MAX, LLONG_MAX} : MatrixMapCoord{0, 0});
-        int64_t end_x = (direction > 0) ? (end_coord.x < LLONG_MAX ? end_coord.x + 1 : LLONG_MAX) :
-                                        end_coord.x - 1;
+        int64_t end_x{0};
+        if(end) {
+            end_x = (direction > 0) ? (end.value().x < LLONG_MAX ? end.value().x + 1 : LLONG_MAX) :
+                                        end.value().x - 1;
+        } else {
+            end_x = (direction > 0) ? LLONG_MAX : -1;
+        }
         int64_t ind{0};
         for(ind = start_coord.x; ind != end_x; ind += direction) {
             size_t index = static_cast<size_t>(ind);
@@ -97,18 +100,22 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
                                 matrix_map_[index][start_coord.y])) {
                 current_roads =  matrix_map_[index][start_coord.y];
             } else {
-                if(current_roads.empty()) {
-                    return std::nullopt; 
-                }
-                return current_roads;
+                break;
             }
         }
+        if(current_roads.empty()) {
+            return std::nullopt; 
+        }
+        return current_roads;
     } else if(old_velocity.vy != 0) {
         int direction = std::signbit(old_velocity.vy) ? -1 : 1;
-        const MatrixMapCoord end_coord = end ? end.value() :
-                (direction > 0 ? MatrixMapCoord{LLONG_MAX, LLONG_MAX} : MatrixMapCoord{0, 0});
-        int64_t end_y = (direction > 0) ? (end_coord.y < LLONG_MAX ? end_coord.y + 1 : LLONG_MAX) :
-                                            end_coord.y - 1;
+        int64_t end_y{0};
+        if(end) {
+            end_y = (direction > 0) ? (end.value().y < LLONG_MAX ? end.value().y + 1 : LLONG_MAX) :
+                                        end.value().y - 1;
+        } else {
+            end_y = (direction > 0) ? LLONG_MAX : -1;
+        }
         int64_t ind{0};
         for(ind = start_coord.y; ind != end_y; ind += direction) {
             size_t index = static_cast<size_t>(ind);
@@ -117,12 +124,13 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
                                 matrix_map_[start_coord.x][index])) {
                 current_roads =  matrix_map_[start_coord.x][index];
             } else {
-                if(current_roads.empty()) {
-                    return std::nullopt; 
-                }
-                return current_roads;
+                break;
             }
         }
+        if(current_roads.empty()) {
+            return std::nullopt; 
+        }
+        return current_roads;
     }
     return std::nullopt;
 };
