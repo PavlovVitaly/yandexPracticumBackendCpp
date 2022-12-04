@@ -86,15 +86,16 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
     if(old_velocity.vx != 0) {
         int direction = std::signbit(old_velocity.vx) ? -1 : 1;
         const MatrixMapCoord end_coord = end ? end.value() :
-                (direction > 0 ? MatrixMapCoord{SIZE_MAX, SIZE_MAX} : MatrixMapCoord{0, 0});
-        size_t end_x = (direction > 0) ? (end_coord.x != SIZE_MAX ? end_coord.x + 1 : SIZE_MAX) :
-                                    (end_coord.x != 0 ? end_coord.x - 1 : 0);
-        size_t ind{0};
+                (direction > 0 ? MatrixMapCoord{LLONG_MAX, LLONG_MAX} : MatrixMapCoord{0, 0});
+        int64_t end_x = (direction > 0) ? (end_coord.x < LLONG_MAX ? end_coord.x + 1 : LLONG_MAX) :
+                                        end_coord.x - 1;
+        int64_t ind{0};
         for(ind = start_coord.x; ind != end_x; ind += direction) {
-            if(ValidateCoordinates({ind, start_coord.y}) &&
+            size_t index = static_cast<size_t>(ind);
+            if(ValidateCoordinates({index, start_coord.y}) &&
                 IsCrossedSets(matrix_map_[start_coord.x][start_coord.y],
-                                matrix_map_[ind][start_coord.y])) {
-                current_roads =  matrix_map_[ind][start_coord.y];
+                                matrix_map_[index][start_coord.y])) {
+                current_roads =  matrix_map_[index][start_coord.y];
             } else {
                 break;
             }
@@ -107,15 +108,16 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
     } else if(old_velocity.vy != 0) {
         int direction = std::signbit(old_velocity.vy) ? -1 : 1;
         const MatrixMapCoord end_coord = end ? end.value() :
-                (direction > 0 ? MatrixMapCoord{SIZE_MAX, SIZE_MAX} : MatrixMapCoord{0, 0});
-        size_t end_y = (direction > 0) ? (end_coord.y != SIZE_MAX ? end_coord.y + 1 : SIZE_MAX) :
-                                    (end_coord.y != 0 ? end_coord.y - 1 : 0);
-        size_t ind{0};
+                (direction > 0 ? MatrixMapCoord{LLONG_MAX, LLONG_MAX} : MatrixMapCoord{0, 0});
+        int64_t end_y = (direction > 0) ? (end_coord.y < LLONG_MAX ? end_coord.y + 1 : LLONG_MAX) :
+                                            end_coord.y - 1;
+        int64_t ind{0};
         for(ind = start_coord.y; ind != end_y; ind += direction) {
-            if(ValidateCoordinates({start_coord.x, ind}) &&
+            size_t index = static_cast<size_t>(ind);
+            if(ValidateCoordinates({start_coord.x, index}) &&
                 IsCrossedSets(matrix_map_[start_coord.x][start_coord.y],
-                                matrix_map_[start_coord.x][ind])) {
-                current_roads =  matrix_map_[start_coord.x][ind];
+                                matrix_map_[start_coord.x][index])) {
+                current_roads =  matrix_map_[start_coord.x][index];
             } else {
                 break;
             }
