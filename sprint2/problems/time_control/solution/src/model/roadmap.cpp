@@ -34,21 +34,30 @@ Roadmap& Roadmap::operator = (Roadmap&& other) {
 };
 
 void Roadmap::AddRoad(const Road& road) {
+    const int64_t SCALLED_OFFSET = OFFSET * SCALE_FACTOR_OF_CELL;
     size_t index = roads_.size();
     roads_.emplace_back(road);
     if(road.IsHorizontal()) {
         int64_t start = (road.GetStart().x < road.GetEnd().x) ? road.GetStart().x : road.GetEnd().x;
         int64_t end = (road.GetStart().x < road.GetEnd().x) ? road.GetEnd().x : road.GetStart().x;
-        for(int x = start; x <= end; ++x) {
-            matrix_map_[x][road.GetStart().y].insert(index);
-            matrix_map_[x][road.GetStart().y - 1].insert(index);
+        start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
+        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET + 1;
+        int64_t y = road.GetStart().y * SCALE_FACTOR_OF_CELL;
+        for(int64_t x = start; x <= end; ++x) {
+            for(int i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET + 1; ++i) {
+                matrix_map_[x][y + i].insert(index);
+            }
         }
     } else {
         int64_t start = (road.GetStart().y < road.GetEnd().y) ? road.GetStart().y : road.GetEnd().y;
         int64_t end = (road.GetStart().y < road.GetEnd().y) ? road.GetEnd().y : road.GetStart().y;
-        for(int y = start; y <= end; ++y) {
-            matrix_map_[road.GetStart().x][y].insert(index);
-            matrix_map_[road.GetStart().x - 1][y].insert(index);
+        start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
+        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET + 1;
+        int64_t x = road.GetStart().x * SCALE_FACTOR_OF_CELL;
+        for(int64_t y = start; y <= end; ++y) {
+            for(int i = -SCALLED_OFFSET; i <= SCALLED_OFFSET + 1; ++i) {
+                matrix_map_[x + i][y].insert(index);
+            }
         }
     }
 };
@@ -64,7 +73,9 @@ std::tuple<Position, Velocity> Roadmap::GetValidMove(const Position& old_positio
     auto start_roads = GetCoordinatesOfPosition(old_position);
     auto end_roads = GetCoordinatesOfPosition(potential_new_position);
     if(end_roads){
-        if(!IsValidPosition(matrix_map_[end_roads.value().x][end_roads.value().y], potential_new_position)) {
+        if(!IsValidPosition(matrix_map_[end_roads.value().x * SCALE_FACTOR_OF_CELL]
+                                        [end_roads.value().y * SCALE_FACTOR_OF_CELL],
+                            potential_new_position)) {
             end_roads = std::nullopt;
             velocity = {0, 0};
         } else if(start_roads == end_roads) {
@@ -89,8 +100,9 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
         int direction = std::signbit(old_velocity.vx) ? -1 : 1;
         int64_t end_x{0};
         if(end) {
-            end_x = (direction > 0) ? (end.value().x < LLONG_MAX ? end.value().x + 1 : LLONG_MAX) :
-                                        end.value().x - 1;
+            end_x = end.value().x * SCALE_FACTOR_OF_CELL;
+            end_x = (direction > 0) ? (end_x < LLONG_MAX ? end_x + 1 : LLONG_MAX) :
+                                        end_x - 1;
         } else {
             end_x = (direction > 0) ? LLONG_MAX : -1;
         }
@@ -112,8 +124,9 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
         int direction = std::signbit(old_velocity.vy) ? -1 : 1;
         int64_t end_y{0};
         if(end) {
-            end_y = (direction > 0) ? (end.value().y < LLONG_MAX ? end.value().y + 1 : LLONG_MAX) :
-                                        end.value().y - 1;
+            end_y = end.value().y * SCALE_FACTOR_OF_CELL;
+            end_y = (direction > 0) ? (end_y < LLONG_MAX ? end_y + 1 : LLONG_MAX) :
+                                        end_y - 1;
         } else {
             end_y = (direction > 0) ? LLONG_MAX : -1;
         }
@@ -136,11 +149,11 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
 };
 
 std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetCoordinatesOfPosition(const Position& position) {
-    if(position.x < -OFFSET || position.y < -OFFSET) {
+    if(position.x < -OFFSET - 0.001 || position.y < -OFFSET - 0.001) {
         return std::nullopt;
     }
-    int64_t x_index = std::floor(position.x);
-    int64_t y_index = std::floor(position.y);
+    int64_t x_index = (position.x >= 0) ? std::floor(position.x * SCALE_FACTOR_OF_CELL) : std::ceil(position.x * SCALE_FACTOR_OF_CELL);
+    int64_t y_index = (position.y >= 0) ? std::floor(position.y * SCALE_FACTOR_OF_CELL) : std::ceil(position.y * SCALE_FACTOR_OF_CELL);
     if(matrix_map_.contains(x_index)) {
         if(matrix_map_[x_index].contains(y_index)) {
             return MatrixMapCoord{x_index, y_index};
@@ -221,10 +234,14 @@ bool Roadmap::IsValidPositionOnRoad(const Road& road, const Position& position) 
         start_y -= OFFSET;
         end_y += OFFSET;
     }
-    return ((position.x > start_x) || (std::abs(position.x - start_x) < 0.001)) &&
-            ((position.x < end_x) || (std::abs(position.x - end_x) < 0.001)) &&
-            ((position.y > start_y) || (std::abs(position.y - start_y) < 0.001)) &&
-            ((position.y < end_y) || (std::abs(position.y - end_y) < 0.001));
+    return (position.x >= start_x) &&
+            (position.x <= end_x) &&
+            (position.y >= start_y) &&
+            (position.y <= end_y);
+    //return ((position.x > start_x) || (std::abs(position.x - start_x) < 0.001)) &&
+    //        ((position.x < end_x) || (std::abs(position.x - end_x) < 0.001)) &&
+    //        ((position.y > start_y) || (std::abs(position.y - start_y) < 0.001)) &&
+    //        ((position.y < end_y) || (std::abs(position.y - end_y) < 0.001));
 };
 
 void Roadmap::CopyContent(const Roadmap::Roads& roads) {
