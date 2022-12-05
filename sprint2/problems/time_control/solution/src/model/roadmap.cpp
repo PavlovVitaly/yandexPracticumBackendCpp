@@ -37,16 +37,18 @@ void Roadmap::AddRoad(const Road& road) {
     size_t index = roads_.size();
     roads_.emplace_back(road);
     if(road.IsHorizontal()) {
-        int step = (road.GetStart().x < road.GetEnd().x) ? 1 : -1;
-        for(int x = road.GetStart().x; x <= road.GetEnd().x; x += step) {
+        int64_t start = (road.GetStart().x < road.GetEnd().x) ? road.GetStart().x : road.GetEnd().x;
+        int64_t end = (road.GetStart().x < road.GetEnd().x) ? road.GetEnd().x : road.GetStart().x;
+        for(int x = start; x <= end; ++x) {
             matrix_map_[x][road.GetStart().y].insert(index);
-            matrix_map_[x][road.GetStart().y + 1].insert(index);
+            matrix_map_[x][road.GetStart().y - 1].insert(index);
         }
     } else {
-        int step = (road.GetStart().y < road.GetEnd().y) ? 1 : -1;
-        for(int y = road.GetStart().y; y <= road.GetEnd().y; y += step) {
+        int64_t start = (road.GetStart().y < road.GetEnd().y) ? road.GetStart().y : road.GetEnd().y;
+        int64_t end = (road.GetStart().y < road.GetEnd().y) ? road.GetEnd().y : road.GetStart().y;
+        for(int y = start; y <= end; ++y) {
             matrix_map_[road.GetStart().x][y].insert(index);
-            matrix_map_[road.GetStart().x + 1][y].insert(index);
+            matrix_map_[road.GetStart().x - 1][y].insert(index);
         }
     }
 };

@@ -34,7 +34,7 @@ private:
             return (x == other.x) && (y == other.y); 
         };
     };
-    using MatrixMap = std::map< size_t, std::map<size_t, std::unordered_set<size_t> > >;
+    using MatrixMap = std::map< int64_t, std::map<int64_t, std::unordered_set<size_t> > >;
     MatrixMap matrix_map_;
     Roads roads_;
 
