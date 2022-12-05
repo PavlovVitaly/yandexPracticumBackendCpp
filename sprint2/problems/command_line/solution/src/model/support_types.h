@@ -6,6 +6,7 @@
 namespace model {
 
 const double OFFSET = 0.4;
+const double MILLISECONDS_IN_SECOND = 1000.0;
 
 using Dimension = int;
 using Coord = Dimension;

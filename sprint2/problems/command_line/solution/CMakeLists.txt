@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo_multi.cmake)
 conan_basic_setup()
 
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 find_package(Boost 1.78.0 REQUIRED)
 find_package(Boost 1.78.0 COMPONENTS log log_setup program_options)
 if(Boost_FOUND)
