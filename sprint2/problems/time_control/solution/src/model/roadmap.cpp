@@ -75,20 +75,22 @@ std::tuple<Position, Velocity> Roadmap::GetValidMove(const Position& old_positio
     if(end_roads){
         if(!IsValidPosition(matrix_map_[end_roads.value().x][end_roads.value().y],
                             potential_new_position)) {
-            std::cout << "Invalid" << std::endl;
             end_roads = std::nullopt;
             velocity = {0, 0};
         } else if(start_roads == end_roads) {
             return std::tie(potential_new_position, velocity);
         }
     } else {
-        std::cout << "end_roads is empty" << std::endl;
         velocity = {0, 0};
     }
     auto dest = GetDestinationRoadsOfRoute(start_roads, end_roads, old_velocity);
-    Position position = (dest && IsValidPosition(dest.value(), potential_new_position)) ?
-            potential_new_position:
-            GetFarestpoinOfRoute(dest.value(), potential_new_position, old_velocity);
+    Position position;
+    if(dest && IsValidPosition(dest.value(), potential_new_position)) {
+        position = potential_new_position;
+    } else {
+        position = GetFarestpoinOfRoute(dest.value(), potential_new_position, old_velocity);
+        velocity = {0, 0};
+    }
     return std::tie(position, velocity);
 };
 
@@ -150,7 +152,7 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
 };
 
 std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetCoordinatesOfPosition(const Position& position) {
-    if(position.x < -OFFSET - 0.001 || position.y < -OFFSET - 0.001) {
+    if(position.x < -OFFSET - EPSILON || position.y < -OFFSET - EPSILON) {
         return std::nullopt;
     }
     int64_t x_index = (position.x >= 0) ? std::floor(position.x * SCALE_FACTOR_OF_CELL) : std::ceil(position.x * SCALE_FACTOR_OF_CELL);
@@ -239,10 +241,10 @@ bool Roadmap::IsValidPositionOnRoad(const Road& road, const Position& position) 
             (position.x <= end_x) &&
             (position.y >= start_y) &&
             (position.y <= end_y);
-    //return ((position.x > start_x) || (std::abs(position.x - start_x) < 0.001)) &&
-    //        ((position.x < end_x) || (std::abs(position.x - end_x) < 0.001)) &&
-    //        ((position.y > start_y) || (std::abs(position.y - start_y) < 0.001)) &&
-    //        ((position.y < end_y) || (std::abs(position.y - end_y) < 0.001));
+    //return ((position.x > start_x) || (std::abs(position.x - start_x) < EPSILON)) &&
+    //        ((position.x < end_x) || (std::abs(position.x - end_x) < EPSILON)) &&
+    //        ((position.y > start_y) || (std::abs(position.y - start_y) < EPSILON)) &&
+    //        ((position.y < end_y) || (std::abs(position.y - end_y) < EPSILON));
 };
 
 void Roadmap::CopyContent(const Roadmap::Roads& roads) {
