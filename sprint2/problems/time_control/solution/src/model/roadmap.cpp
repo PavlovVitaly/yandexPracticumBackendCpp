@@ -94,9 +94,8 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
         } else {
             end_x = (direction > 0) ? LLONG_MAX : -1;
         }
-        int64_t ind{0};
-        for(ind = start_coord.x; ind != end_x; ind += direction) {
-            size_t index = static_cast<size_t>(ind);
+        int64_t index{0};
+        for(index = start_coord.x; index != end_x; index += direction) {
             if(ValidateCoordinates({index, start_coord.y}) &&
                 IsCrossedSets(matrix_map_[start_coord.x][start_coord.y],
                                 matrix_map_[index][start_coord.y])) {
@@ -118,9 +117,8 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
         } else {
             end_y = (direction > 0) ? LLONG_MAX : -1;
         }
-        int64_t ind{0};
-        for(ind = start_coord.y; ind != end_y; ind += direction) {
-            size_t index = static_cast<size_t>(ind);
+        int64_t index{0};
+        for(index = start_coord.y; index != end_y; index += direction) {
             if(ValidateCoordinates({start_coord.x, index}) &&
                 IsCrossedSets(matrix_map_[start_coord.x][start_coord.y],
                                 matrix_map_[start_coord.x][index])) {
@@ -141,8 +139,8 @@ std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetCoordinatesOfPosition(c
     if(position.x < -OFFSET || position.y < -OFFSET) {
         return std::nullopt;
     }
-    size_t x_index = std::floor(std::abs(position.x));
-    size_t y_index = std::floor(std::abs(position.y));
+    int64_t x_index = std::floor(position.x);
+    int64_t y_index = std::floor(position.y);
     if(matrix_map_.contains(x_index)) {
         if(matrix_map_[x_index].contains(y_index)) {
             return MatrixMapCoord{x_index, y_index};
