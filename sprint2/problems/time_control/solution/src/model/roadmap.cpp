@@ -73,15 +73,16 @@ std::tuple<Position, Velocity> Roadmap::GetValidMove(const Position& old_positio
     auto start_roads = GetCoordinatesOfPosition(old_position);
     auto end_roads = GetCoordinatesOfPosition(potential_new_position);
     if(end_roads){
-        if(!IsValidPosition(matrix_map_[end_roads.value().x * SCALE_FACTOR_OF_CELL]
-                                        [end_roads.value().y * SCALE_FACTOR_OF_CELL],
+        if(!IsValidPosition(matrix_map_[end_roads.value().x][end_roads.value().y],
                             potential_new_position)) {
+            std::cout << "Invalid" << std::endl;
             end_roads = std::nullopt;
             velocity = {0, 0};
         } else if(start_roads == end_roads) {
             return std::tie(potential_new_position, velocity);
         }
     } else {
+        std::cout << "end_roads is empty" << std::endl;
         velocity = {0, 0};
     }
     auto dest = GetDestinationRoadsOfRoute(start_roads, end_roads, old_velocity);
