@@ -8,7 +8,6 @@
 #include <optional>
 #include <boost/beast/http.hpp>
 #include <set>
-
 #include <chrono>
 
 namespace rh_storage{

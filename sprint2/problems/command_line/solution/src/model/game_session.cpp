@@ -1,5 +1,6 @@
 #include "game_session.h"
 #include "random_generators.h"
+#include "support_types.h"
 
 namespace model {
 
@@ -21,7 +22,7 @@ std::shared_ptr<Dog> GameSession::CreateDog(const std::string& dog_name, bool ra
     if(randomize_spawn_points) {
         LocateDogInRandomPositionOnMap(dog);
     } else {
-
+        LocateDogInStartPointOnMap(dog);
     }
     return dog;
 };

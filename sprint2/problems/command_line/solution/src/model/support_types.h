@@ -5,12 +5,13 @@
 
 namespace model {
 
-const double OFFSET = 0.4;
-const double MILLISECONDS_IN_SECOND = 1000.0;
-
 using Dimension = int;
 using Coord = Dimension;
 
+const double MILLISECONDS_IN_SECOND = 1000.0;
+const int SCALE_FACTOR_OF_CELL = 20;
+const double EPSILON = 0.001;
+const double OFFSET = 0.4;
 
 struct Point {
     Coord x, y;

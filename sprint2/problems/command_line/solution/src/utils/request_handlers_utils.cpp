@@ -47,4 +47,8 @@ std::string GetTokenString(std::string_view bearer_string) {
     return std::string(splitted[TOKEN_INDEX]);
 };
 
+bool IsEqualUrls(const std::string& server_url, const std::string_view request_url){
+    return request_url == server_url || request_url == server_url + "/";
+};
+
 }
