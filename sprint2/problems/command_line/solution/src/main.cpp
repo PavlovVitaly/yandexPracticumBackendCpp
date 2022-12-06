@@ -48,7 +48,7 @@ int main(int argc, const char* argv[]) {
         //fs::path sc_root_path{"../../static"};
 
         // 3. Инициализируем io_context
-        const unsigned num_threads = std::thread::hardware_concurrency();
+        const unsigned num_threads = 2;//std::thread::hardware_concurrency();
         net::io_context ioc(num_threads);
 
         app::Application application(std::move(game), args.tick_period, args.randomize_spawn_points, ioc);

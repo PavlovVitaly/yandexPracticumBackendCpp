@@ -28,17 +28,27 @@ public:
     };
 
     bool Execute(const Request& req, app::Application& application, Send&& send) {
+        if(GetGameStateActivator(req)) {
+            GetGameStateHandler(req, application, send);
+            return true;
+        } else if(GetPlayersListActivator(req)) {
+            GetPlayersListHandler(req, application, send);
+            return true;
+        } else if(PlayerActionActivator(req)) {
+            PlayerActionHandler(req, application, send);
+            return true;
+        } else {
         for(auto item : rh_storage_) {
             if(item.GetActivator()(req)){
-                net::dispatch(*application.GetStrand(), [&item, &req, &application, &send]{
+                //net::dispatch(*application.GetStrand(), [&item, &req, &application, &send]{
                     auto res = item.GetHandler(req.method())(req, application, send);
                     while(res.has_value()){
                         res = item.GetEmergeHandlerByIndex(res.value())(req, application, send);
                     }
-                });
+                //});
                 return true;
             }
-        }
+        }}
         return false;
     };
 
