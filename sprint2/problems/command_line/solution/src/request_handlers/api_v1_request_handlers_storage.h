@@ -59,9 +59,9 @@ bool BadRequestActivator(const Request& req) {
                     url[3] != "players" &&
                     url[3] != "state" &&
                     url[3] != "player" &&
-                    url[3] != "tick" &&     // todo: temp url
+                    url[3] != "tick" &&
                     (url.size() == SIZE_OF_FIVE_SEGMENT_URL && url[4] != "action"))
-            );
+            ); // todo: need refactor
 };
 
 template <typename Request, typename Send>
@@ -90,7 +90,7 @@ std::optional<size_t> GetMapListHandler(
         app::Application& application,
         Send& send) {
     StringResponse response(http::status::ok, req.version());
-    response.set(http::field::content_type, "application/json");
+    response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.body() = json_converter::ConvertMapListToJson(application.ListMap());
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());

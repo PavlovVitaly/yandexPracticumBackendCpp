@@ -9,6 +9,8 @@
 
 namespace model {
 
+/*Класс для предстваления карты дорог. Map разбивается на ячейки с целочисленными координатами
+в каждой ячейке хранится множество дорог проходящих по данному участку*/
 class Roadmap {
 public:
     using Roads = std::vector<Road>;
@@ -27,8 +29,8 @@ public:
                             const Velocity& old_velocity);
 private:
     struct MatrixMapCoord {
-        size_t x;
-        size_t y;
+        int64_t x;
+        int64_t y;
 
         bool operator == (const MatrixMapCoord& other) const {
             return (x == other.x) && (y == other.y); 

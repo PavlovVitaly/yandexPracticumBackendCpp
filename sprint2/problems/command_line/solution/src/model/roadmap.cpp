@@ -8,6 +8,11 @@
 
 namespace model {
 
+/*Такой масштаб выбран, чтобы в одной клетке не было нескольких дорог без их наложения друг на друга
+(условие непрерывности маршрута если в клетке есть какая-нибудь дорога).*/
+const int SCALE_FACTOR_OF_CELL = 20;    // Разбиваем карту на квадраты размером 0.05x0.05 папугаев.
+const double EPSILON = 0.001;   // Точность рассчетов.
+
 Roadmap::Roadmap(const Roadmap& other) {
     CopyContent(other.roads_);
 };
@@ -248,14 +253,10 @@ bool Roadmap::IsValidPositionOnRoad(const Road& road, const Position& position) 
         start_y -= OFFSET;
         end_y += OFFSET;
     }
-    return (position.x >= start_x) &&
-            (position.x <= end_x) &&
-            (position.y >= start_y) &&
-            (position.y <= end_y);
-    //return ((position.x > start_x) || (std::abs(position.x - start_x) < EPSILON)) &&
-    //        ((position.x < end_x) || (std::abs(position.x - end_x) < EPSILON)) &&
-    //        ((position.y > start_y) || (std::abs(position.y - start_y) < EPSILON)) &&
-    //        ((position.y < end_y) || (std::abs(position.y - end_y) < EPSILON));
+    return ((position.x > start_x) || (std::abs(position.x - start_x) < EPSILON)) &&
+            ((position.x < end_x) || (std::abs(position.x - end_x) < EPSILON)) &&
+            ((position.y > start_y) || (std::abs(position.y - start_y) < EPSILON)) &&
+            ((position.y < end_y) || (std::abs(position.y - end_y) < EPSILON));
 };
 
 void Roadmap::CopyContent(const Roadmap::Roads& roads) {
