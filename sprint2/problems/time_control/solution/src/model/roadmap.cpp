@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <stdint.h>
+#include <set>
 
 namespace model {
 
@@ -88,7 +89,7 @@ std::tuple<Position, Velocity> Roadmap::GetValidMove(const Position& old_positio
     if(dest && IsValidPosition(dest.value(), potential_new_position)) {
         position = potential_new_position;
     } else {
-        position = GetFarestpoinOfRoute(dest.value(), potential_new_position, old_velocity);
+        position = GetFarestPoinOfRoute(dest.value(), potential_new_position, old_velocity);
         velocity = {0, 0};
     }
     return std::tie(position, velocity);
@@ -182,10 +183,11 @@ bool Roadmap::ValidateCoordinates(const MatrixMapCoord& coordinates) {
     return false;
 };
 
-const Position Roadmap::GetFarestpoinOfRoute(const std::unordered_set<size_t>& roads,
+const Position Roadmap::GetFarestPoinOfRoute(const std::unordered_set<size_t>& roads,
                                     const Position invalid_position,
                                     const Velocity& old_velocity) {
     Position res_position = invalid_position;
+    std::set<double> coord;
     for(auto road_ind : roads) {
         auto start = (roads_[road_ind].GetEnd().x - roads_[road_ind].GetStart().x >= 0) &&
                     (roads_[road_ind].GetEnd().y - roads_[road_ind].GetStart().y >= 0) ?
@@ -195,17 +197,28 @@ const Position Roadmap::GetFarestpoinOfRoute(const std::unordered_set<size_t>& r
                     (roads_[road_ind].GetEnd().y - roads_[road_ind].GetStart().y >= 0) ?
                     roads_[road_ind].GetEnd() :
                     roads_[road_ind].GetStart();
+        
         if(old_velocity.vx < 0) {
-            res_position.x = start.x - OFFSET;
+            coord.insert(start.x - OFFSET);
         } else if(old_velocity.vx > 0) {
-            res_position.x = end.x + OFFSET;
+            coord.insert(end.x + OFFSET);
         } else if(old_velocity.vy < 0) {
-            res_position.y = start.y - OFFSET;
+            coord.insert(start.y - OFFSET);
         } else if(old_velocity.vy > 0) {
-            res_position.y = end.y + OFFSET;
+            coord.insert(end.y + OFFSET);
         }
-        break;  // todo: rework. temp changes.
     }
+
+    if(old_velocity.vx < 0) {
+        res_position.x = *coord.begin();
+    } else if(old_velocity.vx > 0) {
+        res_position.x = *coord.rbegin();
+    } else if(old_velocity.vy < 0) {
+        res_position.y = *coord.begin();
+    } else if(old_velocity.vy > 0) {
+        res_position.y = *coord.rbegin();
+    }
+
     return res_position;
 };
 

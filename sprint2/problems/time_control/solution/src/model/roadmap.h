@@ -45,7 +45,7 @@ private:
     bool IsCrossedSets(const std::unordered_set<size_t>& lhs,
                         const std::unordered_set<size_t>& rhs);
     bool ValidateCoordinates(const MatrixMapCoord& coordinates);
-    const Position GetFarestpoinOfRoute(const std::unordered_set<size_t>& roads,
+    const Position GetFarestPoinOfRoute(const std::unordered_set<size_t>& roads,
                                     const Position invalid_position,
                                     const Velocity& old_velocity);
     bool IsValidPosition(const std::unordered_set<size_t>& roads_ind,
