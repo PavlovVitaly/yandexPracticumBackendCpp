@@ -41,10 +41,10 @@ void Roadmap::AddRoad(const Road& road) {
         int64_t start = (road.GetStart().x < road.GetEnd().x) ? road.GetStart().x : road.GetEnd().x;
         int64_t end = (road.GetStart().x < road.GetEnd().x) ? road.GetEnd().x : road.GetStart().x;
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
-        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET + 1;
+        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
         int64_t y = road.GetStart().y * SCALE_FACTOR_OF_CELL;
         for(int64_t x = start; x <= end; ++x) {
-            for(int i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET + 1; ++i) {
+            for(int i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET; ++i) {
                 matrix_map_[x][y + i].insert(index);
             }
         }
@@ -52,10 +52,10 @@ void Roadmap::AddRoad(const Road& road) {
         int64_t start = (road.GetStart().y < road.GetEnd().y) ? road.GetStart().y : road.GetEnd().y;
         int64_t end = (road.GetStart().y < road.GetEnd().y) ? road.GetEnd().y : road.GetStart().y;
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
-        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET + 1;
+        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
         int64_t x = road.GetStart().x * SCALE_FACTOR_OF_CELL;
         for(int64_t y = start; y <= end; ++y) {
-            for(int i = -SCALLED_OFFSET; i <= SCALLED_OFFSET + 1; ++i) {
+            for(int i = -SCALLED_OFFSET; i <= SCALLED_OFFSET; ++i) {
                 matrix_map_[x + i][y].insert(index);
             }
         }
@@ -107,7 +107,7 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
             end_x = (direction > 0) ? (end_x < LLONG_MAX ? end_x + 1 : LLONG_MAX) :
                                         end_x - 1;
         } else {
-            end_x = (direction > 0) ? LLONG_MAX : -1;
+            end_x = (direction > 0) ? LLONG_MAX : -(OFFSET * SCALE_FACTOR_OF_CELL);
         }
         int64_t index{0};
         for(index = start_coord.x; index != end_x; index += direction) {
@@ -131,7 +131,7 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
             end_y = (direction > 0) ? (end_y < LLONG_MAX ? end_y + 1 : LLONG_MAX) :
                                         end_y - 1;
         } else {
-            end_y = (direction > 0) ? LLONG_MAX : -1;
+            end_y = (direction > 0) ? LLONG_MAX : -(OFFSET * SCALE_FACTOR_OF_CELL);
         }
         int64_t index{0};
         for(index = start_coord.y; index != end_y; index += direction) {
