@@ -108,7 +108,7 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
             end_x = (direction > 0) ? (end_x < LLONG_MAX ? end_x + 1 : LLONG_MAX) :
                                         end_x - 1;
         } else {
-            end_x = (direction > 0) ? LLONG_MAX : -(OFFSET * SCALE_FACTOR_OF_CELL);
+            end_x = (direction > 0) ? LLONG_MAX : -(OFFSET * SCALE_FACTOR_OF_CELL) - 1;
         }
         int64_t index{0};
         for(index = start_coord.x; index != end_x; index += direction) {
@@ -132,7 +132,7 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
             end_y = (direction > 0) ? (end_y < LLONG_MAX ? end_y + 1 : LLONG_MAX) :
                                         end_y - 1;
         } else {
-            end_y = (direction > 0) ? LLONG_MAX : -(OFFSET * SCALE_FACTOR_OF_CELL);
+            end_y = (direction > 0) ? LLONG_MAX : -(OFFSET * SCALE_FACTOR_OF_CELL)  - 1;
         }
         int64_t index{0};
         for(index = start_coord.y; index != end_y; index += direction) {
