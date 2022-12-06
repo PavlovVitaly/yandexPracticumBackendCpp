@@ -42,10 +42,10 @@ void Roadmap::AddRoad(const Road& road) {
         int64_t start = (road.GetStart().x < road.GetEnd().x) ? road.GetStart().x : road.GetEnd().x;
         int64_t end = (road.GetStart().x < road.GetEnd().x) ? road.GetEnd().x : road.GetStart().x;
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
-        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
+        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET + 1;
         int64_t y = road.GetStart().y * SCALE_FACTOR_OF_CELL;
         for(int64_t x = start; x <= end; ++x) {
-            for(int i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET; ++i) {
+            for(int i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET + 1; ++i) {
                 matrix_map_[x][y + i].insert(index);
             }
         }
@@ -53,10 +53,10 @@ void Roadmap::AddRoad(const Road& road) {
         int64_t start = (road.GetStart().y < road.GetEnd().y) ? road.GetStart().y : road.GetEnd().y;
         int64_t end = (road.GetStart().y < road.GetEnd().y) ? road.GetEnd().y : road.GetStart().y;
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
-        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
+        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET + 1;
         int64_t x = road.GetStart().x * SCALE_FACTOR_OF_CELL;
         for(int64_t y = start; y <= end; ++y) {
-            for(int i = -SCALLED_OFFSET; i <= SCALLED_OFFSET; ++i) {
+            for(int i = -SCALLED_OFFSET; i <= SCALLED_OFFSET + 1; ++i) {
                 matrix_map_[x + i][y].insert(index);
             }
         }
