@@ -13,6 +13,7 @@
 
 namespace rh_storage{
 
+namespace net = boost::asio;
 namespace beast = boost::beast;
 namespace http = beast::http;
 using StringResponse = http::response<http::string_body>;
@@ -287,14 +288,17 @@ std::optional<size_t> GetPlayersListHandler(
     if(!application.IsExistPlayer(token)) {
         return 0;
     }
-    auto players = application.GetPlayersFromGameSession(token);
-    StringResponse response(http::status::ok, req.version());
-    response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
-    response.set(http::field::cache_control, NO_CACHE_CONTROL);
-    response.body() = json_converter::CreatePlayersListOnMapResponse(players);
-    response.content_length(response.body().size());
-    response.keep_alive(req.keep_alive());
-    send(response);
+    net::dispatch(*application.GetStrand(), [req = std::move(req), application = &application, send = std::move(send)]{
+        authentication::Token token{GetTokenString(req[http::field::authorization])};
+        auto players = application->GetPlayersFromGameSession(token);
+        StringResponse response(http::status::ok, req.version());
+        response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
+        response.set(http::field::cache_control, NO_CACHE_CONTROL);
+        response.body() = json_converter::CreatePlayersListOnMapResponse(players);
+        response.content_length(response.body().size());
+        response.keep_alive(req.keep_alive());
+        send(response);
+    });
     return std::nullopt;
 }
 
@@ -329,14 +333,17 @@ std::optional<size_t> GetGameStateHandler(
     if(!application.IsExistPlayer(token)) {
         return 0;
     }
-    auto players = application.GetPlayersFromGameSession(token);
-    StringResponse response(http::status::ok, req.version());
-    response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
-    response.set(http::field::cache_control, NO_CACHE_CONTROL);
-    response.body() = json_converter::CreateGameStateResponse(players);
-    response.content_length(response.body().size());
-    response.keep_alive(req.keep_alive());
-    send(response);
+    net::dispatch(*application.GetStrand(), [req = std::move(req), application = &application, send = std::move(send)]{
+        authentication::Token token{GetTokenString(req[http::field::authorization])};
+        auto players = application->GetPlayersFromGameSession(token);
+        StringResponse response(http::status::ok, req.version());
+        response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
+        response.set(http::field::cache_control, NO_CACHE_CONTROL);
+        response.body() = json_converter::CreateGameStateResponse(players);
+        response.content_length(response.body().size());
+        response.keep_alive(req.keep_alive());
+        send(response);
+    });
     return std::nullopt;
 }
 
@@ -403,15 +410,18 @@ std::optional<size_t> PlayerActionHandler(
     if(!application.IsExistPlayer(token)) {
         return 0;
     }
-    std::string directionStr = json_converter::ParsePlayerActionRequest(req.body()).value();
-    application.SetPlayerAction(token, model::STRING_TO_DIRECTION.at(directionStr));
-    StringResponse response(http::status::ok, req.version());
-    response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
-    response.set(http::field::cache_control, NO_CACHE_CONTROL);
-    response.body() = json_converter::CreatePlayerActionResponse();
-    response.content_length(response.body().size());
-    response.keep_alive(req.keep_alive());
-    send(response);
+    net::dispatch(*application.GetStrand(), [req = std::move(req), application = &application, send = std::move(send)]{
+        authentication::Token token{GetTokenString(req[http::field::authorization])};
+        std::string directionStr = json_converter::ParsePlayerActionRequest(req.body()).value();
+        application->SetPlayerAction(token, model::STRING_TO_DIRECTION.at(directionStr));
+        StringResponse response(http::status::ok, req.version());
+        response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
+        response.set(http::field::cache_control, NO_CACHE_CONTROL);
+        response.body() = json_converter::CreatePlayerActionResponse();
+        response.content_length(response.body().size());
+        response.keep_alive(req.keep_alive());
+        send(response);
+    });
     return std::nullopt;
 }
 

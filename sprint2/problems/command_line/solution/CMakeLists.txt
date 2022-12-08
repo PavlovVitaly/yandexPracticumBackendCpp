@@ -28,6 +28,7 @@ add_executable(game_server
 	src/model/building.cpp
 	src/model/game_session.cpp
 	src/model/roadmap.cpp
+	src/model/support_types.cpp
 	src/json/json_loader.cpp
 	src/json/json_converter.cpp
 	src/request_handlers/request_handler.cpp

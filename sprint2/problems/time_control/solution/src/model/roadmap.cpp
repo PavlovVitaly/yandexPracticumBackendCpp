@@ -8,7 +8,10 @@
 
 namespace model {
 
-const double OFFSET = 0.4;
+/*Такой масштаб выбран, чтобы в одной клетке не было нескольких дорог без их наложения друг на друга
+(условие непрерывности маршрута если в клетке есть какая-нибудь дорога).*/
+const int SCALE_FACTOR_OF_CELL = 20;    // Разбиваем карту на квадраты размером 0.05x0.05 папугаев.
+const double EPSILON = 0.001;   // Точность рассчетов.
 
 Roadmap::Roadmap(const Roadmap& other) {
     CopyContent(other.roads_);
@@ -70,36 +73,34 @@ const Roadmap::Roads& Roadmap::GetRoads() const noexcept {
 std::tuple<Position, Velocity> Roadmap::GetValidMove(const Position& old_position,
                             const Position& potential_new_position,
                             const Velocity& old_velocity) {
-    Velocity velocity = old_velocity;
+    Velocity velocity = {0, 0};
     auto start_roads = GetCoordinatesOfPosition(old_position);
     auto end_roads = GetCoordinatesOfPosition(potential_new_position);
     if(end_roads){
         if(!IsValidPosition(matrix_map_[end_roads.value().x][end_roads.value().y],
                             potential_new_position)) {
             end_roads = std::nullopt;
-            velocity = {0, 0};
         } else if(start_roads == end_roads) {
-            return std::tie(potential_new_position, velocity);
+            return std::tie(potential_new_position, old_velocity);
         }
-    } else {
-        velocity = {0, 0};
     }
     auto dest = GetDestinationRoadsOfRoute(start_roads, end_roads, old_velocity);
     Position position;
-    if(dest && IsValidPosition(dest.value(), potential_new_position)) {
+    if(dest && IsValidPosition(matrix_map_[dest.value().x][dest.value().y], potential_new_position)) {
         position = potential_new_position;
+        velocity = old_velocity;
     } else {
-        position = GetFarestPoinOfRoute(dest.value(), potential_new_position, old_velocity);
-        velocity = {0, 0};
+        position = GetFarestPoinOfRoute(dest.value(), old_position, old_velocity);
     }
     return std::tie(position, velocity);
 };
 
-std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRoute(std::optional<const MatrixMapCoord> start,
+std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetDestinationRoadsOfRoute(
+                                    std::optional<const MatrixMapCoord> start,
                                     std::optional<const MatrixMapCoord> end,
                                     const Velocity& old_velocity) {
     const MatrixMapCoord start_coord = start.value();
-    std::unordered_set<size_t> current_roads;
+    MatrixMapCoord current_coord = start_coord;
     if(old_velocity.vx != 0) {
         int direction = std::signbit(old_velocity.vx) ? -1 : 1;
         int64_t end_x{0};
@@ -115,15 +116,12 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
             if(ValidateCoordinates({index, start_coord.y}) &&
                 IsCrossedSets(matrix_map_[start_coord.x][start_coord.y],
                                 matrix_map_[index][start_coord.y])) {
-                current_roads =  matrix_map_[index][start_coord.y];
+                current_coord = {index, start_coord.y};
             } else {
                 break;
             }
         }
-        if(current_roads.empty()) {
-            return std::nullopt; 
-        }
-        return current_roads;
+        return current_coord;
     } else if(old_velocity.vy != 0) {
         int direction = std::signbit(old_velocity.vy) ? -1 : 1;
         int64_t end_y{0};
@@ -139,15 +137,12 @@ std::optional<const std::unordered_set<size_t>> Roadmap::GetDestinationRoadsOfRo
             if(ValidateCoordinates({start_coord.x, index}) &&
                 IsCrossedSets(matrix_map_[start_coord.x][start_coord.y],
                                 matrix_map_[start_coord.x][index])) {
-                current_roads =  matrix_map_[start_coord.x][index];
+                current_coord =  {start_coord.x, index};
             } else {
                 break;
             }
         }
-        if(current_roads.empty()) {
-            return std::nullopt; 
-        }
-        return current_roads;
+        return current_coord;
     }
     return std::nullopt;
 };
@@ -183,44 +178,54 @@ bool Roadmap::ValidateCoordinates(const MatrixMapCoord& coordinates) {
     return false;
 };
 
-const Position Roadmap::GetFarestPoinOfRoute(const std::unordered_set<size_t>& roads,
-                                    const Position invalid_position,
+const Position Roadmap::GetFarestPoinOfRoute(const MatrixMapCoord& roads_coord,
+                                    const Position& old_position,
                                     const Velocity& old_velocity) {
-    Position res_position = invalid_position;
-    std::set<double> coord;
-    for(auto road_ind : roads) {
-        auto start = (roads_[road_ind].GetEnd().x - roads_[road_ind].GetStart().x >= 0) &&
-                    (roads_[road_ind].GetEnd().y - roads_[road_ind].GetStart().y >= 0) ?
-                    roads_[road_ind].GetStart() :
-                    roads_[road_ind].GetEnd();
-        auto end = (roads_[road_ind].GetEnd().x - roads_[road_ind].GetStart().x >= 0) &&
-                    (roads_[road_ind].GetEnd().y - roads_[road_ind].GetStart().y >= 0) ?
-                    roads_[road_ind].GetEnd() :
-                    roads_[road_ind].GetStart();
-        
-        if(old_velocity.vx < 0) {
-            coord.insert(start.x - OFFSET);
-        } else if(old_velocity.vx > 0) {
-            coord.insert(end.x + OFFSET);
-        } else if(old_velocity.vy < 0) {
-            coord.insert(start.y - OFFSET);
-        } else if(old_velocity.vy > 0) {
-            coord.insert(end.y + OFFSET);
+    Position res_position{old_position};
+    auto cell_pos = MatrixCoordinateToPosition(roads_coord, old_position);
+    auto direction = VelocityToDirection(old_velocity);
+    for(auto road_ind : matrix_map_[roads_coord.x][roads_coord.y]) {
+        auto start_position = cell_pos.at(direction);
+        auto end_position = cell_pos.at(DIRECTION_TO_OPOSITE_DIRECTION.at(direction));
+        if(IsValidPositionOnRoad(roads_[road_ind], start_position)) {
+            if(IsValidPositionOnRoad(roads_[road_ind], end_position)) {
+                return end_position;
+            }
+            res_position = start_position;
         }
     }
-
-    if(old_velocity.vx < 0) {
-        res_position.x = *coord.begin();
-    } else if(old_velocity.vx > 0) {
-        res_position.x = *coord.rbegin();
-    } else if(old_velocity.vy < 0) {
-        res_position.y = *coord.begin();
-    } else if(old_velocity.vy > 0) {
-        res_position.y = *coord.rbegin();
-    }
-
     return res_position;
 };
+
+const std::unordered_map<Direction, Position> Roadmap::MatrixCoordinateToPosition(const MatrixMapCoord& coord,
+                                                                                const Position& target_position){
+    std::unordered_map<Direction, Position> res;
+    res[Direction::NORTH] = Position{
+        target_position.x,
+        (static_cast<double>(coord.y) / static_cast<double>(SCALE_FACTOR_OF_CELL))};
+    res[Direction::SOUTH] = Position{
+        target_position.x,
+        (static_cast<double>(coord.y +1) / static_cast<double>(SCALE_FACTOR_OF_CELL))};
+    res[Direction::WEST] = Position{
+        (static_cast<double>(coord.x) / static_cast<double>(SCALE_FACTOR_OF_CELL)),
+        target_position.y};
+    res[Direction::EAST] = Position{
+        (static_cast<double>(coord.x + 1) / static_cast<double>(SCALE_FACTOR_OF_CELL)),
+        target_position.y};
+    res[Direction::NONE] = Position{target_position.x, target_position.y};
+    return res;
+}
+
+const Direction Roadmap::VelocityToDirection(const Velocity& velocity) {
+    Velocity vel{0, 0};
+    if(vel.vx != 0) {
+        vel.vx = std::signbit(velocity.vx) ? -1 : 1;
+    }
+    if(vel.vy != 0) {
+        vel.vy = std::signbit(velocity.vy) ? -1 : 1;
+    }
+    return VELOCITY_TO_DIRECTION.at(vel);
+}
 
 bool Roadmap::IsValidPosition(const std::unordered_set<size_t>& roads_ind, const Position& position) {
     for(auto road_index : roads_ind) {
@@ -250,14 +255,10 @@ bool Roadmap::IsValidPositionOnRoad(const Road& road, const Position& position) 
         start_y -= OFFSET;
         end_y += OFFSET;
     }
-    return (position.x >= start_x) &&
-            (position.x <= end_x) &&
-            (position.y >= start_y) &&
-            (position.y <= end_y);
-    //return ((position.x > start_x) || (std::abs(position.x - start_x) < EPSILON)) &&
-    //        ((position.x < end_x) || (std::abs(position.x - end_x) < EPSILON)) &&
-    //        ((position.y > start_y) || (std::abs(position.y - start_y) < EPSILON)) &&
-    //        ((position.y < end_y) || (std::abs(position.y - end_y) < EPSILON));
+    return ((position.x > start_x) || (std::abs(position.x - start_x) < EPSILON)) &&
+            ((position.x < end_x) || (std::abs(position.x - end_x) < EPSILON)) &&
+            ((position.y > start_y) || (std::abs(position.y - start_y) < EPSILON)) &&
+            ((position.y < end_y) || (std::abs(position.y - end_y) < EPSILON));
 };
 
 void Roadmap::CopyContent(const Roadmap::Roads& roads) {
