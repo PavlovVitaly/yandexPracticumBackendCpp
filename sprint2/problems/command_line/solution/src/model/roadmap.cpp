@@ -45,10 +45,10 @@ void Roadmap::AddRoad(const Road& road) {
         int64_t start = (road.GetStart().x < road.GetEnd().x) ? road.GetStart().x : road.GetEnd().x;
         int64_t end = (road.GetStart().x < road.GetEnd().x) ? road.GetEnd().x : road.GetStart().x;
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
-        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET + 1;
+        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
         int64_t y = road.GetStart().y * SCALE_FACTOR_OF_CELL;
         for(int64_t x = start; x <= end; ++x) {
-            for(int i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET + 1; ++i) {
+            for(int i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET; ++i) {
                 matrix_map_[x][y + i].insert(index);
             }
         }
@@ -56,10 +56,10 @@ void Roadmap::AddRoad(const Road& road) {
         int64_t start = (road.GetStart().y < road.GetEnd().y) ? road.GetStart().y : road.GetEnd().y;
         int64_t end = (road.GetStart().y < road.GetEnd().y) ? road.GetEnd().y : road.GetStart().y;
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
-        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET + 1;
+        end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
         int64_t x = road.GetStart().x * SCALE_FACTOR_OF_CELL;
         for(int64_t y = start; y <= end; ++y) {
-            for(int i = -SCALLED_OFFSET; i <= SCALLED_OFFSET + 1; ++i) {
+            for(int i = -SCALLED_OFFSET; i <= SCALLED_OFFSET; ++i) {
                 matrix_map_[x + i][y].insert(index);
             }
         }
@@ -91,6 +91,7 @@ std::tuple<Position, Velocity> Roadmap::GetValidMove(const Position& old_positio
         velocity = old_velocity;
     } else {
         position = GetFarestPoinOfRoute(dest.value(), old_position, old_velocity);
+        std::cout << "HELLO " << "x " << position.x << " y " << position.y << std::endl;
     }
     return std::tie(position, velocity);
 };
@@ -184,14 +185,17 @@ const Position Roadmap::GetFarestPoinOfRoute(const MatrixMapCoord& roads_coord,
     Position res_position{old_position};
     auto cell_pos = MatrixCoordinateToPosition(roads_coord, old_position);
     auto direction = VelocityToDirection(old_velocity);
+    std::cout << "DIRECTION " << DIRECTION_TO_STRING.at(direction) << std::endl;;
     for(auto road_ind : matrix_map_[roads_coord.x][roads_coord.y]) {
         auto start_position = cell_pos.at(DIRECTION_TO_OPOSITE_DIRECTION.at(direction));
         auto end_position = cell_pos.at(direction);
         if(IsValidPositionOnRoad(roads_[road_ind], start_position)) {
             if(IsValidPositionOnRoad(roads_[road_ind], end_position)) {
+                std::cout << "return end_position;" << std::endl;
                 return end_position;
             }
             res_position = start_position;
+            std::cout << "res_position = start_position;" << std::endl;
         }
     }
     return res_position;
@@ -217,6 +221,10 @@ const std::unordered_map<Direction, Position> Roadmap::MatrixCoordinateToPositio
         (static_cast<double>(coord.x + x_inc_e) / static_cast<double>(SCALE_FACTOR_OF_CELL)),
         target_position.y};
     res[Direction::NONE] = Position{target_position.x, target_position.y};
+    std::cout << "NORTH " << "x " << res[Direction::NORTH].x << " y " << res[Direction::NORTH].y << std::endl;
+    std::cout << "SOUTH " << "x " << res[Direction::SOUTH].x << " y " << res[Direction::SOUTH].y << std::endl;
+    std::cout << "WEST " << "x " << res[Direction::WEST].x << " y " << res[Direction::WEST].y << std::endl;
+    std::cout << "EAST " << "x " << res[Direction::EAST].x << " y " << res[Direction::EAST].y << std::endl;
     return res;
 }
 
