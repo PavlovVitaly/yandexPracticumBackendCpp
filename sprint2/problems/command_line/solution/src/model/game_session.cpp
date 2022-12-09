@@ -48,17 +48,8 @@ void GameSession::LocateDogInStartPointOnMap(std::shared_ptr<Dog> dog) {
     double x, y;
     auto roads = map_->GetRoads();
     auto road = roads[0];
-    if(road.GetStart().x == road.GetEnd().x){
-        x = road.GetStart().x;
-    } else {
-        x = (road.GetStart().x < road.GetEnd().x) ? (road.GetStart().x + OFFSET) : (road.GetEnd().x - OFFSET);
-    }
-    if(road.GetStart().y == road.GetEnd().y){
-        y = road.GetStart().y;
-    } else {
-        y = (road.GetStart().y < road.GetEnd().y) ? (road.GetStart().y + OFFSET) : (road.GetEnd().y - OFFSET);
-    }
-    dog->SetPosition({x, y});
+    dog->SetPosition({static_cast<double>(road.GetStart().x),
+                        static_cast<double>(road.GetStart().y)});
 };
 
 }

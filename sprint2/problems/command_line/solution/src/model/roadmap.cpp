@@ -185,8 +185,8 @@ const Position Roadmap::GetFarestPoinOfRoute(const MatrixMapCoord& roads_coord,
     auto cell_pos = MatrixCoordinateToPosition(roads_coord, old_position);
     auto direction = VelocityToDirection(old_velocity);
     for(auto road_ind : matrix_map_[roads_coord.x][roads_coord.y]) {
-        auto start_position = cell_pos.at(direction);
-        auto end_position = cell_pos.at(DIRECTION_TO_OPOSITE_DIRECTION.at(direction));
+        auto start_position = cell_pos.at(DIRECTION_TO_OPOSITE_DIRECTION.at(direction));
+        auto end_position = cell_pos.at(direction);
         if(IsValidPositionOnRoad(roads_[road_ind], start_position)) {
             if(IsValidPositionOnRoad(roads_[road_ind], end_position)) {
                 return end_position;
@@ -200,17 +200,21 @@ const Position Roadmap::GetFarestPoinOfRoute(const MatrixMapCoord& roads_coord,
 const std::unordered_map<Direction, Position> Roadmap::MatrixCoordinateToPosition(const MatrixMapCoord& coord,
                                                                                 const Position& target_position){
     std::unordered_map<Direction, Position> res;
+    int64_t x_inc_e = (coord.x < 0) ? 0 : 1;
+    int64_t y_inc_s = (coord.y < 0) ? 0 : 1;
+    int64_t x_inc_w = (coord.x < 0) ? -1 : 0;
+    int64_t y_inc_n = (coord.y < 0) ? -1 : 0;
     res[Direction::NORTH] = Position{
         target_position.x,
-        (static_cast<double>(coord.y) / static_cast<double>(SCALE_FACTOR_OF_CELL))};
+        (static_cast<double>(coord.y + y_inc_n) / static_cast<double>(SCALE_FACTOR_OF_CELL))};
     res[Direction::SOUTH] = Position{
         target_position.x,
-        (static_cast<double>(coord.y +1) / static_cast<double>(SCALE_FACTOR_OF_CELL))};
+        (static_cast<double>(coord.y + y_inc_s) / static_cast<double>(SCALE_FACTOR_OF_CELL))};
     res[Direction::WEST] = Position{
-        (static_cast<double>(coord.x) / static_cast<double>(SCALE_FACTOR_OF_CELL)),
+        (static_cast<double>(coord.x + x_inc_w) / static_cast<double>(SCALE_FACTOR_OF_CELL)),
         target_position.y};
     res[Direction::EAST] = Position{
-        (static_cast<double>(coord.x + 1) / static_cast<double>(SCALE_FACTOR_OF_CELL)),
+        (static_cast<double>(coord.x + x_inc_e) / static_cast<double>(SCALE_FACTOR_OF_CELL)),
         target_position.y};
     res[Direction::NONE] = Position{target_position.x, target_position.y};
     return res;
@@ -218,10 +222,10 @@ const std::unordered_map<Direction, Position> Roadmap::MatrixCoordinateToPositio
 
 const Direction Roadmap::VelocityToDirection(const Velocity& velocity) {
     Velocity vel{0, 0};
-    if(vel.vx != 0) {
+    if(velocity.vx != 0) {
         vel.vx = std::signbit(velocity.vx) ? -1 : 1;
     }
-    if(vel.vy != 0) {
+    if(velocity.vy != 0) {
         vel.vy = std::signbit(velocity.vy) ? -1 : 1;
     }
     return VELOCITY_TO_DIRECTION.at(vel);
