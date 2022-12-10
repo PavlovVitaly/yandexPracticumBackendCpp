@@ -22,7 +22,7 @@ boost::json::value ReadFile(const std::filesystem::path& json_path) {
                                         logware::ExceptionLogData(EXIT_FAILURE,
                                             "Error: Can't open file."sv,
                                             "write something here"sv)); // todo: write message and handler.
-        std::exit(1);
+        throw OpenConfigFileOfModelException();
     }
     
     std::stringstream ss;

@@ -39,12 +39,12 @@ public:
     const Roads& GetRoads() const noexcept;
     const Offices& GetOffices() const noexcept;
     void AddRoad(const Road& road);
-    void AddRoads(Roads& roads);
+    void AddRoads(const Roads& roads);
     void AddBuilding(const Building& building);
-    void AddBuildings(Buildings& buildings);
-    void AddOffice(Office office);
-    void AddOffices(Offices& offices);
-    void SetDogVelocity(double velocity);
+    void AddBuildings(const Buildings& buildings);
+    void AddOffice(const Office& office);
+    void AddOffices(const Offices& offices);
+    void SetDogVelocity(const double velocity);
     double GetDogVelocity() const noexcept;
     std::tuple<Position, Velocity> GetValidMove(const Position& old_position,
                             const Position& potential_new_position,

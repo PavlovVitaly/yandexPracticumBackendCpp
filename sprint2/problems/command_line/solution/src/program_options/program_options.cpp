@@ -24,21 +24,21 @@ using namespace std::literals;
 
     if (vm.contains("help"s)) {
         std::cout << desc;
-        std::exit(1);
+        std::exit(0);
     }
 
     if (!vm.contains("config-file"s)) {
         std::string error_msg = "Config file have not been specified"s;
         BOOST_LOG_TRIVIAL(error) << logware::CreateLogMessage(error_msg,
                                                             logware::ExitCodeLogData(EXIT_FAILURE));
-        std::exit(1);
+        throw ConfigFileNotSpecifiedException();
     }
 
     if (!vm.contains("www-root"s)) {
         std::string error_msg = "Static content path is not specified"s;
         BOOST_LOG_TRIVIAL(error) << logware::CreateLogMessage(error_msg,
                                                             logware::ExitCodeLogData(EXIT_FAILURE));
-        std::exit(1);
+        throw StaticContentPathNotSpecifiedException();
     }
 
     return args;
