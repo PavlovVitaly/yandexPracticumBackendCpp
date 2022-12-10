@@ -11,7 +11,6 @@ namespace model {
 /*Такой масштаб выбран, чтобы в одной клетке не было нескольких дорог без их наложения друг на друга
 (условие непрерывности маршрута если в клетке есть какая-нибудь дорога).*/
 const int SCALE_FACTOR_OF_CELL = 20;    // Разбиваем карту на квадраты размером 0.05x0.05 папугаев.
-const double EPSILON = 0.001;   // Точность рассчетов.
 
 Roadmap::Roadmap(const Roadmap& other) {
     CopyContent(other.roads_);
@@ -47,8 +46,8 @@ void Roadmap::AddRoad(const Road& road) {
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
         end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
         int64_t y = road.GetStart().y * SCALE_FACTOR_OF_CELL;
-        for(int64_t x = start; x <= end; ++x) {
-            for(int i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET; ++i) {
+        for(auto x = start; x <= end; ++x) {
+            for(auto i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET; ++i) {
                 matrix_map_[x][y + i].insert(index);
             }
         }
@@ -58,8 +57,8 @@ void Roadmap::AddRoad(const Road& road) {
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
         end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
         int64_t x = road.GetStart().x * SCALE_FACTOR_OF_CELL;
-        for(int64_t y = start; y <= end; ++y) {
-            for(int i = -SCALLED_OFFSET; i <= SCALLED_OFFSET; ++i) {
+        for(auto y = start; y <= end; ++y) {
+            for(auto i = -SCALLED_OFFSET; i <= SCALLED_OFFSET; ++i) {
                 matrix_map_[x + i][y].insert(index);
             }
         }

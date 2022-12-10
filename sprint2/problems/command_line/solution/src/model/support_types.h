@@ -10,6 +10,7 @@ using Coord = Dimension;
 
 const double MILLISECONDS_IN_SECOND = 1000.0;
 const double OFFSET = 0.4;
+const double EPSILON = 0.001;   // Точность рассчетов.
 
 struct Point {
     Coord x, y;

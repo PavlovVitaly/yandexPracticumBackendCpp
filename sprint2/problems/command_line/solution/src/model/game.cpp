@@ -65,11 +65,11 @@ std::shared_ptr<GameSession> Game::FindGameSessionBy(const Map::Id& id) const no
 
 void Game::SetDefaultDogVelocity(double velocity) {
         default_dog_velocity_ = std::abs(velocity);
-        if(default_dog_velocity_ == INITIAL_DOG_VELOCITY) {
+        if(std::abs(default_dog_velocity_ - INITIAL_DOG_VELOCITY) < EPSILON) {
             return;
         }
         for(auto map : maps_) {
-            if(map->GetDogVelocity() == INITIAL_DOG_VELOCITY) {
+            if(std::abs(map->GetDogVelocity() - INITIAL_DOG_VELOCITY) < EPSILON) {
                 map->SetDogVelocity(default_dog_velocity_);
             }
         }

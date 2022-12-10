@@ -69,7 +69,7 @@ template <typename Request, typename Send>
 std::optional<size_t> BadRequestHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.body() = json_converter::CreateBadRequestResponse();
@@ -89,7 +89,7 @@ template <typename Request, typename Send>
 std::optional<size_t> GetMapListHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.body() = json_converter::ConvertMapListToJson(application.ListMap());
@@ -113,7 +113,7 @@ template <typename Request, typename Send>
 std::optional<size_t> GetMapByIdHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     auto id = SplitUrl(req.target())[3];
     auto map = application.FindMap(model::Map::Id(std::string(id)));
     if(map == nullptr) {
@@ -132,7 +132,7 @@ template <typename Request, typename Send>
 std::optional<size_t> MapNotFoundHandler(
         const Request& req,
         app::Application& application,
-        Send& send)                                                                                                                                                                          {
+        Send&& send)                                                                                                                                                                          {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.body() = json_converter::CreateMapNotFoundResponse();
@@ -153,7 +153,7 @@ template <typename Request, typename Send>
 std::optional<size_t> JoinToGameInvalidJsonReqHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -182,7 +182,7 @@ template <typename Request, typename Send>
 std::optional<size_t> JoinToGameEmptyPlayerNameHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -203,7 +203,7 @@ template <typename Request, typename Send>
 std::optional<size_t> JoinToGameHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     auto [player_name, map_id] = json_converter::ParseJoinToGameRequest(req.body()).value();
     if(application.FindMap(map_id) == nullptr) {
         return 0;
@@ -223,7 +223,7 @@ template <typename Request, typename Send>
 std::optional<size_t> JoinToGameMapNotFoundHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -238,7 +238,7 @@ template <typename Request, typename Send>
 std::optional<size_t> OnlyPostMethodAllowedHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::method_not_allowed, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -262,7 +262,7 @@ template <typename Request, typename Send>
 std::optional<size_t> EmptyAuthorizationHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::unauthorized, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -283,7 +283,7 @@ template <typename Request, typename Send>
 std::optional<size_t> GetPlayersListHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
     if(!application.IsExistPlayer(token)) {
         return 0;
@@ -306,7 +306,7 @@ template <typename Request, typename Send>
 std::optional<size_t> InvalidMethodHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::method_not_allowed, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -328,7 +328,7 @@ template <typename Request, typename Send>
 std::optional<size_t> GetGameStateHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
     if(!application.IsExistPlayer(token)) {
         return 0;
@@ -359,7 +359,7 @@ template <typename Request, typename Send>
 std::optional<size_t> InvalidContentTypeHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -385,7 +385,7 @@ template <typename Request, typename Send>
 std::optional<size_t> PlayerActionInvalidActionHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -405,7 +405,7 @@ template <typename Request, typename Send>
 std::optional<size_t> PlayerActionHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
     if(!application.IsExistPlayer(token)) {
         return 0;
@@ -430,7 +430,7 @@ template <typename Request, typename Send>
 std::optional<size_t> UnknownTokenHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::unauthorized, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -446,7 +446,7 @@ template <typename Request, typename Send>
 std::optional<size_t> PageNotFoundHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.body() = json_converter::CreatePageNotFoundResponse();
@@ -470,7 +470,7 @@ template <typename Request, typename Send>
 std::optional<size_t> TimeTickInvalidMsgHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     if(!application.IsManualTimeManagement()) {
         return 0;
     }
@@ -494,7 +494,7 @@ template <typename Request, typename Send>
 std::optional<size_t> TimeTickHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     if(!application.IsManualTimeManagement()) {
         return 0;
     }
@@ -515,7 +515,7 @@ template <typename Request, typename Send>
 std::optional<size_t> InvalidEndpointHandler(
         const Request& req,
         app::Application& application,
-        Send& send) {
+        Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
