@@ -37,26 +37,26 @@ Roadmap& Roadmap::operator = (Roadmap&& other) {
 };
 
 void Roadmap::AddRoad(const Road& road) {
-    const int64_t SCALLED_OFFSET = OFFSET * SCALE_FACTOR_OF_CELL;
-    size_t index = roads_.size();
+    const auto SCALLED_OFFSET = static_cast<int64_t>(OFFSET * SCALE_FACTOR_OF_CELL);
+    auto index = roads_.size();
     roads_.emplace_back(road);
     if(road.IsHorizontal()) {
-        int64_t start = (road.GetStart().x < road.GetEnd().x) ? road.GetStart().x : road.GetEnd().x;
-        int64_t end = (road.GetStart().x < road.GetEnd().x) ? road.GetEnd().x : road.GetStart().x;
+        auto start = static_cast<int64_t>((road.GetStart().x < road.GetEnd().x) ? road.GetStart().x : road.GetEnd().x);
+        auto end = static_cast<int64_t>((road.GetStart().x < road.GetEnd().x) ? road.GetEnd().x : road.GetStart().x);
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
         end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
-        int64_t y = road.GetStart().y * SCALE_FACTOR_OF_CELL;
+        auto y = road.GetStart().y * SCALE_FACTOR_OF_CELL;
         for(auto x = start; x <= end; ++x) {
             for(auto i = -(SCALLED_OFFSET); i <= SCALLED_OFFSET; ++i) {
                 matrix_map_[x][y + i].insert(index);
             }
         }
     } else {
-        int64_t start = (road.GetStart().y < road.GetEnd().y) ? road.GetStart().y : road.GetEnd().y;
-        int64_t end = (road.GetStart().y < road.GetEnd().y) ? road.GetEnd().y : road.GetStart().y;
+        auto start = static_cast<int64_t>((road.GetStart().y < road.GetEnd().y) ? road.GetStart().y : road.GetEnd().y);
+        auto end = static_cast<int64_t>((road.GetStart().y < road.GetEnd().y) ? road.GetEnd().y : road.GetStart().y);
         start = start * SCALE_FACTOR_OF_CELL - SCALLED_OFFSET;
         end = end * SCALE_FACTOR_OF_CELL + SCALLED_OFFSET;
-        int64_t x = road.GetStart().x * SCALE_FACTOR_OF_CELL;
+        auto x = road.GetStart().x * SCALE_FACTOR_OF_CELL;
         for(auto y = start; y <= end; ++y) {
             for(auto i = -SCALLED_OFFSET; i <= SCALLED_OFFSET; ++i) {
                 matrix_map_[x + i][y].insert(index);
