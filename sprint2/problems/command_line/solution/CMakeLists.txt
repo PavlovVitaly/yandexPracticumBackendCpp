@@ -21,13 +21,12 @@ add_executable(game_server
 	src/main.cpp
 	src/model/map.cpp
 	src/model/game.cpp
-	src/model/player.cpp
 	src/model/dog.cpp
 	src/model/road.cpp
 	src/model/office.cpp
 	src/model/building.cpp
-	src/model/game_session.cpp
 	src/model/roadmap.cpp
+	src/model/support_types.cpp
 	src/json/json_loader.cpp
 	src/json/json_converter.cpp
 	src/request_handlers/request_handler.cpp
@@ -39,6 +38,8 @@ add_executable(game_server
 	src/logging/logger.cpp
 	src/authentication/player_tokens.cpp
 	src/app/application.cpp
+	src/app/game_session.cpp
+	src/app/player.cpp
 	src/server/http_server.cpp
 	src/program_options/program_options.cpp
 	src/time_management/ticker.cpp

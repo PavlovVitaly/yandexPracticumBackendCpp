@@ -31,7 +31,7 @@ void Map::AddRoad(const Road& road) {
     roadmap_.AddRoad(road);
 }
 
-void Map::AddRoads(Roads& roads){
+void Map::AddRoads(const Roads& roads){
     for(auto item : roads){
         AddRoad(item);
     }
@@ -41,19 +41,19 @@ void Map::AddBuilding(const Building& building) {
     buildings_.emplace_back(building);
 }
 
-void Map::AddBuildings(Buildings& buildings){
+void Map::AddBuildings(const Buildings& buildings){
     for(auto item : buildings){
         AddBuilding(item);
     }
 }
 
-void Map::AddOffice(Office office) {
+void Map::AddOffice(const Office& office) {
     if (warehouse_id_to_index_.contains(office.GetId())) {
         throw std::invalid_argument("Duplicate warehouse");
     }
 
     const size_t index = offices_.size();
-    Office& o = offices_.emplace_back(std::move(office));
+    Office& o = offices_.emplace_back(office);
     try {
         warehouse_id_to_index_.emplace(o.GetId(), index);
     } catch (...) {
@@ -63,13 +63,13 @@ void Map::AddOffice(Office office) {
     }
 }
 
-void Map::AddOffices(Offices& offices){
+void Map::AddOffices(const Offices& offices){
     for(auto item : offices){
         AddOffice(item);
     }
 }
     
-void Map::SetDogVelocity(double velocity) {
+void Map::SetDogVelocity(const double velocity) {
     dog_velocity_ = std::abs(velocity);
 };
 

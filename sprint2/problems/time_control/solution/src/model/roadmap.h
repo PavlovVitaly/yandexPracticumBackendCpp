@@ -9,6 +9,8 @@
 
 namespace model {
 
+/*Класс для предстваления карты дорог. Map разбивается на ячейки с целочисленными координатами
+в каждой ячейке хранится множество дорог проходящих по данному участку*/
 class Roadmap {
 public:
     using Roads = std::vector<Road>;
@@ -38,16 +40,20 @@ private:
     MatrixMap matrix_map_;
     Roads roads_;
 
-    std::optional<const std::unordered_set<size_t>> GetDestinationRoadsOfRoute(std::optional<const MatrixMapCoord> start,
-                                    std::optional<const MatrixMapCoord> end,
-                                    const Velocity& old_velocity);
+    std::optional<const MatrixMapCoord> GetDestinationRoadsOfRoute(
+        std::optional<const MatrixMapCoord> start,
+        std::optional<const MatrixMapCoord> end,
+        const Velocity& old_velocity);
     std::optional<const MatrixMapCoord> GetCoordinatesOfPosition(const Position& position);
+    const Direction VelocityToDirection(const Velocity& velocity);
+    const std::unordered_map<Direction, Position> MatrixCoordinateToPosition(const MatrixMapCoord& coord,
+                                                                            const Position& target_position);
     bool IsCrossedSets(const std::unordered_set<size_t>& lhs,
                         const std::unordered_set<size_t>& rhs);
     bool ValidateCoordinates(const MatrixMapCoord& coordinates);
-    const Position GetFarestPoinOfRoute(const std::unordered_set<size_t>& roads,
-                                    const Position invalid_position,
-                                    const Velocity& old_velocity);
+    const Position GetFarestPoinOfRoute(const MatrixMapCoord& roads_coord,
+                                        const Position& old_position,
+                                        const Velocity& old_velocity);
     bool IsValidPosition(const std::unordered_set<size_t>& roads_ind,
                         const Position& position);
     
