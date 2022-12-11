@@ -23,10 +23,10 @@ public:
     PlayerTokens& operator = (PlayerTokens&& other) = default;
     virtual ~PlayerTokens() = default;
 
-    Token AddPlayer(std::weak_ptr<model::Player> player);
-    std::weak_ptr<model::Player> FindPlayerBy(Token token);
+    Token AddPlayer(std::weak_ptr<app::Player> player);
+    std::weak_ptr<app::Player> FindPlayerBy(Token token);
 private:
-    std::unordered_map< Token, std::weak_ptr<model::Player>, TokenHasher > tokenToPalyer_;
+    std::unordered_map< Token, std::weak_ptr<app::Player>, TokenHasher > tokenToPalyer_;
     std::random_device random_device_;
     std::mt19937_64 generator1_{[this] {
         std::uniform_int_distribution<std::mt19937_64::result_type> dist;

@@ -113,9 +113,7 @@ void GetStaticContentFileHandler(
         const Request& req,
         const fs::path& static_content_root,
         Send&& send) {
-    http::response<http::file_body> response;
-    response.version(11);  // HTTP/1.1
-    response.result(http::status::ok);
+    http::response<http::file_body> response(http::status::ok, req.version());
 
     fs::path static_content{static_content_root};
     if(req.target().empty() || req.target() == "/") {

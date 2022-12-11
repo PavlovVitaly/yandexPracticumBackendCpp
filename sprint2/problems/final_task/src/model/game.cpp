@@ -7,17 +7,18 @@ namespace model {
 
 using namespace std::literals;
 
-void Game::AddMap(Map map) {
+void Game::AddMap(const Map& map) {
     const size_t index = maps_.size();
     if (auto [it, inserted] = map_id_to_index_.emplace(map.GetId(), index); !inserted) {
         throw std::invalid_argument("Map with id "s + *map.GetId() + " already exists"s);
     } else {
         try {
-            if(default_dog_velocity_ != INITIAL_DOG_VELOCITY &&
-                map.GetDogVelocity() == INITIAL_DOG_VELOCITY) {
-                map.SetDogVelocity(default_dog_velocity_);
+            auto current_map = std::make_shared<Map>(map);
+            if(!(std::abs(default_dog_velocity_ - INITIAL_DOG_VELOCITY) < EPSILON) &&
+                std::abs(current_map->GetDogVelocity() - INITIAL_DOG_VELOCITY) < EPSILON) {
+                current_map->SetDogVelocity(default_dog_velocity_);
             }
-            maps_.push_back(std::make_shared<Map>(std::move(map)));
+            maps_.push_back(current_map);
         } catch (...) {
             map_id_to_index_.erase(it);
             throw;
@@ -42,34 +43,13 @@ const std::shared_ptr<Map> Game::FindMap(const Map::Id& id) const noexcept {
     return nullptr;
 };
 
-void Game::AddGameSession(std::shared_ptr<GameSession> session) {
-    const size_t index = sessions_.size();
-    if (auto [it, inserted] = map_id_to_session_index_.emplace(session->GetMap()->GetId(), index); !inserted) {
-        throw std::invalid_argument("Game session with map id "s + *(session->GetMap()->GetId()) + " already exists"s);
-    } else {
-        try {
-            sessions_.push_back(session);
-        } catch (...) {
-            map_id_to_session_index_.erase(it);
-            throw;
-        }
-    }
-};
-
-std::shared_ptr<GameSession> Game::FindGameSessionBy(const Map::Id& id) const noexcept {
-    if (auto it = map_id_to_session_index_.find(id); it != map_id_to_session_index_.end()) {
-        return sessions_.at(it->second);
-    }
-    return nullptr;
-};
-
 void Game::SetDefaultDogVelocity(double velocity) {
         default_dog_velocity_ = std::abs(velocity);
-        if(default_dog_velocity_ == INITIAL_DOG_VELOCITY) {
+        if(std::abs(default_dog_velocity_ - INITIAL_DOG_VELOCITY) < EPSILON) {
             return;
         }
         for(auto map : maps_) {
-            if(map->GetDogVelocity() == INITIAL_DOG_VELOCITY) {
+            if(std::abs(map->GetDogVelocity() - INITIAL_DOG_VELOCITY) < EPSILON) {
                 map->SetDogVelocity(default_dog_velocity_);
             }
         }

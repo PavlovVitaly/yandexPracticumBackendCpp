@@ -103,7 +103,7 @@ std::string CreateInvalidContentTypeResponse() {
     return json::serialize(msg);
 };
 
-std::string CreatePlayersListOnMapResponse(const std::vector< std::weak_ptr<model::Player> >& players) {
+std::string CreatePlayersListOnMapResponse(const std::vector< std::weak_ptr<app::Player> >& players) {
     json::value jv;
     json::object& obj = jv.emplace_object();  
     for(auto item : players) {
@@ -116,12 +116,12 @@ std::string CreatePlayersListOnMapResponse(const std::vector< std::weak_ptr<mode
     return json::serialize(jv);
 };
 
-std::string CreateGameStateResponse(const std::vector< std::weak_ptr<model::Player> >& players) {
+std::string CreateGameStateResponse(const std::vector< std::weak_ptr<app::Player> >& players) {
     json::value jv;
     json::object obj;  
     for(auto item : players) {
         auto player = item.lock();
-        auto dog = player->GetDog().lock();
+        auto dog = player->GetDog();
         std::stringstream ss;
         ss << *(player->GetId());
         json::array pos = {dog->GetPosition().x, dog->GetPosition().y};
