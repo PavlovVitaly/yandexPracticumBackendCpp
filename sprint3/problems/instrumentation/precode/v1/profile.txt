@@ -1,0 +1,239 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 61.11      0.11     0.11    34238     0.00     0.00  getNode(char*, NodeListNode*&)
+ 22.22      0.15     0.04    28952     0.00     0.00  addEdge(Graph*, Node*, Node*)
+ 16.67      0.18     0.03                             _init
+  0.00      0.18     0.00  1042412     0.00     0.00  CompareKey(void const*, void const*)
+  0.00      0.18     0.00   208230     0.00     0.00  CountEdges(void*, void*)
+  0.00      0.18     0.00    42759     0.00     0.00  BinaryTree::get(void*)
+  0.00      0.18     0.00     6941     0.00     0.00  PrintEdge(void*, void*)
+  0.00      0.18     0.00     6941     0.00     0.00  BinaryTree::put(void*, void*)
+  0.00      0.18     0.00     6940     0.00     0.00  btr_node::put(void*, void*, int (*)(void const*, void const*))
+  0.00      0.18     0.00     5286     0.00     0.00  newGraphListNode(GraphListNode*, Node*)
+  0.00      0.18     0.00      217     0.00     0.00  btr_node::walk(void (*)(void*, void*), void*)
+  0.00      0.18     0.00       31     0.00     0.00  BinaryTree::walk(void (*)(void*, void*), void*)
+  0.00      0.18     0.00        1     0.00     0.00  ReadConfig(char*)
+  0.00      0.18     0.00        1     0.00     0.00  GenerateDot(_IO_FILE*, AnnotatedGraph*, NodeListNode*, Config*)
+  0.00      0.18     0.00        1     0.00     0.00  FindTreshold(BinaryTree*, int)
+  0.00      0.18     0.00        1     0.00   150.00  getGraphFromFile(char*, NodeListNode*&, Config*)
+  0.00      0.18     0.00        1     0.00     0.00  summarize(GraphListNode*, Config*)
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2022 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 5.56% of 0.18 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     83.3    0.00    0.15                 main [1]
+                0.00    0.15       1/1           getGraphFromFile(char*, NodeListNode*&, Config*) [2]
+                0.00    0.00       1/1           ReadConfig(char*) [21]
+                0.00    0.00       1/1           summarize(GraphListNode*, Config*) [24]
+                0.00    0.00       1/1           GenerateDot(_IO_FILE*, AnnotatedGraph*, NodeListNode*, Config*) [22]
+-----------------------------------------------
+                0.00    0.15       1/1           main [1]
+[2]     83.3    0.00    0.15       1         getGraphFromFile(char*, NodeListNode*&, Config*) [2]
+                0.11    0.00   34238/34238       getNode(char*, NodeListNode*&) [3]
+                0.04    0.00   28952/28952       addEdge(Graph*, Node*, Node*) [4]
+                0.00    0.00    5286/5286        newGraphListNode(GraphListNode*, Node*) [18]
+-----------------------------------------------
+                0.11    0.00   34238/34238       getGraphFromFile(char*, NodeListNode*&, Config*) [2]
+[3]     61.1    0.11    0.00   34238         getNode(char*, NodeListNode*&) [3]
+-----------------------------------------------
+                0.04    0.00   28952/28952       getGraphFromFile(char*, NodeListNode*&, Config*) [2]
+[4]     22.2    0.04    0.00   28952         addEdge(Graph*, Node*, Node*) [4]
+-----------------------------------------------
+                                                 <spontaneous>
+[5]     16.7    0.03    0.00                 _init [5]
+-----------------------------------------------
+                0.00    0.00  177268/1042412     btr_node::put(void*, void*, int (*)(void const*, void const*)) [17]
+                0.00    0.00  865144/1042412     BinaryTree::get(void*) [14]
+[12]     0.0    0.00    0.00 1042412         CompareKey(void const*, void const*) [12]
+-----------------------------------------------
+                0.00    0.00     210/208230      BinaryTree::walk(void (*)(void*, void*), void*) [20]
+                0.00    0.00  208020/208230      btr_node::walk(void (*)(void*, void*), void*) [19]
+[13]     0.0    0.00    0.00  208230         CountEdges(void*, void*) [13]
+-----------------------------------------------
+                0.00    0.00   42759/42759       summarize(GraphListNode*, Config*) [24]
+[14]     0.0    0.00    0.00   42759         BinaryTree::get(void*) [14]
+                0.00    0.00  865144/1042412     CompareKey(void const*, void const*) [12]
+-----------------------------------------------
+                0.00    0.00       7/6941        BinaryTree::walk(void (*)(void*, void*), void*) [20]
+                0.00    0.00    6934/6941        btr_node::walk(void (*)(void*, void*), void*) [19]
+[15]     0.0    0.00    0.00    6941         PrintEdge(void*, void*) [15]
+-----------------------------------------------
+                0.00    0.00    6941/6941        summarize(GraphListNode*, Config*) [24]
+[16]     0.0    0.00    0.00    6941         BinaryTree::put(void*, void*) [16]
+-----------------------------------------------
+                0.00    0.00    6940/6940        summarize(GraphListNode*, Config*) [24]
+[17]     0.0    0.00    0.00    6940         btr_node::put(void*, void*, int (*)(void const*, void const*)) [17]
+                0.00    0.00  177268/1042412     CompareKey(void const*, void const*) [12]
+-----------------------------------------------
+                0.00    0.00    5286/5286        getGraphFromFile(char*, NodeListNode*&, Config*) [2]
+[18]     0.0    0.00    0.00    5286         newGraphListNode(GraphListNode*, Node*) [18]
+-----------------------------------------------
+                               10540             btr_node::walk(void (*)(void*, void*), void*) [19]
+                0.00    0.00     217/217         BinaryTree::walk(void (*)(void*, void*), void*) [20]
+[19]     0.0    0.00    0.00     217+10540   btr_node::walk(void (*)(void*, void*), void*) [19]
+                0.00    0.00  208020/208230      CountEdges(void*, void*) [13]
+                0.00    0.00    6934/6941        PrintEdge(void*, void*) [15]
+                               10540             btr_node::walk(void (*)(void*, void*), void*) [19]
+-----------------------------------------------
+                0.00    0.00       1/31          GenerateDot(_IO_FILE*, AnnotatedGraph*, NodeListNode*, Config*) [22]
+                0.00    0.00      30/31          FindTreshold(BinaryTree*, int) [23]
+[20]     0.0    0.00    0.00      31         BinaryTree::walk(void (*)(void*, void*), void*) [20]
+                0.00    0.00     217/217         btr_node::walk(void (*)(void*, void*), void*) [19]
+                0.00    0.00     210/208230      CountEdges(void*, void*) [13]
+                0.00    0.00       7/6941        PrintEdge(void*, void*) [15]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[21]     0.0    0.00    0.00       1         ReadConfig(char*) [21]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[22]     0.0    0.00    0.00       1         GenerateDot(_IO_FILE*, AnnotatedGraph*, NodeListNode*, Config*) [22]
+                0.00    0.00       1/31          BinaryTree::walk(void (*)(void*, void*), void*) [20]
+                0.00    0.00       1/1           FindTreshold(BinaryTree*, int) [23]
+-----------------------------------------------
+                0.00    0.00       1/1           GenerateDot(_IO_FILE*, AnnotatedGraph*, NodeListNode*, Config*) [22]
+[23]     0.0    0.00    0.00       1         FindTreshold(BinaryTree*, int) [23]
+                0.00    0.00      30/31          BinaryTree::walk(void (*)(void*, void*), void*) [20]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[24]     0.0    0.00    0.00       1         summarize(GraphListNode*, Config*) [24]
+                0.00    0.00   42759/42759       BinaryTree::get(void*) [14]
+                0.00    0.00    6941/6941        BinaryTree::put(void*, void*) [16]
+                0.00    0.00    6940/6940        btr_node::put(void*, void*, int (*)(void const*, void const*)) [17]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2022 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+  [12] CompareKey(void const*, void const*) [18] newGraphListNode(GraphListNode*, Node*) [16] BinaryTree::put(void*, void*)
+  [13] CountEdges(void*, void*) [4] addEdge(Graph*, Node*, Node*) [20] BinaryTree::walk(void (*)(void*, void*), void*)
+  [21] ReadConfig(char*)       [3] getNode(char*, NodeListNode*&) [17] btr_node::put(void*, void*, int (*)(void const*, void const*))
+  [22] GenerateDot(_IO_FILE*, AnnotatedGraph*, NodeListNode*, Config*) [15] PrintEdge(void*, void*) [19] btr_node::walk(void (*)(void*, void*), void*)
+  [23] FindTreshold(BinaryTree*, int) [24] summarize(GraphListNode*, Config*) [5] _init
+   [2] getGraphFromFile(char*, NodeListNode*&, Config*) [14] BinaryTree::get(void*)
