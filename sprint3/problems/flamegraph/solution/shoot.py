@@ -23,10 +23,6 @@ def start_server():
     parser.add_argument('server', type=str)
     return parser.parse_args().server
 
-    
-def start_server_bg():
-	return start_server() + " &"
-
 
 def perf_record_of(pid):
 	return "perf record -p " + str(pid) + " -o perf.data -ag"
