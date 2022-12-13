@@ -89,6 +89,7 @@ std::optional<size_t> GetMapListHandler(
         Send& send) {
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
+    response.set(http::field::cache_control, req[http::field::cache_control]);
     response.body() = json_converter::ConvertMapListToJson(application.ListMap());
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
@@ -118,6 +119,7 @@ std::optional<size_t> GetMapByIdHandler(
     }
     http::response<http::string_body> response(http::status::ok, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
+    response.set(http::field::cache_control, req[http::field::cache_control]);
     response.body() = json_converter::ConvertMapToJson(*map);
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
