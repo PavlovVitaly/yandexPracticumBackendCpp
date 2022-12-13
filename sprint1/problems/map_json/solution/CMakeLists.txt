@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 
 project(game_server CXX)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
