@@ -1046,3 +1046,4 @@ dkms.conf
 
 .venv/
 cpp-backend-tests-practicum/
+FlameGraph/
