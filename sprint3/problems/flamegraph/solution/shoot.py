@@ -61,7 +61,7 @@ time.sleep(0.1)
 stop(server)
 time.sleep(1)
 with open("graph.svg", "w") as graph_file:
-	perf_script = subprocess.Popen(shlex.split("perf script"), stdout=subprocess.PIPE)
+	perf_script = subprocess.Popen(shlex.split("perf script -i perf.data"), stdout=subprocess.PIPE)
 	flamegraph_stackcollapse = subprocess.Popen(shlex.split("./FlameGraph/stackcollapse-perf.pl"), stdin=perf_script.stdout, stdout=subprocess.PIPE)
 	flamegraph_output = subprocess.Popen(shlex.split("./FlameGraph/flamegraph.pl"), stdin=flamegraph_stackcollapse.stdout, stdout=graph_file)
 	stop(perf_script, True)
