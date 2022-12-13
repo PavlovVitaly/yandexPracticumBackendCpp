@@ -25,7 +25,7 @@ def start_server():
 
 
 def perf_record_of(pid):
-	return "perf record -p " + str(pid) + " -o perf.data1 -gs"
+	return "perf record -p " + str(pid) + " -o perf.data -gs"
 
 def run(command, output=None):
     process = subprocess.Popen(shlex.split(command), stdout=output, stderr=subprocess.DEVNULL)
