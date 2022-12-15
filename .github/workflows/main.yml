@@ -321,12 +321,72 @@ jobs:
 
       - name: build tests sprint3 gather-tests
         run: |
-          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/* sprint3/problems/gather-tests/solution/src/
+          cp -r cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/* sprint3/problems/gather-tests/solution/src/
           cd sprint3/problems/gather-tests/solution
           docker build -t gather-tests .
 
       - name: run tests sprint3 gather-tests
         run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests
+
+      - name: build tests sprint3 gather-tests_wrong1
+        run: |
+          cp -r cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/* sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/collision_detector.cpp sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/CMakeLists.txt sprint3/problems/gather-tests/solution/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile1 sprint3/problems/gather-tests/solution/Dockerfile
+          cd sprint3/problems/gather-tests/solution
+          docker build -t gather-tests_wrong1 .
+
+      - name: run tests sprint3 gather-tests_wrong1
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong1  || [ $? -ne 0 ]
+
+      - name: build tests sprint3 gather-tests_wrong2
+        run: |
+          cp -r cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/* sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/collision_detector.cpp sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/CMakeLists.txt sprint3/problems/gather-tests/solution/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile2 sprint3/problems/gather-tests/solution/Dockerfile
+          cd sprint3/problems/gather-tests/solution
+          docker build -t gather-tests_wrong2 .
+
+      - name: run tests sprint3 gather-tests_wrong2
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong2  || [ $? -ne 0 ]
+
+      - name: build tests sprint3 gather-tests_wrong3
+        run: |
+          cp -r cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/* sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/collision_detector.cpp sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/CMakeLists.txt sprint3/problems/gather-tests/solution/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile3 sprint3/problems/gather-tests/solution/Dockerfile
+          cd sprint3/problems/gather-tests/solution
+          docker build -t gather-tests_wrong3 .
+
+      - name: run tests sprint3 gather-tests_wrong3
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong3  || [ $? -ne 0 ]
+
+      - name: build tests sprint3 gather-tests_wrong4
+        run: |
+          cp -r cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/* sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/collision_detector.cpp sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/CMakeLists.txt sprint3/problems/gather-tests/solution/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile4 sprint3/problems/gather-tests/solution/Dockerfile
+          cd sprint3/problems/gather-tests/solution
+          docker build -t gather-tests_wrong4 .
+
+      - name: run tests sprint3 gather-tests_wrong4
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong4  || [ $? -ne 0 ]
+
+      - name: build tests sprint3 gather-tests_wrong5
+        run: |
+          cp -r cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/* sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/collision_detector.cpp sprint3/problems/gather-tests/solution/src/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/CMakeLists.txt sprint3/problems/gather-tests/solution/
+          cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile5 sprint3/problems/gather-tests/solution/Dockerfile
+          cd sprint3/problems/gather-tests/solution
+          docker build -t gather-tests_wrong5 .
+
+      - name: run tests sprint3 gather-tests_wrong5
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong5  || [ $? -ne 0 ]
 
       - name: build tests sprint3 gather
         run: |
@@ -473,6 +533,25 @@ jobs:
         run: pytest --junitxml=${GITHUB_WORKSPACE}/db_of_books.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_db_of_books.py
         env:
           DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/db_of_books/solution/build/book_manager
+
+      - name: build sprint4 bookypedia-1
+        run: |
+          cd sprint4/problems/bookypedia-1/solution
+          mkdir build
+          cd build
+          conan install ..
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          cmake --build .
+          echo "POSTGRES_USER=postgres" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=Mys3Cr3t" >> $GITHUB_ENV
+          echo "POSTGRES_HOST=postgres" >> $GITHUB_ENV
+          echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
+
+
+      - name: run tests sprint4 bookypedia-1
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/bookypedia-1.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_bookypedia-1.py
+        env:
+          DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/bookypedia-1/solution/build/bookypedia
 
       - name: Publish XML reports
         uses: EnricoMi/publish-unit-test-result-action@v2
