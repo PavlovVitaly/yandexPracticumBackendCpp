@@ -1,0 +1,17 @@
+overload:
+  enabled: false                            # загрузка результатов в сервис-агрегатор https://overload.yandex.net/
+phantom:
+  address: cppserver:8080                   # адрес тестируемого приложения
+  ammofile: /var/loadtest/ammo_local.txt    # путь к файлу с патронами
+  ammo_type: uri                            # тип запросов POST (или uri для GET)
+  load_profile:
+    load_type: rps                          # тип нагрузки
+    schedule: line(5, 30, 1m)               # линейный профиль от 5 до 30 rps в течение минуты
+  ssl: false                                # если нужна поддержка https, то нужно указать true
+autostop:
+  autostop:                                 # автоостановка теста при 10% ошибок с кодом 5хх в течение 5 секунд
+    - http(5xx,10%,5s)
+console:
+  enabled: false                            # отображение в консоли процесса стрельбы и результатов
+telegraf:
+  enabled: false                            # модуль мониторинга системных ресурсов
