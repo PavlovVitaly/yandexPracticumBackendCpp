@@ -32,6 +32,5 @@ std::string UrlDecode(std::string_view str) {
         pos = res.find('%', start);
     }
     ss << res.substr(start, res.size());
-    auto result = ss.str();
     return ss.str();
 }
