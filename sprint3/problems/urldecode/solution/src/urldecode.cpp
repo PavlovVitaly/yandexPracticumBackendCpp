@@ -26,7 +26,7 @@ std::string UrlDecode(std::string_view str) {
         if(!std::regex_search(sym_str.begin(), sym_str.end(), match_res, hexRegex)) {
             throw std::invalid_argument("");
         }
-        sym_code = stoul(sym.str(), nullptr, 16);;
+        sym_code = stoul(sym.str(), nullptr, 16);
         ss << sym_code;
         start = pos + 3;
         pos = res.find('%', start);
