@@ -28,4 +28,21 @@ const std::string OFFICE_Y        = "y";
 const std::string OFFICE_OFFSET_X = "offsetX";
 const std::string OFFICE_OFFSET_Y = "offsetY";
 
+const std::string LOOT_GENERATOR_CONFIG         = "lootGeneratorConfig";
+const std::string LOOT_GENERATOR_PERIOD         = "period";
+const std::string LOOT_GENERATOR_PROBABILITY    = "probability";
+
+const std::string LOOT_TYPES            = "lootTypes";
+const std::string LOOT_TYPES_NAME       = "name";
+const std::string LOOT_TYPES_FILE       = "file";
+const std::string LOOT_TYPES_TYPE       = "type";
+const std::string LOOT_TYPES_ROTATION   = "rotation";
+const std::string LOOT_TYPES_COLOR      = "color";
+const std::string LOOT_TYPES_SCALE      = "scale";
+
+const std::string LOST_OBJECTS          = "lostObjects";
+const std::string LOST_OBJECTS_TYPE     = "type";
+const std::string LOST_OBJECTS_POSITION = "pos";
+
+
 }

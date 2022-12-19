@@ -27,6 +27,10 @@ const Map::Offices& Map::GetOffices() const noexcept {
     return offices_;
 }
 
+const Map::LootTypes& Map::GetLootTypes() const noexcept {
+    return loot_types_;
+};
+
 void Map::AddRoad(const Road& road) {
     roadmap_.AddRoad(road);
 }
@@ -77,37 +81,24 @@ double Map::GetDogVelocity() const noexcept {
     return dog_velocity_;
 };
 
+void Map::AddLootType(const LootType& loot_type) {
+    loot_types_.emplace_back(loot_type);
+};
+
+void Map::AddLootTypes(const Map::LootTypes& loot_types) {
+    for(auto item : loot_types){
+        AddLootType(item);
+    }
+};
+
 std::tuple<Position, Velocity> Map::GetValidMove(const Position& old_position,
                                                 const Position& potential_new_position,
                                                 const Velocity& old_velocity) {
     return roadmap_.GetValidMove(old_position, potential_new_position, old_velocity);
 };
 
-
-void tag_invoke(json::value_from_tag, json::value& jv, const Map& map) {
-    jv = {{MAP_ID, json::value_from(*(map.GetId()))},
-            {MAP_NAME, json::value_from(map.GetName())},
-            //{MAP_DOG_VELOCITY, json::value_from(map.GetDogVelocity())}, // todo: need?
-            {ROADS, json::value_from(map.GetRoads())},
-            {BUILDINGS, json::value_from(map.GetBuildings())},
-            {OFFICES, json::value_from(map.GetOffices())}};
-};
-
-Map tag_invoke(json::value_to_tag<Map>, const json::value& jv) {
-    Map::Id id{json::value_to<std::string>(jv.as_object().at(MAP_ID))};
-    std::string name = json::value_to<std::string>(jv.as_object().at(MAP_NAME));
-    Map map(id, name);
-    std::vector<Road> roads = json::value_to< std::vector<Road> >(jv.as_object().at(ROADS));
-    map.AddRoads(roads);
-    std::vector<Building> buildings = json::value_to<std::vector<Building>>(jv.as_object().at(BUILDINGS));
-    map.AddBuildings(buildings);
-    std::vector<Office> offices = json::value_to<std::vector<Office>>(jv.as_object().at(OFFICES));
-    map.AddOffices(offices);
-    try {
-        double dog_velocity = json::value_to<double>(jv.as_object().at(MAP_DOG_VELOCITY));
-        map.SetDogVelocity(dog_velocity);
-    } catch(...) {}
-    return map;
+Position Map::GenerateRandomPosition() const {
+    return roadmap_.GenerateValidRandomPosition();
 };
 
 }  // namespace model

@@ -27,6 +27,7 @@ public:
     std::tuple<Position, Velocity> GetValidMove(const Position& old_position,
                             const Position& potential_new_position,
                             const Velocity& old_velocity);
+    Position GenerateValidRandomPosition() const;
 private:
     struct MatrixMapCoord {
         int64_t x;

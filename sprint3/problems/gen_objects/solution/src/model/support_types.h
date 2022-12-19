@@ -86,6 +86,4 @@ struct Position {
     double x, y;
 };
 
-
-
 }

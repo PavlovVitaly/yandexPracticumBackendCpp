@@ -59,4 +59,12 @@ double Game::GetDefaultDogVelocity() const noexcept {
     return default_dog_velocity_;
 };
 
+void Game::AddLootGeneratorConfig(LootGeneratorConfig cfg) {
+    loot_gen_cfg_ = std::move(cfg);
+};
+
+const LootGeneratorConfig& Game::GetLootGeneratorConfig() {
+    return loot_gen_cfg_;
+};
+
 }

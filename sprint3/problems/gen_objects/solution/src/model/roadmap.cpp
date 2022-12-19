@@ -1,7 +1,7 @@
 #include "roadmap.h"
+#include "random_generators.h"
 
 #include <cmath>
-
 #include <iostream>
 #include <stdint.h>
 #include <set>
@@ -92,6 +92,22 @@ std::tuple<Position, Velocity> Roadmap::GetValidMove(const Position& old_positio
         position = GetFarestPoinOfRoute(dest.value(), old_position, old_velocity);
     }
     return std::tie(position, velocity);
+};
+
+Position Roadmap::GenerateValidRandomPosition() const {
+    Position pos;
+    int road_index = utils::GenerateIntegerFromInterval(0, roads_.size() - 1);
+    auto road = roads_[road_index];
+    if(road.IsHorizontal()) {
+        pos.x = utils::GenerateDoubleFromInterval(road.GetStart().x,
+                                                road.GetEnd().x);
+        pos.y = road.GetStart().y;
+    } else {
+        pos.y = utils::GenerateDoubleFromInterval(road.GetStart().y,
+                                                road.GetEnd().y);
+        pos.x = road.GetStart().x;
+    }
+    return pos;
 };
 
 std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetDestinationRoadsOfRoute(

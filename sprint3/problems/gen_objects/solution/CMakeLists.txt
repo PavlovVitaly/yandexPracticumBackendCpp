@@ -22,14 +22,12 @@ add_executable(game_server
 	src/model/map.cpp
 	src/model/game.cpp
 	src/model/dog.cpp
-	src/model/road.cpp
-	src/model/office.cpp
-	src/model/building.cpp
 	src/model/roadmap.cpp
 	src/model/support_types.cpp
 	src/model/loot_generator.cpp
 	src/json/json_loader.cpp
 	src/json/json_converter.cpp
+	src/json/json_model_converter.cpp
 	src/request_handlers/request_handler.cpp
 	src/utils/request_handlers_utils.cpp
 	src/utils/filesystem_utils.cpp
@@ -60,7 +58,7 @@ target_include_directories(game_server PRIVATE
 	src/time_management
 	src/error_handling
 )
-target_link_libraries(game_server PRIVATE Threads::Threads Boost::log Boost::log_setup Boost::program_options)
+target_link_libraries(game_server PRIVATE Threads::Threads CONAN_PKG::boost)
 
 add_executable(catch_tests
 	tests/loot_generator_tests.cpp

@@ -21,7 +21,7 @@ std::tuple<authentication::Token, Player::Id> Application::JoinGame(
     auto token = player_tokens_.AddPlayer(player);
     std::shared_ptr<GameSession> game_session = FindGameSessionBy(id);
     if(!game_session){
-        game_session = std::make_shared<GameSession>(game_.FindMap(id), ioc_);
+        game_session = std::make_shared<GameSession>(game_.FindMap(id), game_.GetLootGeneratorConfig(), ioc_);
         AddGameSession(game_session);
     }
     BoundPlayerAndGameSession(player, game_session);
@@ -41,9 +41,9 @@ void Application::BoundPlayerAndGameSession(std::shared_ptr<Player> player,
     player->CreateDog(player->GetName(), *(session->GetMap()), randomize_spawn_points_);
 };
 
-const std::vector< std::weak_ptr<Player> >& Application::GetPlayersFromGameSession(const authentication::Token& token) {
-    static const std::vector< std::weak_ptr<Player> > emptyPlayerList;
-    auto player = player_tokens_.FindPlayerBy(token).lock();
+const std::vector< std::shared_ptr<Player> >& Application::GetPlayersFromGameSession(const authentication::Token& token) {
+    static const std::vector< std::shared_ptr<Player> > emptyPlayerList;
+    auto player = player_tokens_.FindPlayerBy(token);
     auto session_id = player->GetGameSessionId();
     if(!session_id_to_players_.contains(session_id)) {
         return emptyPlayerList;
@@ -52,11 +52,11 @@ const std::vector< std::weak_ptr<Player> >& Application::GetPlayersFromGameSessi
 };
 
 bool Application::IsExistPlayer(const authentication::Token& token) {
-    return !player_tokens_.FindPlayerBy(token).expired();
+    return static_cast<bool>(player_tokens_.FindPlayerBy(token));
 };
 
 void Application::SetPlayerAction(const authentication::Token& token, model::Direction direction) {
-    auto player = player_tokens_.FindPlayerBy(token).lock();
+    auto player = player_tokens_.FindPlayerBy(token);
     auto dog = player->GetDog();
     double velocity = player->GetGameSession()->GetMap()->GetDogVelocity();
     dog->SetAction(direction, velocity);

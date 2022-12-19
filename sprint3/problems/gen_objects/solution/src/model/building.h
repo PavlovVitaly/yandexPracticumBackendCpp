@@ -9,11 +9,8 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-#include <boost/json.hpp>
 
 namespace model {
-
-namespace json = boost::json;
 
 class Building {
 public:
@@ -28,8 +25,5 @@ public:
 private:
     Rectangle bounds_;
 };
-
-void tag_invoke(json::value_from_tag, json::value& jv, const Building& building);
-Building tag_invoke(json::value_to_tag<Building>, const json::value& jv);
 
 }

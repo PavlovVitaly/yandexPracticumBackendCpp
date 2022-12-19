@@ -7,11 +7,8 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-#include <boost/json.hpp>
 
 namespace model {
-
-namespace json = boost::json;
 
 class Office {
 public:
@@ -40,8 +37,5 @@ private:
     Point position_;
     Offset offset_;
 };
-
-void tag_invoke(json::value_from_tag, json::value& jv, const Office& office);
-Office tag_invoke(json::value_to_tag<Office>, const json::value& jv);
 
 }

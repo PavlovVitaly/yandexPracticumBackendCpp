@@ -8,11 +8,8 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-#include <boost/json.hpp>
 
 namespace model {
-
-namespace json = boost::json;
 
 class Road {
     struct HorizontalTag {
@@ -57,9 +54,5 @@ private:
     Point start_;
     Point end_;
 };
-
-void tag_invoke(json::value_from_tag, json::value& jv, const Road& road);
-Road tag_invoke(json::value_to_tag<Road>, const json::value& jv);
-
 
 }

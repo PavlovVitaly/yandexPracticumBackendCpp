@@ -46,20 +46,7 @@ void Player::CreateDog(const std::string& dog_name, const model::Map& map, bool 
 };
 
 void Player::LocateDogInRandomPositionOnMap(const model::Map& map) {
-    double x, y;
-    auto roads = map.GetRoads();
-    int road_index = utils::GenerateIntegerFromInterval(0, roads.size() - 1);
-    auto road = roads[road_index];
-    if(road.IsHorizontal()) {
-        x = utils::GenerateDoubleFromInterval(road.GetStart().x,
-                                                road.GetEnd().x);
-        y = road.GetStart().y;
-    } else {
-        y = utils::GenerateDoubleFromInterval(road.GetStart().y,
-                                                road.GetEnd().y);
-        x = road.GetStart().x;
-    }
-    dog_->SetPosition({x, y});
+    dog_->SetPosition(map.GenerateRandomPosition());
 };
 
 void Player::LocateDogInStartPointOnMap(const model::Map& map) {

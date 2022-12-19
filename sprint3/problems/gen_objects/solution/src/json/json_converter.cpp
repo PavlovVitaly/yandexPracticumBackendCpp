@@ -5,6 +5,7 @@
 #include <sstream>
 #include <boost/json/array.hpp>
 #include <boost/json.hpp>
+#include "json_model_converter.h"
 
 namespace json_converter{
 
@@ -103,11 +104,10 @@ std::string CreateInvalidContentTypeResponse() {
     return json::serialize(msg);
 };
 
-std::string CreatePlayersListOnMapResponse(const std::vector< std::weak_ptr<app::Player> >& players) {
+std::string CreatePlayersListOnMapResponse(const std::vector< std::shared_ptr<app::Player> >& players) {
     json::value jv;
     json::object& obj = jv.emplace_object();  
-    for(auto item : players) {
-        auto player = item.lock();
+    for(auto player : players) {
         std::stringstream ss;
         ss << *(player->GetId());
         json::value jv_item = {{json_keys::RESPONSE_PLAYER_NAME, player->GetName()}};
@@ -116,11 +116,10 @@ std::string CreatePlayersListOnMapResponse(const std::vector< std::weak_ptr<app:
     return json::serialize(jv);
 };
 
-std::string CreateGameStateResponse(const std::vector< std::weak_ptr<app::Player> >& players) {
+std::string CreateGameStateResponse(const std::vector< std::shared_ptr<app::Player> >& players) {
     json::value jv;
     json::object obj;  
-    for(auto item : players) {
-        auto player = item.lock();
+    for(auto player : players) {
         auto dog = player->GetDog();
         std::stringstream ss;
         ss << *(player->GetId());

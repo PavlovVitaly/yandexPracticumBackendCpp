@@ -43,7 +43,7 @@ public:
     const model::Game::Maps& ListMap() const noexcept;
     const std::shared_ptr<model::Map> FindMap(const model::Map::Id& id) const noexcept;
     std::tuple<authentication::Token, Player::Id> JoinGame(const std::string& player_name, const model::Map::Id& id);
-    const std::vector< std::weak_ptr<Player> >& GetPlayersFromGameSession(const authentication::Token& token);
+    const std::vector< std::shared_ptr<Player> >& GetPlayersFromGameSession(const authentication::Token& token);
     bool IsExistPlayer(const authentication::Token& token);
     void SetPlayerAction(const authentication::Token& token, model::Direction direction);
     std::shared_ptr<AppStrand> GetStrand();
@@ -54,7 +54,7 @@ public:
 private:
     using GameSessionIdHasher = util::TaggedHasher<GameSession::Id>;
     using GameSessionIdToIndex = std::unordered_map<GameSession::Id,
-                                                    std::vector< std::weak_ptr<Player> >,
+                                                    std::vector< std::shared_ptr<Player> >,
                                                     GameSessionIdHasher>;
     using MapIdHasher = util::TaggedHasher<model::Map::Id>;
     using MapIdToSessionIndex = std::unordered_map<model::Map::Id, size_t, MapIdHasher>;

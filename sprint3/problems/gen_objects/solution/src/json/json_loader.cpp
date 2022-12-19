@@ -2,6 +2,8 @@
 #include "logger.h"
 #include "json_key_storage.h"
 #include "model_key_storage.h"
+#include "loot_generator_config.h"
+#include "json_model_converter.h"
 
 #include <fstream>
 #include <iostream>
@@ -37,12 +39,15 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
     // Загрузить модель игры из файла
     model::Game game;
     boost::json::value jsonVal = ReadFile(json_path);
+    model::LootGeneratorConfig lootGenCfg = 
+        boost::json::value_to<model::LootGeneratorConfig>(jsonVal.as_object().at(model::LOOT_GENERATOR_CONFIG));
+    game.AddLootGeneratorConfig(lootGenCfg);
     std::vector<model::Map> maps = boost::json::value_to< std::vector<model::Map> >(jsonVal.as_object().at(model::MAPS));
     game.AddMaps(maps);
     try {
         double default_dog_velocity = boost::json::value_to<double>(jsonVal.as_object().at(model::DEFAULT_DOG_VELOCITY));
         game.SetDefaultDogVelocity(default_dog_velocity);
-    } catch(...) {}
+    } catch(boost::wrapexcept<std::out_of_range> e) {}
     return game;
 };
 
