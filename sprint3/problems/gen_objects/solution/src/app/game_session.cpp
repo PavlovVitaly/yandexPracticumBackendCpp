@@ -24,15 +24,10 @@ std::weak_ptr<model::Dog> GameSession::CreateDog(const std::string& dog_name, co
         LocateDogInStartPointOnMap(dog);
     }
     dogs_[dog->GetId()] = dog;
-    if(dogs_.size() == 1) {
-        GenerateLoot(loot_generator_.GetPeriod());
-        generate_loot_ticker_ = std::make_shared<time_m::Ticker>(
-            strand_,
-            loot_generator_.GetPeriod(),
-            std::bind(&GameSession::GenerateLoot, this, std::placeholders::_1)
-        );
-        generate_loot_ticker_->Start();
-    }
+    net::dispatch(*strand_, [self = shared_from_this()]{
+        self->GenerateLoot(self->loot_generator_.GetPeriod());
+    });
+
     return dog;
 };
 

@@ -19,7 +19,7 @@ namespace app {
 
 namespace net = boost::asio;
 
-class GameSession {
+class GameSession : public std::enable_shared_from_this<GameSession>  {
 public:
     using SessionStrand = net::strand<net::io_context::executor_type>;
     using Id = util::Tagged<std::string, GameSession>;
@@ -51,6 +51,13 @@ public:
             );
             update_game_state_ticker_->Start();
         }
+
+        generate_loot_ticker_ = std::make_shared<time_m::Ticker>(
+            strand_,
+            loot_generator_.GetPeriod(),
+            std::bind(&GameSession::GenerateLoot, this, std::placeholders::_1)
+        );
+        generate_loot_ticker_->Start();
     };
     
     const Id& GetId() const noexcept;
