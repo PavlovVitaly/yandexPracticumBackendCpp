@@ -53,7 +53,7 @@ private:
 
         RequestHandlerNode<ActivatorType, HandlerType>(GetMapByIdActivator,
                                                         {{http::verb::get, GetMapByIdHandler}},
-                                                        BadRequestHandler,
+                                                        InvalidMethodHandler,
                                                         {MapNotFoundHandler}),
                                                         
         RequestHandlerNode<ActivatorType, HandlerType>(InvalidContentTypeActivator,

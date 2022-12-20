@@ -12,24 +12,19 @@ LootGeneratorConfig tag_invoke(json::value_to_tag<LootGeneratorConfig>, const js
 
 
 void tag_invoke(json::value_from_tag, json::value& jv, const LootType& loot_type) {
-    if(loot_type.color.empty()) {
-        jv = {
-            {LOOT_TYPES_NAME, json::value_from(loot_type.name)},
-            {LOOT_TYPES_FILE, json::value_from(loot_type.file)},
-            {LOOT_TYPES_TYPE, json::value_from(loot_type.type)},
-            {LOOT_TYPES_ROTATION, json::value_from(loot_type.rotation)},
-            {LOOT_TYPES_SCALE, json::value_from(loot_type.scale)}
-        };
-    } else {
-        jv = {
-            {LOOT_TYPES_NAME, json::value_from(loot_type.name)},
-            {LOOT_TYPES_FILE, json::value_from(loot_type.file)},
-            {LOOT_TYPES_TYPE, json::value_from(loot_type.type)},
-            {LOOT_TYPES_ROTATION, json::value_from(loot_type.rotation)},
-            {LOOT_TYPES_COLOR, json::value_from(loot_type.color)},
-            {LOOT_TYPES_SCALE, json::value_from(loot_type.scale)}
-        };
+    json::object res = {
+        {LOOT_TYPES_NAME, json::value_from(loot_type.name)},
+        {LOOT_TYPES_FILE, json::value_from(loot_type.file)},
+        {LOOT_TYPES_TYPE, json::value_from(loot_type.type)},
+        {LOOT_TYPES_SCALE, json::value_from(loot_type.scale)}
+    };
+    if(!loot_type.color.empty()) {
+        res[LOOT_TYPES_COLOR] = json::value_from(loot_type.color);
     }
+    if(loot_type.rotation != INT_MIN) {
+        res[LOOT_TYPES_ROTATION] = json::value_from(loot_type.rotation);
+    }
+    jv.emplace_object() = res;
 };
 
 LootType tag_invoke(json::value_to_tag<LootType>, const json::value& jv) {
