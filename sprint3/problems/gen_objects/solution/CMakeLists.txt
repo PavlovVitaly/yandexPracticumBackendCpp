@@ -60,14 +60,10 @@ target_include_directories(game_server PRIVATE
 )
 target_link_libraries(game_server PRIVATE Threads::Threads CONAN_PKG::boost)
 
-message("HELLO SOURCE DIR: " ${CMAKE_SOURCE_DIR})
 add_executable(catch_tests
 	tests/loot_generator_tests.cpp
 	src/model/loot_generator.cpp
 	src/model/loot_generator.h
-)
-target_include_directories(catch_tests PRIVATE
-	tests
 )
 target_link_libraries(catch_tests PRIVATE CONAN_PKG::catch2)
 
