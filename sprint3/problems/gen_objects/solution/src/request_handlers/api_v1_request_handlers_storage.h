@@ -137,6 +137,7 @@ std::optional<size_t> MapNotFoundHandler(
         Send&& send)                                                                                                                                                                          {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
+    response.set(http::field::cache_control, NO_CACHE_CONTROL);
     response.body() = json_converter::CreateMapNotFoundResponse();
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
