@@ -17,4 +17,11 @@ int GenerateIntegerFromInterval(const int lower, const int upper) {
     return distr(eng);
 };
 
+size_t GenerateSizeTFromInterval(const size_t lower, const size_t upper) {
+    std::random_device rd;
+    std::default_random_engine eng(rd());
+    std::uniform_int_distribution<size_t> distr(lower,upper);
+    return distr(eng);
+};
+
 }

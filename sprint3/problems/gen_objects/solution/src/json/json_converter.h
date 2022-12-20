@@ -23,7 +23,8 @@ std::string CreatePlayerActionResponse();
 std::string CreatePlayerActionInvalidActionResponse();
 std::string CreateInvalidContentTypeResponse();
 std::string CreatePlayersListOnMapResponse(const std::vector< std::shared_ptr<app::Player> >& players);
-std::string CreateGameStateResponse(const std::vector< std::shared_ptr<app::Player> >& players);
+std::string CreateGameStateResponse(const std::vector< std::shared_ptr<app::Player> >& players,
+                                    const app::GameSession::LostObjects& lost_objects);
 std::string CreateSetDeltaTimeResponse();
 std::string CreateSetDeltaTimeInvalidMsgResponse();
 std::string CreateInvalidEndpointResponse();

@@ -40,9 +40,4 @@ const std::string LOOT_TYPES_ROTATION   = "rotation";
 const std::string LOOT_TYPES_COLOR      = "color";
 const std::string LOOT_TYPES_SCALE      = "scale";
 
-const std::string LOST_OBJECTS          = "lostObjects";
-const std::string LOST_OBJECTS_TYPE     = "type";
-const std::string LOST_OBJECTS_POSITION = "pos";
-
-
 }

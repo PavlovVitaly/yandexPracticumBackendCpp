@@ -21,9 +21,10 @@ std::tuple<authentication::Token, Player::Id> Application::JoinGame(
     auto token = player_tokens_.AddPlayer(player);
     std::shared_ptr<GameSession> game_session = FindGameSessionBy(id);
     if(!game_session){
-        game_session = std::make_shared<GameSession>(game_.FindMap(id), game_.GetLootGeneratorConfig(), ioc_);
+        game_session = std::make_shared<GameSession>(game_.FindMap(id), tick_period_, game_.GetLootGeneratorConfig(), ioc_);
         AddGameSession(game_session);
     }
+    auth_token_to_session_index_[token] = game_session;
     BoundPlayerAndGameSession(player, game_session);
     return std::tie(token, player->GetId());
 };
@@ -38,7 +39,8 @@ void Application::BoundPlayerAndGameSession(std::shared_ptr<Player> player,
                                     std::shared_ptr<GameSession> session){
     session_id_to_players_[session->GetId()].push_back(player);
     player->SetGameSession(session);
-    player->CreateDog(player->GetName(), *(session->GetMap()), randomize_spawn_points_);
+    auto dog = session->CreateDog(player->GetName(), *(session->GetMap()), randomize_spawn_points_);
+    player->SetDog(dog);
 };
 
 const std::vector< std::shared_ptr<Player> >& Application::GetPlayersFromGameSession(const authentication::Token& token) {
@@ -57,7 +59,7 @@ bool Application::IsExistPlayer(const authentication::Token& token) {
 
 void Application::SetPlayerAction(const authentication::Token& token, model::Direction direction) {
     auto player = player_tokens_.FindPlayerBy(token);
-    auto dog = player->GetDog();
+    auto dog = player->GetDog().lock();
     double velocity = player->GetGameSession()->GetMap()->GetDogVelocity();
     dog->SetAction(direction, velocity);
 };
@@ -67,13 +69,9 @@ bool Application::IsManualTimeManagement() {
 };
 
 void Application::UpdateGameState(const std::chrono::milliseconds& delta_time) {
-    for(auto player : players_) {
-        player->MoveDog(delta_time);
+    for(auto session : sessions_) {
+        session->UpdateGameState(delta_time);
     }
-};
-
-std::shared_ptr<Application::AppStrand> Application::GetStrand() {
-    return strand_;
 };
 
 void Application::AddGameSession(std::shared_ptr<GameSession> session) {
@@ -95,6 +93,17 @@ std::shared_ptr<GameSession> Application::FindGameSessionBy(const model::Map::Id
         return sessions_.at(it->second);
     }
     return nullptr;
+};
+
+std::shared_ptr<GameSession> Application::FindGameSessionBy(const authentication::Token& token) const noexcept {
+    if (auto it = auth_token_to_session_index_.find(token); it != auth_token_to_session_index_.end()) {
+        return it->second;
+    }
+    return nullptr;
+};
+
+const std::vector< std::shared_ptr<GameSession> >& Application::GetSessions() {
+    return sessions_;
 };
 
 }

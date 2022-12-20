@@ -25,6 +25,7 @@ add_executable(game_server
 	src/model/roadmap.cpp
 	src/model/support_types.cpp
 	src/model/loot_generator.cpp
+	src/model/lost_object.cpp
 	src/json/json_loader.cpp
 	src/json/json_converter.cpp
 	src/json/json_model_converter.cpp
@@ -64,6 +65,9 @@ add_executable(catch_tests
 	tests/loot_generator_tests.cpp
 	src/model/loot_generator.cpp
 	src/model/loot_generator.h
+)
+target_include_directories(catch_tests PRIVATE
+	tests
 )
 target_link_libraries(catch_tests PRIVATE CONAN_PKG::catch2)
 

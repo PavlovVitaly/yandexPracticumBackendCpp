@@ -1,7 +1,6 @@
 #pragma once
 #include "loot_generator_config.h"
 #include "loot_type.h"
-#include "lost_object.h"
 #include "building.h"
 #include "office.h"
 #include "map.h"
@@ -14,12 +13,8 @@ namespace json = boost::json;
 
 LootGeneratorConfig tag_invoke(json::value_to_tag<LootGeneratorConfig>, const json::value& jv);
 
-
 void tag_invoke(json::value_from_tag, json::value& jv, const LootType& loot_type);
 LootType tag_invoke(json::value_to_tag<LootType>, const json::value& jv);
-
-void tag_invoke(json::value_from_tag, json::value& jv, const LostObject& lost_object);
-
 
 void tag_invoke(json::value_from_tag, json::value& jv, const Building& building);
 Building tag_invoke(json::value_to_tag<Building>, const json::value& jv);

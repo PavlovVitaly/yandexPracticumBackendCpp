@@ -101,4 +101,8 @@ Position Map::GenerateRandomPosition() const {
     return roadmap_.GenerateValidRandomPosition();
 };
 
+size_t Map::GetNumberOfLootTypes() {
+    return loot_types_.size();
+};
+
 }  // namespace model

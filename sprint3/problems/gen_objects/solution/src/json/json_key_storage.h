@@ -18,4 +18,8 @@ const std::string REQUEST_PLAYER_MOVE   = "move";
 
 const std::string REQUEST_TIME_DELTA = "timeDelta";
 
+const std::string LOST_OBJECTS          = "lostObjects";
+const std::string LOST_OBJECTS_TYPE     = "type";
+const std::string LOST_OBJECTS_POSITION = "pos";
+
 }

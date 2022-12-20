@@ -24,6 +24,8 @@ public:
         , random_generator_{std::move(random_gen)} {
     }
 
+    const TimeInterval& GetPeriod() const;
+
     /*
      * Возвращает количество трофеев, которые должны появиться на карте спустя
      * заданный промежуток времени.

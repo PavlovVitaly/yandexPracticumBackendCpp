@@ -53,6 +53,7 @@ public:
                             const Position& potential_new_position,
                             const Velocity& old_velocity);
     Position GenerateRandomPosition() const;
+    size_t GetNumberOfLootTypes();
 
 private:
     using OfficeIdToIndex = std::unordered_map<Office::Id, size_t, util::TaggedHasher<Office::Id>>;

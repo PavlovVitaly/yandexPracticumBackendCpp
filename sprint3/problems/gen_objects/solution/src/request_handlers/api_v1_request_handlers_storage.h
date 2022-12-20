@@ -210,17 +210,14 @@ std::optional<size_t> JoinToGameHandler(
     if(application.FindMap(map_id) == nullptr) {
         return 0;
     }
-    net::dispatch(*application.GetStrand(), [req = std::move(req), application = &application, send = std::move(send)]{
-        auto [player_name, map_id] = json_converter::ParseJoinToGameRequest(req.body()).value();
-        auto [token, player_id] = application->JoinGame(player_name, map_id);
-        StringResponse response(http::status::ok, req.version());
-        response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
-        response.set(http::field::cache_control, NO_CACHE_CONTROL);
-        response.body() = json_converter::CreateJoinToGameResponse(*token, *player_id);
-        response.content_length(response.body().size());
-        response.keep_alive(req.keep_alive());
-        send(response);
-    });
+    auto [token, player_id] = application.JoinGame(player_name, map_id);
+    StringResponse response(http::status::ok, req.version());
+    response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
+    response.set(http::field::cache_control, NO_CACHE_CONTROL);
+    response.body() = json_converter::CreateJoinToGameResponse(*token, *player_id);
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
     return std::nullopt;
 }
 
@@ -293,7 +290,8 @@ std::optional<size_t> GetPlayersListHandler(
     if(!application.IsExistPlayer(token)) {
         return 0;
     }
-    net::dispatch(*application.GetStrand(), [req = std::move(req), application = &application, send = std::move(send)]{
+    net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
+        [req = std::move(req), application = &application, send = std::move(send)]{
         authentication::Token token{GetTokenString(req[http::field::authorization])};
         auto players = application->GetPlayersFromGameSession(token);
         StringResponse response(http::status::ok, req.version());
@@ -338,13 +336,15 @@ std::optional<size_t> GetGameStateHandler(
     if(!application.IsExistPlayer(token)) {
         return 0;
     }
-    net::dispatch(*application.GetStrand(), [req = std::move(req), application = &application, send = std::move(send)]{
+    net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
+        [req = std::move(req), application = &application, send = std::move(send)]{
         authentication::Token token{GetTokenString(req[http::field::authorization])};
         auto players = application->GetPlayersFromGameSession(token);
         StringResponse response(http::status::ok, req.version());
         response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
         response.set(http::field::cache_control, NO_CACHE_CONTROL);
-        response.body() = json_converter::CreateGameStateResponse(players);
+        response.body() = json_converter::CreateGameStateResponse(players,
+            application->FindGameSessionBy(token)->GetLostObjects());
         response.content_length(response.body().size());
         response.keep_alive(req.keep_alive());
         send(response);
@@ -415,7 +415,8 @@ std::optional<size_t> PlayerActionHandler(
     if(!application.IsExistPlayer(token)) {
         return 0;
     }
-    net::dispatch(*application.GetStrand(), [req = std::move(req), application = &application, send = std::move(send)]{
+    net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
+        [req = std::move(req), application = &application, send = std::move(send)]{
         authentication::Token token{GetTokenString(req[http::field::authorization])};
         std::string directionStr = json_converter::ParsePlayerActionRequest(req.body()).value();
         application->SetPlayerAction(token, model::STRING_TO_DIRECTION.at(directionStr));
@@ -503,18 +504,20 @@ std::optional<size_t> TimeTickHandler(
     if(!application.IsManualTimeManagement()) {
         return 0;
     }
-    net::dispatch(*application.GetStrand(), [req = std::move(req), application = &application, send = std::move(send)]{
-        int delta_time = json_converter::ParseSetDeltaTimeRequest(req.body()).value();
-        std::chrono::milliseconds dtime(delta_time);
-        application->UpdateGameState(dtime);
-        StringResponse response(http::status::ok, req.version());
-        response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
-        response.set(http::field::cache_control, NO_CACHE_CONTROL);
-        response.body() = json_converter::CreateSetDeltaTimeResponse();
-        response.content_length(response.body().size());
-        response.keep_alive(req.keep_alive());
-        send(response);
-    });
+    for(auto session : application.GetSessions()) {
+        net::dispatch(*(session->GetStrand()), [req = std::move(req), application = &application, send = std::move(send)]{
+            int delta_time = json_converter::ParseSetDeltaTimeRequest(req.body()).value();
+            std::chrono::milliseconds dtime(delta_time);
+            application->UpdateGameState(dtime);
+            StringResponse response(http::status::ok, req.version());
+            response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
+            response.set(http::field::cache_control, NO_CACHE_CONTROL);
+            response.body() = json_converter::CreateSetDeltaTimeResponse();
+            response.content_length(response.body().size());
+            response.keep_alive(req.keep_alive());
+            send(response);
+        });
+    }
     return std::nullopt;
 }
 

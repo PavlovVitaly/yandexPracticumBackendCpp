@@ -27,17 +27,13 @@ public:
     const GameSession::Id& GetGameSessionId() const;
     std::shared_ptr<GameSession> GetGameSession();
     void SetGameSession(std::shared_ptr<GameSession> session);
-    std::shared_ptr<model::Dog> GetDog();
-    void CreateDog(const std::string& dog_name, const model::Map& map, bool randomize_spawn_points);
-    void MoveDog(const std::chrono::milliseconds& delta_time);
+    std::weak_ptr<model::Dog> GetDog();
+    void SetDog(std::weak_ptr<model::Dog> dog);
 private:
     Id id_;
     std::string name_;
     std::shared_ptr<GameSession> session_;
-    std::shared_ptr<model::Dog> dog_;
-
-    void LocateDogInRandomPositionOnMap(const model::Map& map);
-    void LocateDogInStartPointOnMap(const model::Map& map);
+    std::weak_ptr<model::Dog> dog_;
 };
 
 }

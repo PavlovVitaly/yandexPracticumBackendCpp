@@ -116,11 +116,14 @@ std::string CreatePlayersListOnMapResponse(const std::vector< std::shared_ptr<ap
     return json::serialize(jv);
 };
 
-std::string CreateGameStateResponse(const std::vector< std::shared_ptr<app::Player> >& players) {
+std::string CreateGameStateResponse(const std::vector< std::shared_ptr<app::Player> >& players,
+                                    const app::GameSession::LostObjects& lost_objects) {
     json::value jv;
-    json::object obj;  
+    json::object palyers_obj;
+    json::object loots; 
+    json::object res;
     for(auto player : players) {
-        auto dog = player->GetDog();
+        auto dog = player->GetDog().lock();
         std::stringstream ss;
         ss << *(player->GetId());
         json::array pos = {dog->GetPosition().x, dog->GetPosition().y};
@@ -128,9 +131,21 @@ std::string CreateGameStateResponse(const std::vector< std::shared_ptr<app::Play
         json::value jv_item = {{json_keys::RESPONSE_DOG_POSITION, pos},
                                 {json_keys::RESPONSE_DOG_VELOCITY, speed},
                                 {json_keys::RESPONSE_DOG_DIRECTION, model::DIRECTION_TO_STRING.at(dog->GetDirection())}};
-        obj[ss.str()] = jv_item;
+        palyers_obj[ss.str()] = jv_item;
     }
-    jv.emplace_object()[json_keys::RESPONSE_PLAYERS] = obj;  
+    res[json_keys::RESPONSE_PLAYERS] = palyers_obj;
+    
+    for(auto [id, lost_object] : lost_objects) {
+        std::stringstream ss;
+        ss << *id;
+        json::value loot = {
+            {json_keys::LOST_OBJECTS_TYPE, json::value_from(lost_object->GetType())},
+            {json_keys::LOST_OBJECTS_POSITION, json::array{lost_object->GetPosition().x, lost_object->GetPosition().y}}
+        };
+        loots[ss.str()] = loot;
+    }
+    res[json_keys::LOST_OBJECTS] = loots;
+    jv.emplace_object() = res;
     return json::serialize(jv);
 };
 

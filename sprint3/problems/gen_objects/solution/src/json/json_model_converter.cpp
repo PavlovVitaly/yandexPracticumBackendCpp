@@ -47,13 +47,6 @@ LootType tag_invoke(json::value_to_tag<LootType>, const json::value& jv) {
     return loot_type;
 };
 
-void tag_invoke(json::value_from_tag, json::value& jv, const LostObject& lost_object) {
-    jv = {
-        {LOST_OBJECTS_TYPE, json::value_from(lost_object.type)},
-        {LOST_OBJECTS_POSITION, json::array{lost_object.position.x, lost_object.position.y}}
-    };
-};
-
 void tag_invoke(json::value_from_tag, json::value& jv, const Building& building) {
     jv = {{BUILDING_X, json::value_from(building.GetBounds().position.x)},
             {BUILDING_Y, json::value_from(building.GetBounds().position.y)},
