@@ -54,6 +54,6 @@ struct GatheringEvent {
 
 // Эту функцию вам нужно будет реализовать в соответствующем задании.
 // При проверке ваших тестов она не нужна - функция будет линковаться снаружи.
-//std::vector<GatheringEvent> FindGatherEvents(const ItemGathererProvider& provider);
+std::vector<GatheringEvent> FindGatherEvents(const ItemGathererProvider& provider);
 
 }  // namespace collision_detector
