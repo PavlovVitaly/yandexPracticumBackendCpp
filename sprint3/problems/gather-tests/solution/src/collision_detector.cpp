@@ -32,7 +32,7 @@ CollectionResult TryCollectPoint(geom::Point2D a, geom::Point2D b, geom::Point2D
             auto gatherer = provider.GetGatherer(g);
             auto item = provider.GetItem(i);
             auto collect_result = TryCollectPoint(gatherer.start_pos, gatherer.end_pos, item.position);
-            if(collect_result.IsCollected(item.width)){
+            if(collect_result.IsCollected(item.width + gatherer.width)){
                 result.push_back({i, g, collect_result.sq_distance, collect_result.proj_ratio});
             }
         }
