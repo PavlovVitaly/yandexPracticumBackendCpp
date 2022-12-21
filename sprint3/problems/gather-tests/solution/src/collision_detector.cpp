@@ -37,6 +37,10 @@ CollectionResult TryCollectPoint(geom::Point2D a, geom::Point2D b, geom::Point2D
             }
         }
     }
+    sort(result.begin(), result.end(),
+        [](const GatheringEvent& lhs, const GatheringEvent& rhs) {
+        return lhs.time < rhs.time;
+    });
     return result;
 }*/
 

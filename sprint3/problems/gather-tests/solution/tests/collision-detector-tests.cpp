@@ -59,7 +59,95 @@ TEST_CASE("Gather collect one item moving on x-axis", TAG) {
     provider.AddItem(item);
     provider.AddGatherer(gatherer);
     auto events = collision_detector::FindGatherEvents(provider);
+    
     CHECK(events.size() == 1);
+    CHECK(events[0].item_id == 0);
+    CHECK(events[0].gatherer_id == 0);
     CHECK(events[0].sq_distance == 0);
     CHECK_THAT(events[0].time, WithinRel((item.position.x/gatherer.end_pos.x), 1e-9)); 
+}
+
+TEST_CASE("Gather collect one item moving on y-axis", TAG) {
+    using Catch::Matchers::WithinRel;
+    collision_detector::Item item{{0, 12.5}, 0.6};
+    collision_detector::Gatherer gatherer{{0, 0}, {0, 22.5}, 0.6};
+    collision_detector::ItemGathererProviderImpl provider;
+    provider.AddItem(item);
+    provider.AddGatherer(gatherer);
+    auto events = collision_detector::FindGatherEvents(provider);
+    
+    CHECK(events.size() == 1);
+    CHECK(events[0].item_id == 0);
+    CHECK(events[0].gatherer_id == 0);
+    CHECK(events[0].sq_distance == 0);
+    CHECK_THAT(events[0].time, WithinRel((item.position.y/gatherer.end_pos.y), 1e-9)); 
+}
+
+TEST_CASE("Gather collect two unordered items moving on x-axis", TAG) {
+    using Catch::Matchers::WithinRel;
+    collision_detector::Item item1{{12.5, 0}, 0.6};
+    collision_detector::Item item2{{6.5, 0}, 0.6};
+    collision_detector::Gatherer gatherer{{0, 0}, {22.5, 0}, 0.6};
+    collision_detector::ItemGathererProviderImpl provider;
+    provider.AddItem(item1);
+    provider.AddItem(item2);
+    provider.AddGatherer(gatherer);
+    auto events = collision_detector::FindGatherEvents(provider);
+    
+    CHECK(events.size() == 2);
+
+    CHECK(events[0].item_id == 1);
+    CHECK(events[0].gatherer_id == 0);
+    CHECK(events[0].sq_distance == 0);
+    CHECK_THAT(events[0].time, WithinRel((item2.position.x/gatherer.end_pos.x), 1e-9)); 
+    
+    CHECK(events[1].item_id == 0);
+    CHECK(events[1].gatherer_id == 0);
+    CHECK(events[1].sq_distance == 0);
+    CHECK_THAT(events[1].time, WithinRel((item1.position.x/gatherer.end_pos.x), 1e-9)); 
+}
+
+TEST_CASE("Gather collect one of two items moving on x-axis", TAG) {
+    using Catch::Matchers::WithinRel;
+    collision_detector::Item item1{{42.5, 0}, 0.6};
+    collision_detector::Item item2{{6.5, 0}, 0.6};
+    collision_detector::Gatherer gatherer{{0, 0}, {22.5, 0}, 0.6};
+    collision_detector::ItemGathererProviderImpl provider;
+    provider.AddItem(item1);
+    provider.AddItem(item2);
+    provider.AddGatherer(gatherer);
+    auto events = collision_detector::FindGatherEvents(provider);
+
+    CHECK(events.size() == 1);
+
+    CHECK(events[0].item_id == 1);
+    CHECK(events[0].gatherer_id == 0);
+    CHECK(events[0].sq_distance == 0);
+    CHECK_THAT(events[0].time, WithinRel((item2.position.x/gatherer.end_pos.x), 1e-9)); 
+}
+
+TEST_CASE("Two gathers collect two separate items moving on x-axis and y-axis", TAG) {
+    using Catch::Matchers::WithinRel;
+    collision_detector::Item item1{{0, 12.5}, 0.6};
+    collision_detector::Item item2{{6.5, 0}, 0.6};
+    collision_detector::Gatherer gatherer1{{0, 0}, {22.5, 0}, 0.6};
+    collision_detector::Gatherer gatherer2{{0, 0}, {0, 22.5}, 0.6};
+    collision_detector::ItemGathererProviderImpl provider;
+    provider.AddItem(item1);
+    provider.AddItem(item2);
+    provider.AddGatherer(gatherer1);
+    provider.AddGatherer(gatherer2);
+    auto events = collision_detector::FindGatherEvents(provider);
+    
+    CHECK(events.size() == 2);
+
+    CHECK(events[0].item_id == 1);
+    CHECK(events[0].gatherer_id == 0);
+    CHECK(events[0].sq_distance == 0);
+    CHECK_THAT(events[0].time, WithinRel((item2.position.x/gatherer1.end_pos.x), 1e-9)); 
+    
+    CHECK(events[1].item_id == 0);
+    CHECK(events[1].gatherer_id == 1);
+    CHECK(events[1].sq_distance == 0);
+    CHECK_THAT(events[1].time, WithinRel((item1.position.y/gatherer2.end_pos.y), 1e-9)); 
 }
