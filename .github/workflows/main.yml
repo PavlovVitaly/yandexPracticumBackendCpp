@@ -326,7 +326,7 @@ jobs:
           docker build -t gather-tests .
 
       - name: run tests sprint3 gather-tests
-        run: docker run --rm --entrypoint /app/build/bin/collision_detection_tests gather-tests
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests
 
       - name: build tests sprint3 gather-tests_wrong1
         run: |
@@ -338,7 +338,7 @@ jobs:
           docker build -t gather-tests_wrong1 .
 
       - name: run tests sprint3 gather-tests_wrong1
-        run: docker run --rm --entrypoint /app/build/bin/collision_detection_tests gather-tests_wrong1  || [ $? -ne 0 ]
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong1  || [ $? -ne 0 ]
 
       - name: build tests sprint3 gather-tests_wrong2
         run: |
@@ -350,7 +350,7 @@ jobs:
           docker build -t gather-tests_wrong2 .
 
       - name: run tests sprint3 gather-tests_wrong2
-        run: docker run --rm --entrypoint /app/build/bin/collision_detection_tests gather-tests_wrong2  || [ $? -ne 0 ]
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong2  || [ $? -ne 0 ]
 
       - name: build tests sprint3 gather-tests_wrong3
         run: |
@@ -362,7 +362,7 @@ jobs:
           docker build -t gather-tests_wrong3 .
 
       - name: run tests sprint3 gather-tests_wrong3
-        run: docker run --rm --entrypoint /app/build/bin/collision_detection_tests gather-tests_wrong3  || [ $? -ne 0 ]
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong3  || [ $? -ne 0 ]
 
       - name: build tests sprint3 gather-tests_wrong4
         run: |
@@ -374,7 +374,7 @@ jobs:
           docker build -t gather-tests_wrong4 .
 
       - name: run tests sprint3 gather-tests_wrong4
-        run: docker run --rm --entrypoint /app/build/bin/collision_detection_tests gather-tests_wrong4  || [ $? -ne 0 ]
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong4  || [ $? -ne 0 ]
 
       - name: build tests sprint3 gather-tests_wrong5
         run: |
@@ -386,7 +386,7 @@ jobs:
           docker build -t gather-tests_wrong5 .
 
       - name: run tests sprint3 gather-tests_wrong5
-        run: docker run --rm --entrypoint /app/build/bin/collision_detection_tests gather-tests_wrong5  || [ $? -ne 0 ]
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong5  || [ $? -ne 0 ]
 
       - name: build tests sprint3 gather
         run: |
@@ -395,7 +395,7 @@ jobs:
           docker build -t gather .
 
       - name: run tests sprint3 gather
-        run: docker run --rm --entrypoint /app/build/bin/collision_detection_tests gather
+        run: docker run --rm --entrypoint /app/build/collision_detection_tests gather
 
       - name: build tests sprint3 find_return
         run: |
