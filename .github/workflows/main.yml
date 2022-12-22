@@ -493,6 +493,9 @@ jobs:
     runs-on: ubuntu-22.04
     container:
       image: praktikumcpp/practicum_cpp_backend:latest
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+      options: --name main-container
     services:
       postgres:
         image: ubuntu/postgres:14-22.04_beta
@@ -500,6 +503,16 @@ jobs:
           POSTGRES_PASSWORD: Mys3Cr3t
 
     steps:
+      - name: get docker network
+        run: echo "DOCKER_NETWORK=$(docker inspect main-container -f '{{range $k, $v := .NetworkSettings.Networks}}{{printf "%s" $k}}{{end}}')" >> $GITHUB_ENV
+
+      - name: set postgresql credentials
+        run: |
+          echo "POSTGRES_USER=postgres" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=Mys3Cr3t" >> $GITHUB_ENV
+          echo "POSTGRES_HOST=postgres" >> $GITHUB_ENV
+          echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -521,10 +534,6 @@ jobs:
           conan install ..
           cmake -DCMAKE_BUILD_TYPE=Release ..
           cmake --build .
-          echo "POSTGRES_USER=postgres" >> $GITHUB_ENV
-          echo "POSTGRES_PASSWORD=Mys3Cr3t" >> $GITHUB_ENV
-          echo "POSTGRES_HOST=postgres" >> $GITHUB_ENV
-          echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
 
       - name: configure postgresql database
         run: python3 ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_db_of_books.py
@@ -534,9 +543,25 @@ jobs:
         env:
           DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/db_of_books/solution/build/book_manager
 
+
       - name: build sprint4 bookypedia-1
         run: |
           cd sprint4/problems/bookypedia-1/solution
+          mkdir build
+          cd build
+          conan install ..
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          cmake --build .
+
+      - name: run tests sprint4 bookypedia-1
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/bookypedia-1.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_bookypedia-1.py
+        env:
+          DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/bookypedia-1/solution/build/bookypedia
+
+
+      - name: build sprint4 bookypedia-2
+        run: |
+          cd sprint4/problems/bookypedia-2/solution
           mkdir build
           cd build
           conan install ..
@@ -547,11 +572,24 @@ jobs:
           echo "POSTGRES_HOST=postgres" >> $GITHUB_ENV
           echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
 
-
-      - name: run tests sprint4 bookypedia-1
-        run: pytest --junitxml=${GITHUB_WORKSPACE}/bookypedia-1.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_bookypedia-1.py
+      - name: run tests sprint4 bookypedia-2
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/bookypedia-2.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_bookypedia-2.py
         env:
-          DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/bookypedia-1/solution/build/bookypedia
+          DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/bookypedia-2/solution/build/bookypedia
+
+
+      - name: build sprint4 leave_game
+        run: |
+          cd sprint4/problems/leave_game/solution
+          docker build -t leave_game .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 -e GAME_DB_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/records leave_game" >> $GITHUB_ENV
+
+      - name: run tests sprint4 leave_game
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/leave_game.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_leave_game.py
+        env:
+          SERVER_DOMAIN: cppserver
+          CONFIG_PATH: ${{ github.workspace }}/sprint4/problems/leave_game/solution/data/config.json
+
 
       - name: Publish XML reports
         uses: EnricoMi/publish-unit-test-result-action@v2
