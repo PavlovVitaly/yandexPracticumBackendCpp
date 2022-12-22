@@ -42,5 +42,6 @@ const std::string LOOT_TYPES_TYPE       = "type";
 const std::string LOOT_TYPES_ROTATION   = "rotation";
 const std::string LOOT_TYPES_COLOR      = "color";
 const std::string LOOT_TYPES_SCALE      = "scale";
+const std::string LOOT_TYPES_VALUE      = "value";
 
 }

@@ -16,6 +16,13 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+add_library(collision_detection_lib STATIC
+	src/physics/collision_detector.h
+	src/physics/collision_detector.cpp
+	src/physics/geom.h
+)
+target_link_libraries(collision_detection_lib PUBLIC CONAN_PKG::boost Threads::Threads)
+
 add_library(game_model_lib STATIC
 	src/model/map.cpp
 	src/model/game.cpp
@@ -32,15 +39,9 @@ target_include_directories(game_model_lib PUBLIC
 	${ZLIB_INCLUDES}
 	src/model
 	src/utils
+	src/physics
 )
-target_link_libraries(game_model_lib PUBLIC ${BOOST_LIB} ${ZLIB_LIB})
-
-add_library(collision_detection_lib STATIC
-	src/physics/collision_detector.h
-	src/physics/collision_detector.cpp
-	src/physics/geom.h
-)
-target_link_libraries(collision_detection_lib PUBLIC CONAN_PKG::boost Threads::Threads)
+target_link_libraries(game_model_lib PUBLIC ${BOOST_LIB} ${ZLIB_LIB} collision_detection_lib)
 
 add_executable(game_server
 	src/main.cpp
@@ -72,7 +73,7 @@ target_include_directories(game_server PRIVATE
 	src/time_management
 	src/error_handling
 )
-target_link_libraries(game_server PRIVATE Threads::Threads CONAN_PKG::boost game_model_lib collision_detection_lib)
+target_link_libraries(game_server PRIVATE Threads::Threads CONAN_PKG::boost game_model_lib)
 
 include(CTest)
 include(${CONAN_BUILD_DIRS_CATCH2}/Catch.cmake)

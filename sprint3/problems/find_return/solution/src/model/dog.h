@@ -2,6 +2,7 @@
 #include "tagged.h"
 #include "support_types.h"
 #include "lost_object.h"
+#include "collision_detector.h"
 
 #include <string>
 #include <unordered_map>
@@ -51,6 +52,7 @@ private:
     Position position_{0.0, 0.0};
     Velocity velocity_{0.0, 0.0};
     BagType bag_;
+    collision_detector::Gatherer gatherer_;
 };
 
 }

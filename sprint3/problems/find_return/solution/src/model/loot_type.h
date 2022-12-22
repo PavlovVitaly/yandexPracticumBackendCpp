@@ -11,6 +11,7 @@ struct LootType {
     std::optional<int> rotation{std::nullopt};
     std::optional<std::string> color{std::nullopt};
     double scale{0.0};
+    size_t value{0};
 };
 
 
