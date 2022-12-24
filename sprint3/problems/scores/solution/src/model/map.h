@@ -52,7 +52,8 @@ public:
                             const geom::Point2D& potential_new_position,
                             const Velocity& old_velocity);
     geom::Point2D GenerateRandomPosition() const;
-    size_t GetNumberOfLootTypes();
+    size_t GetNumberOfLootTypes() const noexcept;
+    const LootType& GetLootTypeBy(size_t id);
     void SetBagCapacity(size_t bag_capacity);
     size_t GetBagCapacity() const noexcept;
 

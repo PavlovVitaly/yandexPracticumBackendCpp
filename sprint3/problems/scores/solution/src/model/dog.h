@@ -9,6 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <chrono>
+#include <memory>
 
 namespace model {
 
@@ -17,14 +18,16 @@ class Dog {
     inline static size_t max_id_cont_ = 0;
 public:
     using Id = util::Tagged<size_t, Dog>;
-    using BagType = std::vector<LostObject>;
+    using BagType = std::vector< std::shared_ptr<LostObject> >;
 
-    Dog(std::string name) : 
+    Dog(std::string name, size_t bag_capacity) : 
         id_(Id{Dog::max_id_cont_++}),
-        name_(name) {};
-    Dog(Id id, std::string name) :
+        name_(name),
+        bag_capacity_(bag_capacity) {};
+    Dog(Id id, std::string name, size_t bag_capacity) :
         id_(id),
-        name_(name) {};
+        name_(name),
+        bag_capacity_(bag_capacity) {};
     Dog(const Dog& other) = default;
     Dog(Dog&& other) = default;
     Dog& operator = (const Dog& other) = default;
@@ -47,10 +50,14 @@ public:
     geom::Point2D CalculateNewPosition(const std::chrono::milliseconds& delta_time);
 
     const BagType& GetBag() const;
+    void CollectLostObject(std::shared_ptr<LostObject> loot);
+    bool IsFullBag();
 
     const size_t GetScore() const;
+    void AddScore(size_t score);
+    void ClearScore();
 
-    const collision_detector::Gatherer& AsGatherer();
+    const collision_detector::Gatherer& AsGatherer() const;
 private:
     Id id_;
     std::string name_;
@@ -64,6 +71,7 @@ private:
         DOG_WIDTH
     };
     size_t score_{0};
+    size_t bag_capacity_{0};
 };
 
 }

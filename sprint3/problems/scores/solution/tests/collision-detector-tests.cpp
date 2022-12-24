@@ -23,7 +23,7 @@ public:
         return items_.size();
     };
 
-    Item GetItem(size_t idx) const override{
+    Item GetItem(size_t idx) const override {
         return items_[idx];
     };
 
@@ -31,11 +31,11 @@ public:
         items_.push_back(std::move(item));
     };
 
-    size_t GatherersCount() const override{
+    size_t GatherersCount() const override {
         return gatherers_.size();
     };
 
-    Gatherer GetGatherer(size_t idx) const override{
+    Gatherer GetGatherer(size_t idx) const override {
         return gatherers_[idx];
     };
 

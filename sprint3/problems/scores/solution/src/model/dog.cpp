@@ -78,11 +78,29 @@ const Dog::BagType& Dog::GetBag() const {
     return bag_;
 };
 
+void Dog::CollectLostObject(std::shared_ptr<LostObject> loot) {
+    if(bag_.size() < bag_capacity_) {
+        bag_.push_back(loot);
+    }
+};
+
+bool Dog::IsFullBag() {
+    return bag_.size() >= bag_capacity_;
+};
+
 const size_t Dog::GetScore() const {
     return score_;
 };
 
-const collision_detector::Gatherer& Dog::AsGatherer() {
+void Dog::AddScore(size_t score) {
+    score_ += score;
+};
+
+void Dog::ClearScore() {
+    score_ = 0;
+};
+
+const collision_detector::Gatherer& Dog::AsGatherer() const {
     return gatherer_;
 };
 

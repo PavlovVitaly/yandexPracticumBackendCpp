@@ -102,8 +102,12 @@ geom::Point2D Map::GenerateRandomPosition() const {
     return roadmap_.GenerateValidRandomPosition();
 };
 
-size_t Map::GetNumberOfLootTypes() {
+size_t Map::GetNumberOfLootTypes() const noexcept{
     return loot_types_.size();
+};
+
+const LootType& Map::GetLootTypeBy(size_t id) {
+    return loot_types_[id];
 };
 
 void Map::SetBagCapacity(size_t bag_capacity) {

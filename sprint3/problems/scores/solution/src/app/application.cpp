@@ -23,6 +23,7 @@ std::tuple<authentication::Token, Player::Id> Application::JoinGame(
     if(!game_session){
         game_session = std::make_shared<GameSession>(game_.FindMap(id), tick_period_, game_.GetLootGeneratorConfig(), ioc_);
         AddGameSession(game_session);
+        game_session->Run();
     }
     auth_token_to_session_index_[token] = game_session;
     BoundPlayerAndGameSession(player, game_session);

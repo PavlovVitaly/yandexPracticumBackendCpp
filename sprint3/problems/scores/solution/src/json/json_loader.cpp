@@ -47,11 +47,11 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
     try {
         double default_dog_velocity = boost::json::value_to<double>(jsonVal.as_object().at(model::DEFAULT_DOG_VELOCITY));
         game.SetDefaultDogVelocity(default_dog_velocity);
-    } catch(boost::wrapexcept<std::out_of_range> e) {}
+    } catch(boost::wrapexcept<std::out_of_range>& e) {}
     try {
         double default_bag_capacity = boost::json::value_to<double>(jsonVal.as_object().at(model::DEFAULT_BAG_CAPACITY));
         game.SetDefaultBagCapacity(default_bag_capacity);
-    } catch(boost::wrapexcept<std::out_of_range> e) {}
+    } catch(boost::wrapexcept<std::out_of_range>& e) {}
     return game;
 };
 

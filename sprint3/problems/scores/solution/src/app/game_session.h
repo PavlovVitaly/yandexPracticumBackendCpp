@@ -27,8 +27,12 @@ public:
     using TimeInterval = std::chrono::milliseconds;
     using LostObjectIdHasher = util::TaggedHasher<model::LostObject::Id>;
     using LostObjects = std::unordered_map<model::LostObject::Id,
-                        std::shared_ptr<model::LostObject>,
-                        LostObjectIdHasher>;
+                                            std::shared_ptr<model::LostObject>,
+                                            LostObjectIdHasher>;
+    using DogIdHasher = util::TaggedHasher<model::Dog::Id>;
+    using Dogs = std::unordered_map<model::Dog::Id,
+                                    std::shared_ptr<model::Dog>,
+                                    DogIdHasher>;
 
     GameSession(std::shared_ptr<model::Map> map,
                     const TimeInterval& period_of_update_game_state,
@@ -44,22 +48,8 @@ public:
                 ),
                 loot_gen_cfg.probability),
             period_of_update_game_state_(period_of_update_game_state) {
-        if(period_of_update_game_state_.count() != 0){
-            update_game_state_ticker_ = std::make_shared<time_m::Ticker>(
-                strand_,
-                period_of_update_game_state_,
-                std::bind(&GameSession::UpdateGameState, this, std::placeholders::_1)
-            );
-            update_game_state_ticker_->Start();
-        }
-
-        generate_loot_ticker_ = std::make_shared<time_m::Ticker>(
-            strand_,
-            loot_generator_.GetPeriod(),
-            std::bind(&GameSession::GenerateLoot, this, std::placeholders::_1)
-        );
-        generate_loot_ticker_->Start();
     };
+    void Run();
     
     const Id& GetId() const noexcept;
     const std::shared_ptr<model::Map> GetMap();
@@ -71,16 +61,12 @@ public:
     const LostObjects& GetLostObjects();
     
 private:
-    using DogIdHasher = util::TaggedHasher<model::Dog::Id>;
-
     std::shared_ptr<model::Map> map_;
     net::io_context& ioc_;
     std::shared_ptr<SessionStrand> strand_;
     Id id_;
     loot_gen::LootGenerator loot_generator_;
-    std::unordered_map<model::Dog::Id,
-                        std::shared_ptr<model::Dog>,
-                        DogIdHasher> dogs_;
+    Dogs dogs_;
     LostObjects lost_objects_;
     TimeInterval period_of_update_game_state_;
     std::shared_ptr<time_m::Ticker> update_game_state_ticker_;
@@ -92,6 +78,7 @@ private:
     void LocateLootInRandomPositionOnMap(std::shared_ptr<model::LostObject> loot);
     void LocateDogInRandomPositionOnMap(std::shared_ptr<model::Dog> dog);
     void LocateDogInStartPointOnMap(std::shared_ptr<model::Dog> dog);
+    void CollectLoot();
 };
 
 }

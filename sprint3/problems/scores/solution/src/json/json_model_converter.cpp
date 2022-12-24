@@ -36,10 +36,10 @@ LootType tag_invoke(json::value_to_tag<LootType>, const json::value& jv) {
     loot_type.value = json::value_to<size_t>(jv.as_object().at(LOOT_TYPES_VALUE));
     try {
         loot_type.rotation = json::value_to<int>(jv.as_object().at(LOOT_TYPES_ROTATION));
-    } catch (boost::wrapexcept<std::out_of_range> e) {};
+    } catch (boost::wrapexcept<std::out_of_range>& e) {};
     try {
         loot_type.color = json::value_to<std::string>(jv.as_object().at(LOOT_TYPES_COLOR));
-    } catch (boost::wrapexcept<std::out_of_range> e) {};
+    } catch (boost::wrapexcept<std::out_of_range>& e) {};
     loot_type.scale = json::value_to<double>(jv.as_object().at(LOOT_TYPES_SCALE));
     return loot_type;
 };
@@ -137,11 +137,11 @@ Map tag_invoke(json::value_to_tag<Map>, const json::value& jv) {
     try {
         double dog_velocity = json::value_to<double>(jv.as_object().at(MAP_DOG_VELOCITY));
         map.SetDogVelocity(dog_velocity);
-    } catch(boost::wrapexcept<std::out_of_range> e) {}
+    } catch(boost::wrapexcept<std::out_of_range>& e) {}
     try {
         double bag_capacity = json::value_to<double>(jv.as_object().at(MAP_BAG_CAPACITY));
         map.SetBagCapacity(bag_capacity);
-    } catch(boost::wrapexcept<std::out_of_range> e) {}
+    } catch(boost::wrapexcept<std::out_of_range>& e) {}
     return map;
 };
 

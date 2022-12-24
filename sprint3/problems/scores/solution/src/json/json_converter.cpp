@@ -130,8 +130,8 @@ std::string CreateGameStateResponse(const std::vector< std::shared_ptr<app::Play
         json::array speed = {dog->GetVelocity().vx, dog->GetVelocity().vy};
         json::array bag;
         for(auto item : dog->GetBag()) {
-            bag.push_back({{json_keys::RESPONSE_BAG_ITEM_ID, *item.GetId()},
-                            {json_keys::RESPONSE_BAG_ITEM_TYPE, item.GetType()}});
+            bag.push_back({{json_keys::RESPONSE_BAG_ITEM_ID, *(item->GetId())},
+                            {json_keys::RESPONSE_BAG_ITEM_TYPE, item->GetType()}});
         }
         json::value jv_item = {{json_keys::RESPONSE_DOG_POSITION, pos},
                                 {json_keys::RESPONSE_DOG_VELOCITY, speed},

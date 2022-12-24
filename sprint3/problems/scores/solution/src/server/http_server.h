@@ -36,7 +36,7 @@ public:
                         .address()
                         .to_string();
             remote_ip = temp;
-        } catch(sys::system_error ex) {}
+        } catch(sys::system_error& ex) {}
         return remote_ip;
     };
 

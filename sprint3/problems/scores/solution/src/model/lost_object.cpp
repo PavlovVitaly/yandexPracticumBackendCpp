@@ -20,6 +20,19 @@ const geom::Point2D& LostObject::GetPosition() const {
 
 void LostObject::SetPosition(geom::Point2D position) {
     position_ = std::move(position);
+    item_.position = position_;
+};
+
+size_t LostObject::GetValue() const {
+    return value_;
+};
+
+void LostObject::SetValue(size_t value) {
+    value_ = value;
+};
+
+const collision_detector::Item& LostObject::AsItem() const {
+    return item_;
 };
 
 }
