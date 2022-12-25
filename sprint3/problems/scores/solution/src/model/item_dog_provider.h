@@ -26,7 +26,7 @@ public:
     const Dog::Id& GetDogId(size_t idx) const;
 
     template<typename T> 
-    const T* TryCastItemTo(size_t idx) const {
+    const T* const TryCastItemTo(size_t idx) const {
         return dynamic_cast<T*>(items_[idx].get());
     };
 

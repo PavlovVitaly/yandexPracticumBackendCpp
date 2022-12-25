@@ -134,7 +134,7 @@ void GameSession::CollectLoot(const model::ItemDogProvider& provider,
                     size_t item_id,
                     size_t gatherer_id) {
     auto dog = dogs_[provider.GetDogId(gatherer_id)];
-    const auto* casted_lost_obj = provider.TryCastItemTo<model::LostObject>(item_id);
+    const auto* const casted_lost_obj = provider.TryCastItemTo<model::LostObject>(item_id);
     if(casted_lost_obj) {
         auto lost_object_id = casted_lost_obj->GetId();
         if(dog->IsFullBag() || !lost_objects_.contains(lost_object_id)) {
@@ -151,7 +151,7 @@ void GameSession::CollectLoot(const model::ItemDogProvider& provider,
 
 void GameSession::DropLoot(const model::ItemDogProvider& provider, size_t item_id, size_t gatherer_id) {
     auto dog = dogs_[provider.GetDogId(gatherer_id)];
-    const auto* casted_office = provider.TryCastItemTo<model::Office>(item_id);
+    const auto* const casted_office = provider.TryCastItemTo<model::Office>(item_id);
     if(casted_office) {
         if(dog->IsEmptyBag()) {
             return;
