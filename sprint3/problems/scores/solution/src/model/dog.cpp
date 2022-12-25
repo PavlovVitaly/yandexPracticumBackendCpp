@@ -88,16 +88,23 @@ bool Dog::IsFullBag() {
     return bag_.size() >= bag_capacity_;
 };
 
+bool Dog::IsEmptyBag() {
+    return bag_.empty();
+};
+
+void Dog::DropLostObjectsFromBag() {
+    for(auto lost_obj : bag_) {
+        AddScore(lost_obj->GetValue());
+    }
+    bag_.clear();
+};
+
 const size_t Dog::GetScore() const {
     return score_;
 };
 
 void Dog::AddScore(size_t score) {
     score_ += score;
-};
-
-void Dog::ClearScore() {
-    score_ = 0;
 };
 
 const collision_detector::Gatherer& Dog::AsGatherer() const {

@@ -52,10 +52,10 @@ public:
     const BagType& GetBag() const;
     void CollectLostObject(std::shared_ptr<LostObject> loot);
     bool IsFullBag();
+    bool IsEmptyBag();
+    void DropLostObjectsFromBag();
 
     const size_t GetScore() const;
-    void AddScore(size_t score);
-    void ClearScore();
 
     const collision_detector::Gatherer& AsGatherer() const;
 private:
@@ -72,6 +72,8 @@ private:
     };
     size_t score_{0};
     size_t bag_capacity_{0};
+
+    void AddScore(size_t score);
 };
 
 }

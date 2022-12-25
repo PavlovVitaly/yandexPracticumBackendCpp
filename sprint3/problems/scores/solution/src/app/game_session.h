@@ -81,7 +81,7 @@ private:
     void LocateDogInStartPointOnMap(std::shared_ptr<model::Dog> dog);
     void HandleLoot();
     void CollectLoot(const model::ItemDogProvider& provider, size_t item_id, size_t gatherer_id);
-    void DropLoot();
+    void DropLoot(const model::ItemDogProvider& provider, size_t item_id, size_t gatherer_id);
 };
 
 }

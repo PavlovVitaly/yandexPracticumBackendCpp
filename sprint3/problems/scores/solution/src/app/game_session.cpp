@@ -113,6 +113,9 @@ void GameSession::HandleLoot() {
     for(auto [id, lost_obj] : lost_objects_) {
         items.push_back(lost_obj);
     }
+    for(auto office : map_->GetOffices()) {
+        items.push_back(std::make_shared<model::Office>(office));
+    }
     for(auto [id, dog] : dogs_) {
         dogs.push_back(dog);
     }
@@ -121,15 +124,9 @@ void GameSession::HandleLoot() {
     if(collected_loot.empty()) {
         return;
     }
-    // remove dublicate collected events
-    auto last = std::unique(collected_loot.begin(), collected_loot.end(),
-            [](const collision_detector::GatheringEvent& lhs,
-                const collision_detector::GatheringEvent& rhs){
-        return lhs.item_id == rhs.item_id;
-    });
-    collected_loot.erase(last, collected_loot.end());
     for(auto clltd_loot : collected_loot){
         CollectLoot(provider, clltd_loot.item_id, clltd_loot.gatherer_id);
+        DropLoot(provider, clltd_loot.item_id, clltd_loot.gatherer_id);
     }
 };
 
@@ -139,16 +136,28 @@ void GameSession::CollectLoot(const model::ItemDogProvider& provider,
     auto dog = dogs_[provider.GetDogId(gatherer_id)];
     const auto* casted_lost_obj = provider.TryCastItemTo<model::LostObject>(item_id);
     if(casted_lost_obj) {
-        if(dog->IsFullBag()) {
+        auto lost_object_id = casted_lost_obj->GetId();
+        if(dog->IsFullBag() || !lost_objects_.contains(lost_object_id)) {
             return;
         }
-        auto lost_object_id = casted_lost_obj->GetId();
         auto loot = lost_objects_.at(lost_object_id);
         dog->CollectLostObject(loot);
         std::erase_if(lost_objects_, [id = lost_object_id](const auto& item) {
             auto const& [key, value] = item;
             return key == id;
         });
+    }
+};
+
+void GameSession::DropLoot(const model::ItemDogProvider& provider, size_t item_id, size_t gatherer_id) {
+    auto dog = dogs_[provider.GetDogId(gatherer_id)];
+    const auto* casted_office = provider.TryCastItemTo<model::Office>(item_id);
+    if(casted_office) {
+        if(dog->IsEmptyBag()) {
+            return;
+        }
+        auto office_id = casted_office->GetId();
+        dog->DropLostObjectsFromBag();
     }
 };
 

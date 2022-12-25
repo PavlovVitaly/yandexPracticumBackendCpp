@@ -1,6 +1,8 @@
 #pragma once
 #include "tagged.h"
 #include "support_types.h"
+#include "collision_detector.h"
+#include "model_invariants.h"
 
 #include <cmath>
 #include <string>
@@ -10,22 +12,18 @@
 
 namespace model {
 
-class Office {
+class Office: public collision_detector::Item  {
 public:
     using Id = util::Tagged<std::string, Office>;
 
-    Office(Id id, Point position, Offset offset) noexcept
-        : id_{std::move(id)}
-        , position_{position}
+    Office(Id id, geom::Point2D position, Offset offset, double width = BASE_WIDTH) noexcept
+        : Item(position, width)
+        , id_{std::move(id)}
         , offset_{offset} {
     }
 
     const Id& GetId() const noexcept {
         return id_;
-    }
-
-    Point GetPosition() const noexcept {
-        return position_;
     }
 
     Offset GetOffset() const noexcept {
@@ -34,7 +32,6 @@ public:
 
 private:
     Id id_;
-    Point position_;
     Offset offset_;
 };
 

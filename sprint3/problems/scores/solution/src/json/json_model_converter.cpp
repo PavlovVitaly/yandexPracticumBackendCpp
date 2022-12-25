@@ -71,7 +71,7 @@ void tag_invoke(json::value_from_tag, json::value& jv, const Office& office) {
 
 Office tag_invoke(json::value_to_tag<Office>, const json::value& jv) {
     Office::Id id{json::value_to<std::string>(jv.as_object().at(OFFICE_ID))};
-    Point position;
+    geom::Point2D position;
     position.x = json::value_to<int>(jv.as_object().at(OFFICE_X));
     position.y = json::value_to<int>(jv.as_object().at(OFFICE_Y));
     Offset offset;
