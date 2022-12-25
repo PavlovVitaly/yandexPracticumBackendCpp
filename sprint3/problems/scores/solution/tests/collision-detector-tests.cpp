@@ -64,7 +64,7 @@ TEST_CASE("Gather collect one item moving on x-axis", TAG) {
     CHECK(events[0].item_id == 0);
     CHECK(events[0].gatherer_id == 0);
     CHECK_THAT(events[0].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[0].time, WithinRel((item.position.x/gatherer.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[0].time, WithinRel((item.GetPosition().x/gatherer.end_pos.x), 1e-9)); 
 }
 
 TEST_CASE("Gather collect one item moving on x-axis on edge", TAG) {
@@ -80,7 +80,7 @@ TEST_CASE("Gather collect one item moving on x-axis on edge", TAG) {
     CHECK(events[0].item_id == 0);
     CHECK(events[0].gatherer_id == 0);
     CHECK_THAT(events[0].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[0].time, WithinRel((item.position.x/gatherer.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[0].time, WithinRel((item.GetPosition().x/gatherer.end_pos.x), 1e-9)); 
 }
 
 TEST_CASE("Gather collect one item moving on x-axis on side", TAG) {
@@ -96,7 +96,7 @@ TEST_CASE("Gather collect one item moving on x-axis on side", TAG) {
     CHECK(events[0].item_id == 0);
     CHECK(events[0].gatherer_id == 0);
     CHECK_THAT(events[0].sq_distance, WithinRel(0.16, 1e-9));
-    CHECK_THAT(events[0].time, WithinRel((item.position.x/gatherer.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[0].time, WithinRel((item.GetPosition().x/gatherer.end_pos.x), 1e-9)); 
 }
 
 TEST_CASE("Gather collect one item moving on y-axis", TAG) {
@@ -112,7 +112,7 @@ TEST_CASE("Gather collect one item moving on y-axis", TAG) {
     CHECK(events[0].item_id == 0);
     CHECK(events[0].gatherer_id == 0);
     CHECK_THAT(events[0].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[0].time, WithinRel((item.position.y/gatherer.end_pos.y), 1e-9)); 
+    CHECK_THAT(events[0].time, WithinRel((item.GetPosition().y/gatherer.end_pos.y), 1e-9)); 
 }
 
 TEST_CASE("Gather collect two unordered items moving on x-axis", TAG) {
@@ -131,12 +131,12 @@ TEST_CASE("Gather collect two unordered items moving on x-axis", TAG) {
     CHECK(events[0].item_id == 1);
     CHECK(events[0].gatherer_id == 0);
     CHECK_THAT(events[0].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[0].time, WithinRel((item2.position.x/gatherer.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[0].time, WithinRel((item2.GetPosition().x/gatherer.end_pos.x), 1e-9)); 
     
     CHECK(events[1].item_id == 0);
     CHECK(events[1].gatherer_id == 0);
     CHECK_THAT(events[1].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[1].time, WithinRel((item1.position.x/gatherer.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[1].time, WithinRel((item1.GetPosition().x/gatherer.end_pos.x), 1e-9)); 
 }
 
 TEST_CASE("Gather collect one of two items moving on x-axis", TAG) {
@@ -155,7 +155,7 @@ TEST_CASE("Gather collect one of two items moving on x-axis", TAG) {
     CHECK(events[0].item_id == 1);
     CHECK(events[0].gatherer_id == 0);
     CHECK_THAT(events[0].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[0].time, WithinRel((item2.position.x/gatherer.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[0].time, WithinRel((item2.GetPosition().x/gatherer.end_pos.x), 1e-9)); 
 }
 
 TEST_CASE("Two gathers collect two separate items moving on x-axis and y-axis", TAG) {
@@ -176,12 +176,12 @@ TEST_CASE("Two gathers collect two separate items moving on x-axis and y-axis", 
     CHECK(events[0].item_id == 1);
     CHECK(events[0].gatherer_id == 0);
     CHECK_THAT(events[0].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[0].time, WithinRel((item2.position.x/gatherer1.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[0].time, WithinRel((item2.GetPosition().x/gatherer1.end_pos.x), 1e-9)); 
     
     CHECK(events[1].item_id == 0);
     CHECK(events[1].gatherer_id == 1);
     CHECK_THAT(events[1].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[1].time, WithinRel((item1.position.y/gatherer2.end_pos.y), 1e-9)); 
+    CHECK_THAT(events[1].time, WithinRel((item1.GetPosition().y/gatherer2.end_pos.y), 1e-9)); 
 }
 
 TEST_CASE("Two gathers collect three items moving on x-axis and y-axis", TAG) {
@@ -202,15 +202,15 @@ TEST_CASE("Two gathers collect three items moving on x-axis and y-axis", TAG) {
     CHECK(events[0].item_id == 1);
     CHECK(events[0].gatherer_id == 0);
     CHECK_THAT(events[0].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[0].time, WithinRel((item2.position.x/gatherer1.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[0].time, WithinRel((item2.GetPosition().x/gatherer1.end_pos.x), 1e-9)); 
 
     CHECK(events[1].item_id == 0);
     CHECK(events[1].gatherer_id == 0);
     CHECK_THAT(events[1].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[1].time, WithinRel((item1.position.x/gatherer1.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[1].time, WithinRel((item1.GetPosition().x/gatherer1.end_pos.x), 1e-9)); 
 
     CHECK(events[2].item_id == 1);
     CHECK(events[2].gatherer_id == 1);
     CHECK_THAT(events[2].sq_distance, WithinRel(0.0, 1e-9));
-    CHECK_THAT(events[2].time, WithinRel((item2.position.x/gatherer2.end_pos.x), 1e-9)); 
+    CHECK_THAT(events[2].time, WithinRel((item2.GetPosition().x/gatherer2.end_pos.x), 1e-9)); 
 }

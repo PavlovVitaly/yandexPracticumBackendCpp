@@ -32,7 +32,7 @@ add_library(game_model_lib STATIC
 	src/model/support_types.cpp
 	src/model/loot_generator.cpp
 	src/model/lost_object.cpp
-	src/model/lost_object_dog_provider.cpp
+	src/model/item_dog_provider.cpp
 	src/utils/request_handlers_utils.cpp
 	src/utils/filesystem_utils.cpp
 	src/utils/random_generators.cpp

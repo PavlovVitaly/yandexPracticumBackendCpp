@@ -23,9 +23,31 @@ struct CollectionResult {
 // Эта функция реализована в уроке.
 CollectionResult TryCollectPoint(geom::Point2D a, geom::Point2D b, geom::Point2D c);
 
-struct Item {
-    geom::Point2D position;
-    double width;
+class Item {
+public:
+    Item(geom::Point2D position, double width)
+        : position_(std::move(position))
+        , width_(width) {
+    }
+
+    virtual const geom::Point2D& GetPosition() const {
+        return position_;
+    };
+
+    virtual void SetPosition(geom::Point2D position) {
+        position_ = std::move(position);
+    };
+
+    virtual const double GetWidth() const {
+        return width_;
+    };
+    virtual void SetWidth(double width) {
+        width_ = width;
+    };
+
+private:
+    geom::Point2D position_;
+    double width_;
 };
 
 struct Gatherer {

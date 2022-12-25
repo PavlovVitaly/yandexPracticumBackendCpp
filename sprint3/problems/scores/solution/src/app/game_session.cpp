@@ -1,7 +1,7 @@
 #include "game_session.h"
 #include "random_generators.h"
 #include "support_types.h"
-#include "lost_object_dog_provider.h"
+#include "item_dog_provider.h"
 
 namespace app {
 
@@ -109,7 +109,15 @@ void GameSession::LocateDogInStartPointOnMap(std::shared_ptr<model::Dog> dog) {
 };
 
 void GameSession::CollectLoot() {
-    model::LostObjectsDogProvider provider(lost_objects_, dogs_);
+    std::vector< std::shared_ptr<collision_detector::Item> > items;
+    std::vector< std::shared_ptr<model::Dog> > dogs;
+    for(auto [id, lost_obj] : lost_objects_) {
+        items.push_back(lost_obj);
+    }
+    for(auto [id, dog] : dogs_) {
+        dogs.push_back(dog);
+    }
+    model::ItemDogProvider provider(std::move(items), std::move(dogs));
     auto collected_loot = collision_detector::FindGatherEvents(provider);
     if(collected_loot.empty()) {
         return;
@@ -121,15 +129,21 @@ void GameSession::CollectLoot() {
         return lhs.item_id == rhs.item_id;
     });
     collected_loot.erase(last, collected_loot.end());
-    for(auto item : collected_loot){
-        auto dog = dogs_[provider.GetDogId(item.gatherer_id)];
-        auto lost_object_id = provider.GetLostObjectId(item.item_id);
-        auto loot = lost_objects_.at(lost_object_id);
-        dog->CollectLostObject(loot);
-        std::erase_if(lost_objects_, [id = lost_object_id](const auto& item) {
-            auto const& [key, value] = item;
-            return key == id;
-        });
+    for(auto clltd_loot : collected_loot){
+        auto dog = dogs_[provider.GetDogId(clltd_loot.gatherer_id)];
+        auto* casted_lost_obj = provider.TryCastItemTo<model::LostObject>(clltd_loot.item_id);
+        if(casted_lost_obj) {
+            if(dog->IsFullBag()) {
+                continue;
+            }
+            auto lost_object_id = casted_lost_obj->GetId();
+            auto loot = lost_objects_.at(lost_object_id);
+            dog->CollectLostObject(loot);
+            std::erase_if(lost_objects_, [id = lost_object_id](const auto& item) {
+                auto const& [key, value] = item;
+                return key == id;
+            });
+        }
     }
 };
 

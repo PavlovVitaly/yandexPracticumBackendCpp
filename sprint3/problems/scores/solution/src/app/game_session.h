@@ -79,6 +79,7 @@ private:
     void LocateDogInRandomPositionOnMap(std::shared_ptr<model::Dog> dog);
     void LocateDogInStartPointOnMap(std::shared_ptr<model::Dog> dog);
     void CollectLoot();
+    void DropLoot();
 };
 
 }
