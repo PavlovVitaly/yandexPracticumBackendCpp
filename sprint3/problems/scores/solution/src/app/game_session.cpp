@@ -1,7 +1,6 @@
 #include "game_session.h"
 #include "random_generators.h"
 #include "support_types.h"
-#include "item_dog_provider.h"
 
 namespace app {
 
@@ -67,7 +66,7 @@ void GameSession::UpdateGameState(const GameSession::TimeInterval& delta_time) {
         dog->SetPosition(new_position);
         dog->SetVelocity(new_velocity);
     }
-    CollectLoot();
+    HandleLoot();
 };
 
 void GameSession::GenerateLoot(const GameSession::TimeInterval& delta_time) {
@@ -108,7 +107,7 @@ void GameSession::LocateDogInStartPointOnMap(std::shared_ptr<model::Dog> dog) {
                         static_cast<double>(road.GetStart().y)});
 };
 
-void GameSession::CollectLoot() {
+void GameSession::HandleLoot() {
     std::vector< std::shared_ptr<collision_detector::Item> > items;
     std::vector< std::shared_ptr<model::Dog> > dogs;
     for(auto [id, lost_obj] : lost_objects_) {
@@ -130,20 +129,26 @@ void GameSession::CollectLoot() {
     });
     collected_loot.erase(last, collected_loot.end());
     for(auto clltd_loot : collected_loot){
-        auto dog = dogs_[provider.GetDogId(clltd_loot.gatherer_id)];
-        auto* casted_lost_obj = provider.TryCastItemTo<model::LostObject>(clltd_loot.item_id);
-        if(casted_lost_obj) {
-            if(dog->IsFullBag()) {
-                continue;
-            }
-            auto lost_object_id = casted_lost_obj->GetId();
-            auto loot = lost_objects_.at(lost_object_id);
-            dog->CollectLostObject(loot);
-            std::erase_if(lost_objects_, [id = lost_object_id](const auto& item) {
-                auto const& [key, value] = item;
-                return key == id;
-            });
+        CollectLoot(provider, clltd_loot.item_id, clltd_loot.gatherer_id);
+    }
+};
+
+void GameSession::CollectLoot(const model::ItemDogProvider& provider,
+                    size_t item_id,
+                    size_t gatherer_id) {
+    auto dog = dogs_[provider.GetDogId(gatherer_id)];
+    const auto* casted_lost_obj = provider.TryCastItemTo<model::LostObject>(item_id);
+    if(casted_lost_obj) {
+        if(dog->IsFullBag()) {
+            return;
         }
+        auto lost_object_id = casted_lost_obj->GetId();
+        auto loot = lost_objects_.at(lost_object_id);
+        dog->CollectLostObject(loot);
+        std::erase_if(lost_objects_, [id = lost_object_id](const auto& item) {
+            auto const& [key, value] = item;
+            return key == id;
+        });
     }
 };
 

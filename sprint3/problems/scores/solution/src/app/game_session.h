@@ -7,6 +7,7 @@
 #include "lost_object.h"
 #include "ticker.h"
 #include "model_invariants.h"
+#include "item_dog_provider.h"
 
 #include <chrono>
 #include <vector>
@@ -78,7 +79,8 @@ private:
     void LocateLootInRandomPositionOnMap(std::shared_ptr<model::LostObject> loot);
     void LocateDogInRandomPositionOnMap(std::shared_ptr<model::Dog> dog);
     void LocateDogInStartPointOnMap(std::shared_ptr<model::Dog> dog);
-    void CollectLoot();
+    void HandleLoot();
+    void CollectLoot(const model::ItemDogProvider& provider, size_t item_id, size_t gatherer_id);
     void DropLoot();
 };
 
