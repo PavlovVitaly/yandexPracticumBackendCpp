@@ -18,9 +18,9 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_library(collision_detection_lib STATIC
-	src/physics/collision_detector.h
-	src/physics/collision_detector.cpp
-	src/physics/geom.h
+	src/model/physics/collision_detector.h
+	src/model/physics/collision_detector.cpp
+	src/model/physics/geom.h
 )
 target_link_libraries(collision_detection_lib PUBLIC CONAN_PKG::boost Threads::Threads)
 
@@ -40,8 +40,8 @@ add_library(game_model_lib STATIC
 target_include_directories(game_model_lib PUBLIC 
 	${ZLIB_INCLUDES}
 	src/model
+	src/model/physics
 	src/utils
-	src/physics
 )
 target_link_libraries(game_model_lib PUBLIC ${BOOST_LIB} ${ZLIB_LIB} collision_detection_lib)
 
@@ -93,3 +93,4 @@ target_link_libraries(collision_detection_tests CONAN_PKG::catch2 collision_dete
 catch_discover_tests(collision_detection_tests)
 # Boost.Beast будет использовать std::string_view вместо boost::string_view
 add_compile_definitions(BOOST_BEAST_USE_STD_STRING_VIEW)
+add_compile_definitions(BOOST_THREAD_PROVIDES_FUTURE)

@@ -2,7 +2,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include "../src/physics/collision_detector.h"
+#include "../src/model/physics/collision_detector.h"
 
 #include <string>
 #include <memory>
