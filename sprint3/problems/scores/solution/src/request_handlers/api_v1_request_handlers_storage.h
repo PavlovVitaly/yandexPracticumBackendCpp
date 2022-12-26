@@ -10,7 +10,7 @@
 #include <boost/beast/http.hpp>
 #include <chrono>
 #include <unordered_set>
-
+#include <boost/thread/future.hpp>
 
 namespace rh_storage{
 
@@ -289,13 +289,20 @@ std::optional<size_t> GetPlayersListHandler(
         app::Application& application,
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
-    if(!application.IsExistPlayer(token)) {
-        return 0;
-    }
+    boost::promise<std::optional<size_t>> res_promise;
+    boost::future<std::optional<size_t>> res_future = res_promise.get_future();
     net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
-        [req = std::move(req), application = &application, send = std::move(send)]{
+        [&res_promise,
+            &token,
+            req = std::move(req),
+            &application,
+            send = std::move(send)]{
+        if(!application.IsExistPlayer(token)) {
+            res_promise.set_value(0);
+            return;
+        }
         authentication::Token token{GetTokenString(req[http::field::authorization])};
-        auto players = application->GetPlayersFromGameSession(token);
+        auto players = application.GetPlayersFromGameSession(token);
         StringResponse response(http::status::ok, req.version());
         response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
         response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -303,8 +310,10 @@ std::optional<size_t> GetPlayersListHandler(
         response.content_length(response.body().size());
         response.keep_alive(req.keep_alive());
         send(response);
+        res_promise.set_value(std::nullopt);
+        return;
     });
-    return std::nullopt;
+    return res_future.get();
 }
 
 template <typename Request, typename Send>
@@ -335,23 +344,31 @@ std::optional<size_t> GetGameStateHandler(
         app::Application& application,
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
-    if(!application.IsExistPlayer(token)) {
-        return 0;
-    }
+    boost::promise<std::optional<size_t>> res_promise;
+    boost::future<std::optional<size_t>> res_future = res_promise.get_future();
     net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
-        [req = std::move(req), application = &application, send = std::move(send)]{
-        authentication::Token token{GetTokenString(req[http::field::authorization])};
-        auto players = application->GetPlayersFromGameSession(token);
+        [&res_promise,
+            &token,
+            req = std::move(req),
+            &application,
+            send = std::move(send)] {
+        if(!application.IsExistPlayer(token)) {
+            res_promise.set_value(0);
+            return;
+        }
+        auto players = application.GetPlayersFromGameSession(token);
         StringResponse response(http::status::ok, req.version());
         response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
         response.set(http::field::cache_control, NO_CACHE_CONTROL);
         response.body() = json_converter::CreateGameStateResponse(players,
-            application->FindGameSessionBy(token)->GetLostObjects());
+            application.FindGameSessionBy(token)->GetLostObjects());
         response.content_length(response.body().size());
         response.keep_alive(req.keep_alive());
         send(response);
+        res_promise.set_value(std::nullopt);
+        return;
     });
-    return std::nullopt;
+    return res_future.get();
 }
 
 
@@ -414,14 +431,21 @@ std::optional<size_t> PlayerActionHandler(
         app::Application& application,
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
-    if(!application.IsExistPlayer(token)) {
-        return 0;
-    }
+    boost::promise<std::optional<size_t>> res_promise;
+    boost::future<std::optional<size_t>> res_future = res_promise.get_future();
     net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
-        [req = std::move(req), application = &application, send = std::move(send)]{
+        [&res_promise,
+            &token,
+            req = std::move(req),
+            &application,
+            send = std::move(send)]{
+        if(!application.IsExistPlayer(token)) {
+            res_promise.set_value(0);
+            return;
+        }
         authentication::Token token{GetTokenString(req[http::field::authorization])};
         std::string directionStr = json_converter::ParsePlayerActionRequest(req.body()).value();
-        application->SetPlayerAction(token, model::STRING_TO_DIRECTION.at(directionStr));
+        application.SetPlayerAction(token, model::STRING_TO_DIRECTION.at(directionStr));
         StringResponse response(http::status::ok, req.version());
         response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
         response.set(http::field::cache_control, NO_CACHE_CONTROL);
@@ -429,8 +453,10 @@ std::optional<size_t> PlayerActionHandler(
         response.content_length(response.body().size());
         response.keep_alive(req.keep_alive());
         send(response);
+        res_promise.set_value(std::nullopt);
+        return;
     });
-    return std::nullopt;
+    return res_future.get();
 }
 
 
@@ -507,10 +533,10 @@ std::optional<size_t> TimeTickHandler(
         return 0;
     }
     for(auto session : application.GetSessions()) {
-        net::dispatch(*(session->GetStrand()), [req = std::move(req), application = &application, send = std::move(send)]{
+        net::dispatch(*(session->GetStrand()), [req = std::move(req), &application, send = std::move(send)]{
             int delta_time = json_converter::ParseSetDeltaTimeRequest(req.body()).value();
             std::chrono::milliseconds dtime(delta_time);
-            application->UpdateGameState(dtime);
+            application.UpdateGameState(dtime);
             StringResponse response(http::status::ok, req.version());
             response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
             response.set(http::field::cache_control, NO_CACHE_CONTROL);

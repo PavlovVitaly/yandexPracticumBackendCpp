@@ -14,7 +14,7 @@ namespace app {
 
 namespace net = boost::asio;
 
-class Application {
+class Application{
 public:
     using AppStrand = net::strand<net::io_context::executor_type>;
 
