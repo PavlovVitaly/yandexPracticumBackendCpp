@@ -33,47 +33,49 @@ add_library(game_model_lib STATIC
 	src/model/loot_generator.cpp
 	src/model/lost_object.cpp
 	src/model/item_dog_provider.cpp
-	src/utils/request_handlers_utils.cpp
-	src/utils/filesystem_utils.cpp
-	src/utils/random_generators.cpp
+	src/middleware/utils/request_handlers_utils.cpp
+	src/middleware/utils/filesystem_utils.cpp
+	src/middleware/utils/random_generators.cpp
 )
 target_include_directories(game_model_lib PUBLIC 
 	${ZLIB_INCLUDES}
 	src/model
 	src/model/physics
-	src/utils
+	src/middleware/utils
 )
 target_link_libraries(game_model_lib PUBLIC ${BOOST_LIB} ${ZLIB_LIB} collision_detection_lib)
 
 add_executable(game_server
 	src/main.cpp
-	src/json/json_loader.cpp
-	src/json/json_converter.cpp
-	src/json/json_model_converter.cpp
-	src/request_handlers/request_handler.cpp
-	src/boost_json.cpp
-	src/logging/logging_data_storage.cpp
-	src/logging/logger.cpp
-	src/authentication/player_tokens.cpp
+	src/middleware/json/json_loader.cpp
+	src/middleware/json/json_converter.cpp
+	src/middleware/json/json_model_converter.cpp
+	src/middleware/json/boost_json.cpp
+	src/web/request_handlers/request_handler.cpp
+	src/middleware/logging/logging_data_storage.cpp
+	src/middleware/logging/logger.cpp
+	src/app/authentication/player_tokens.cpp
 	src/app/application.cpp
 	src/app/game_session.cpp
 	src/app/player.cpp
-	src/server/http_server.cpp
-	src/program_options/program_options.cpp
-	src/time_management/ticker.cpp
-	src/error_handling/error_report.cpp
+	src/web/server/http_server.cpp
+	src/middleware/program_options/program_options.cpp
+	src/middleware/time_management/ticker.cpp
+	src/middleware/error_handling/error_report.cpp
 )
 target_include_directories(game_server PRIVATE
 	src
-	src/json
-	src/request_handlers
-	src/logging
-	src/authentication
 	src/app
-	src/server
-	src/program_options
-	src/time_management
-	src/error_handling
+	src/web
+	src/middleware
+	src/middleware/json
+	src/web/request_handlers
+	src/middleware/logging
+	src/app/authentication
+	src/web/server
+	src/middleware/program_options
+	src/middleware/time_management
+	src/middleware/error_handling
 )
 target_link_libraries(game_server PRIVATE Threads::Threads CONAN_PKG::boost game_model_lib)
 

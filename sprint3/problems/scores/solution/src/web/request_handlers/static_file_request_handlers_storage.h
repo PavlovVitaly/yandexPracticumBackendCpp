@@ -6,7 +6,6 @@
 #include <boost/beast/http.hpp>
 #include <unordered_map>
 #include <string>
-#include <iostream>
 
 namespace rh_storage{
 

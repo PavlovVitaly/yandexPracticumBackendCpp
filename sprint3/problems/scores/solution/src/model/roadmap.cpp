@@ -3,7 +3,6 @@
 #include "model_invariants.h"
 
 #include <cmath>
-#include <iostream>
 #include <stdint.h>
 #include <set>
 
