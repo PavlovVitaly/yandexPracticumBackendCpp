@@ -360,7 +360,7 @@ std::optional<size_t> GetGameStateHandler(
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
     boost::promise<std::optional<size_t>> res_promise;
-    boost::future<std::optional<size_t>> res_future = res_promise.get_future();
+    auto res_future = res_promise.get_future();
     net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
         [&res_promise
         , &token
