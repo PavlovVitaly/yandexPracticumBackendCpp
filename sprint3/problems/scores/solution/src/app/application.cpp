@@ -1,7 +1,5 @@
 #include "application.h"
 
-#include <iostream>
-
 namespace app {
 
 using namespace std::literals;

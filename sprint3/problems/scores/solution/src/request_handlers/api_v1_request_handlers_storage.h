@@ -212,11 +212,26 @@ std::optional<size_t> JoinToGameHandler(
     if(application.FindMap(map_id) == nullptr) {
         return 0;
     }
-    auto [token, player_id] = application.JoinGame(player_name, map_id);
     StringResponse response(http::status::ok, req.version());
+    auto session = application.FindGameSessionBy(map_id);
+    if(session) {
+        boost::promise<std::string> res_promise;
+        boost::future<std::string> res_future = res_promise.get_future();
+        net::dispatch(*(session->GetStrand()),
+            [&res_promise
+            , &application
+            , &player_name
+            , &map_id] {
+            auto [token, player_id] = application.JoinGame(player_name, map_id);
+            res_promise.set_value(json_converter::CreateJoinToGameResponse(*token, *player_id));
+        });
+        response.body() = res_future.get();
+    } else {
+        auto [token, player_id] = application.JoinGame(player_name, map_id);
+        response.body() = json_converter::CreateJoinToGameResponse(*token, *player_id);
+    }
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
-    response.body() = json_converter::CreateJoinToGameResponse(*token, *player_id);
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
     send(response);
@@ -292,11 +307,11 @@ std::optional<size_t> GetPlayersListHandler(
     boost::promise<std::optional<size_t>> res_promise;
     boost::future<std::optional<size_t>> res_future = res_promise.get_future();
     net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
-        [&res_promise,
-            &token,
-            req = std::move(req),
-            &application,
-            send = std::move(send)]{
+        [&res_promise
+        , &token
+        , req = std::move(req)
+        , &application
+        , send = std::move(send)]{
         if(!application.IsExistPlayer(token)) {
             res_promise.set_value(0);
             return;
@@ -347,11 +362,11 @@ std::optional<size_t> GetGameStateHandler(
     boost::promise<std::optional<size_t>> res_promise;
     boost::future<std::optional<size_t>> res_future = res_promise.get_future();
     net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
-        [&res_promise,
-            &token,
-            req = std::move(req),
-            &application,
-            send = std::move(send)] {
+        [&res_promise
+        , &token
+        , req = std::move(req)
+        , &application
+        , send = std::move(send)] {
         if(!application.IsExistPlayer(token)) {
             res_promise.set_value(0);
             return;
@@ -434,11 +449,11 @@ std::optional<size_t> PlayerActionHandler(
     boost::promise<std::optional<size_t>> res_promise;
     boost::future<std::optional<size_t>> res_future = res_promise.get_future();
     net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
-        [&res_promise,
-            &token,
-            req = std::move(req),
-            &application,
-            send = std::move(send)]{
+        [&res_promise
+        , &token
+        , req = std::move(req)
+        , &application
+        , send = std::move(send)]{
         if(!application.IsExistPlayer(token)) {
             res_promise.set_value(0);
             return;
@@ -533,7 +548,10 @@ std::optional<size_t> TimeTickHandler(
         return 0;
     }
     for(auto session : application.GetSessions()) {
-        net::dispatch(*(session->GetStrand()), [req = std::move(req), &application, send = std::move(send)]{
+        net::dispatch(*(session->GetStrand()),
+            [req = std::move(req)
+            , &application
+            , send = std::move(send)]{
             int delta_time = json_converter::ParseSetDeltaTimeRequest(req.body()).value();
             std::chrono::milliseconds dtime(delta_time);
             application.UpdateGameState(dtime);
