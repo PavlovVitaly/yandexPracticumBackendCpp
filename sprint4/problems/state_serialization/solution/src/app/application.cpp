@@ -71,6 +71,7 @@ void Application::UpdateGameState(const std::chrono::milliseconds& delta_time) {
     for(auto session : sessions_) {
         session->UpdateGameState(delta_time);
     }
+    SaveGameState(delta_time);
 };
 
 void Application::AddGameSession(std::shared_ptr<GameSession> session) {
@@ -103,6 +104,10 @@ std::shared_ptr<GameSession> Application::FindGameSessionBy(const authentication
 
 const std::vector< std::shared_ptr<GameSession> >& Application::GetSessions() {
     return sessions_;
+};
+
+void Application::SaveGameState(const std::chrono::milliseconds& delta_time) {
+
 };
 
 }

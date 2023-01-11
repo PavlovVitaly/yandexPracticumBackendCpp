@@ -3,6 +3,7 @@
 #include "player.h"
 #include "player_tokens.h"
 #include "tagged.h"
+#include "saving_settings.h"
 
 #include <vector>
 #include <memory>
@@ -63,10 +64,12 @@ private:
     std::vector< std::shared_ptr<app::GameSession> > sessions_;
     MapIdToSessionIndex map_id_to_session_index_;
     AuthTokenToSessionIndex auth_token_to_session_index_;
+    saving::SavingSettings saving_settings;
 
     std::shared_ptr<Player> CreatePlayer(const std::string& player_name);
     void BoundPlayerAndGameSession(std::shared_ptr<Player> player,
                                     std::shared_ptr<GameSession> session);
+    void SaveGameState(const std::chrono::milliseconds& delta_time);
 
 };
 
