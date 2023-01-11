@@ -58,6 +58,8 @@ add_executable(game_server
 	src/middleware/error_handling/error_report.cpp
 	src/middleware/game_data_store/lost_object_serialization.cpp
 	src/middleware/game_data_store/dog_serialization.cpp
+	src/middleware/game_data_store/player_serialization.cpp
+	src/middleware/game_data_store/game_session_serialization.cpp
 	src/web/request_handlers/request_handler.cpp
 	src/web/server/http_server.cpp
 	src/app/authentication/player_tokens.cpp
