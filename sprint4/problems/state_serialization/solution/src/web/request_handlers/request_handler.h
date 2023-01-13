@@ -15,7 +15,7 @@ namespace fs = std::filesystem;
 
 class RequestHandler {
 public:
-    explicit RequestHandler(app::Application& application, fs::path static_content_root_path)
+    explicit RequestHandler(std::shared_ptr<app::Application> application, fs::path static_content_root_path)
         : application_{application}, static_content_root_path_{static_content_root_path} {
     }
 
@@ -41,7 +41,7 @@ public:
     }
 
 private:
-    app::Application& application_;
+    std::shared_ptr<app::Application> application_;
     fs::path static_content_root_path_;
     
 };

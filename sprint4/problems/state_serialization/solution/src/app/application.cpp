@@ -1,5 +1,4 @@
 #include "application.h"
-#include "game_session_serialization.h"
 
 #include <boost/archive/text_oarchive.hpp>
 #include <iostream>
@@ -121,15 +120,35 @@ void Application::SaveGameState(const std::chrono::milliseconds& delta_time) {
 
 void Application::SaveGame() {
     using game_data_ser::GameSessionSerialization;
-    std::vector<GameSessionSerialization> sessions_ser;
-    for(auto session : sessions_) {
-        sessions_ser.push_back(GameSessionSerialization(*session, game_session_to_token_player_pair_.at(session)));
-    };
+    std::vector<GameSessionSerialization> sessions_ser = GetSerializedData();
+
     std::stringstream ss;
     {
         boost::archive::text_oarchive oa{ss};
         oa << sessions_ser;
     }
+};
+
+std::vector<game_data_ser::GameSessionSerialization> Application::ThreadsafeGetSerializedData() {
+    using game_data_ser::GameSessionSerialization;
+    std::vector<GameSessionSerialization> sessions_ser;
+    std::ranges::transform(sessions_, std::back_inserter(sessions_ser),
+        [self = shared_from_this()](auto session_ptr)->GameSessionSerialization {
+            return GameSessionSerialization(*session_ptr, self->game_session_to_token_player_pair_.at(session_ptr));
+        }
+    );
+    return sessions_ser;
+};
+
+std::vector<game_data_ser::GameSessionSerialization> Application::GetSerializedData() {
+    using game_data_ser::GameSessionSerialization;
+    std::vector<GameSessionSerialization> sessions_ser;
+    std::ranges::transform(sessions_, std::back_inserter(sessions_ser),
+        [self = shared_from_this()](auto session_ptr)->GameSessionSerialization {
+            return GameSessionSerialization(*session_ptr, self->game_session_to_token_player_pair_.at(session_ptr));
+        }
+    );
+    return sessions_ser;
 };
 
 }

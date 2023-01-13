@@ -70,7 +70,7 @@ bool BadRequestActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> BadRequestHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -90,12 +90,12 @@ bool GetMapListActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> GetMapListHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
-    response.body() = json_converter::ConvertMapListToJson(application.ListMap());
+    response.body() = json_converter::ConvertMapListToJson(application->ListMap());
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
     send(response);
@@ -115,10 +115,10 @@ bool GetMapByIdActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> GetMapByIdHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     auto id = SplitUrl(req.target())[3];
-    auto map = application.FindMap(model::Map::Id(std::string(id)));
+    auto map = application->FindMap(model::Map::Id(std::string(id)));
     if(map == nullptr) {
         return 0;
     }
@@ -135,7 +135,7 @@ std::optional<size_t> GetMapByIdHandler(
 template <typename Request, typename Send>
 std::optional<size_t> MapNotFoundHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send)                                                                                                                                                                          {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -157,7 +157,7 @@ bool JoinToGameInvalidJsonReqActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> JoinToGameInvalidJsonReqHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -186,7 +186,7 @@ bool JoinToGameEmptyPlayerNameActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> JoinToGameEmptyPlayerNameHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -207,28 +207,28 @@ bool JoinToGameActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> JoinToGameHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     auto [player_name, map_id] = json_converter::ParseJoinToGameRequest(req.body()).value();
-    if(application.FindMap(map_id) == nullptr) {
+    if(application->FindMap(map_id) == nullptr) {
         return 0;
     }
     StringResponse response(http::status::ok, req.version());
-    auto session = application.FindGameSessionBy(map_id);
+    auto session = application->FindGameSessionBy(map_id);
     if(session) {
         boost::promise<std::string> res_promise;
         auto res_future = res_promise.get_future();
         net::dispatch(*(session->GetStrand()),
             [&res_promise
-            , &application
+            , application
             , &player_name
             , &map_id] {
-            auto [token, player_id] = application.JoinGame(player_name, map_id);
+            auto [token, player_id] = application->JoinGame(player_name, map_id);
             res_promise.set_value(json_converter::CreateJoinToGameResponse(*token, *player_id));
         });
         response.body() = res_future.get();
     } else {
-        auto [token, player_id] = application.JoinGame(player_name, map_id);
+        auto [token, player_id] = application->JoinGame(player_name, map_id);
         response.body() = json_converter::CreateJoinToGameResponse(*token, *player_id);
     }
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -242,7 +242,7 @@ std::optional<size_t> JoinToGameHandler(
 template <typename Request, typename Send>
 std::optional<size_t> JoinToGameMapNotFoundHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -257,7 +257,7 @@ std::optional<size_t> JoinToGameMapNotFoundHandler(
 template <typename Request, typename Send>
 std::optional<size_t> OnlyPostMethodAllowedHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::method_not_allowed, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -281,7 +281,7 @@ bool EmptyAuthorizationActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> EmptyAuthorizationHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::unauthorized, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -302,20 +302,20 @@ bool GetPlayersListActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> GetPlayersListHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
     boost::promise<std::variant<std::string, size_t>> res_promise;
     auto res_future = res_promise.get_future();
-    net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
+    net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
         [&res_promise
         , &token
-        , &application]{
-        if(!application.IsExistPlayer(token)) {
+        , application]{
+        if(!application->IsExistPlayer(token)) {
             res_promise.set_value(0ul);
             return;
         }
-        auto players = application.GetPlayersFromGameSession(token);
+        auto players = application->GetPlayersFromGameSession(token);
         res_promise.set_value(json_converter::CreatePlayersListOnMapResponse(players));
     });
     auto res = res_future.get();
@@ -335,7 +335,7 @@ std::optional<size_t> GetPlayersListHandler(
 template <typename Request, typename Send>
 std::optional<size_t> InvalidMethodHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::method_not_allowed, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -357,23 +357,23 @@ bool GetGameStateActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> GetGameStateHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
     boost::promise<std::variant<std::string, size_t>> res_promise;
     auto res_future = res_promise.get_future();
-    net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
+    net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
         [&res_promise
         , &token
-        , &application] {
-        if(!application.IsExistPlayer(token)) {
+        , application] {
+        if(!application->IsExistPlayer(token)) {
             res_promise.set_value(0ul);
             return;
         }
-        auto players = application.GetPlayersFromGameSession(token);
+        auto players = application->GetPlayersFromGameSession(token);
         res_promise.set_value(json_converter::CreateGameStateResponse(
             players,
-            application.FindGameSessionBy(token)->GetLostObjects())
+            application->FindGameSessionBy(token)->GetLostObjects())
         );
     });
     auto res = res_future.get();
@@ -401,7 +401,7 @@ bool InvalidContentTypeActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> InvalidContentTypeHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -427,7 +427,7 @@ bool PlayerActionInvalidActionActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> PlayerActionInvalidActionHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -447,22 +447,22 @@ bool PlayerActionActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> PlayerActionHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
     boost::promise<std::optional<size_t>> res_promise;
     auto res_future = res_promise.get_future();
-    net::dispatch(*(application.FindGameSessionBy(token)->GetStrand()),
+    net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
         [&res_promise
         , &token
         , &req
-        , &application]{
-        if(!application.IsExistPlayer(token)) {
+        , application]{
+        if(!application->IsExistPlayer(token)) {
             res_promise.set_value(0);
             return;
         }
         std::string directionStr = json_converter::ParsePlayerActionRequest(req.body()).value();
-        application.SetPlayerAction(token, model::STRING_TO_DIRECTION.at(directionStr));
+        application->SetPlayerAction(token, model::STRING_TO_DIRECTION.at(directionStr));
         res_promise.set_value(std::nullopt);
     });
     auto res = res_future.get();
@@ -483,7 +483,7 @@ std::optional<size_t> PlayerActionHandler(
 template <typename Request, typename Send>
 std::optional<size_t> UnknownTokenHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::unauthorized, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -499,7 +499,7 @@ std::optional<size_t> UnknownTokenHandler(
 template <typename Request, typename Send>
 std::optional<size_t> PageNotFoundHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::not_found, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
@@ -523,9 +523,9 @@ bool TimeTickInvalidMsgActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> TimeTickInvalidMsgHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
-    if(!application.IsManualTimeManagement()) {
+    if(!application->IsManualTimeManagement()) {
         return 0;
     }
     StringResponse response(http::status::bad_request, req.version());
@@ -547,12 +547,12 @@ bool TimeTickActivator(const Request& req) {
 template <typename Request, typename Send>
 std::optional<size_t> TimeTickHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
-    if(!application.IsManualTimeManagement()) {
+    if(!application->IsManualTimeManagement()) {
         return 0;
     }
-    for(auto session : application.GetSessions()) {
+    for(auto session : application->GetSessions()) {
         net::dispatch(*(session->GetStrand()),
             [&req
             , session]{
@@ -573,7 +573,7 @@ std::optional<size_t> TimeTickHandler(
 template <typename Request, typename Send>
 std::optional<size_t> InvalidEndpointHandler(
         const Request& req,
-        app::Application& application,
+        std::shared_ptr<app::Application> application,
         Send&& send) {
     StringResponse response(http::status::bad_request, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);

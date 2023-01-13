@@ -12,6 +12,7 @@
 #include <boost/asio/signal_set.hpp>
 #include <filesystem>
 #include <chrono>
+#include <memory>
 
 using namespace std::literals;
 namespace net = boost::asio;
@@ -53,7 +54,10 @@ int main(int argc, const char* argv[]) {
         net::io_context ioc(num_threads);
 
         // 4. Создание application
-        app::Application application(std::move(game), args.tick_period, args.randomize_spawn_points, ioc);
+        auto application = std::make_shared<app::Application>(std::move(game)
+                                                            , args.tick_period
+                                                            , args.randomize_spawn_points
+                                                            , ioc);
 
         // 5. Инициализация настроек сохранения игрового состояния.
         saving::SavingSettings saving_settings;
@@ -62,7 +66,7 @@ int main(int argc, const char* argv[]) {
             if(args.save_state_period != 0) {
                 saving_settings.period = std::chrono::milliseconds(args.save_state_period);
             }
-            application.SetSaveSettings(std::move(saving_settings));
+            application->SetSaveSettings(std::move(saving_settings));
         }        
 
         // 6. Добавляем асинхронный обработчик сигналов SIGINT и SIGTERM

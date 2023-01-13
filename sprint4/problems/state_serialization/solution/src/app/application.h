@@ -4,6 +4,7 @@
 #include "player_tokens.h"
 #include "tagged.h"
 #include "saving_settings.h"
+#include "game_session_serialization.h"
 
 #include <vector>
 #include <memory>
@@ -15,7 +16,7 @@ namespace app {
 
 namespace net = boost::asio;
 
-class Application  : public std::enable_shared_from_this<GameSession>{
+class Application  : public std::enable_shared_from_this<Application>{
 public:
     using AppStrand = net::strand<net::io_context::executor_type>;
 
@@ -76,6 +77,8 @@ private:
     void BoundPlayerAndGameSession(std::shared_ptr<Player> player,
                                     std::shared_ptr<GameSession> session);
     void SaveGameState(const std::chrono::milliseconds& delta_time);
+    std::vector<game_data_ser::GameSessionSerialization> ThreadsafeGetSerializedData();
+    std::vector<game_data_ser::GameSessionSerialization> GetSerializedData();
     void RestoreGame();
 };
 
