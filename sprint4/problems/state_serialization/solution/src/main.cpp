@@ -71,10 +71,11 @@ int main(int argc, const char* argv[]) {
 
         // 6. Добавляем асинхронный обработчик сигналов SIGINT и SIGTERM
         net::signal_set signals(ioc, SIGINT, SIGTERM);
-        signals.async_wait([&ioc](const sys::error_code& ec, [[maybe_unused]] int signal_number) {
+        signals.async_wait([&ioc, application](const sys::error_code& ec, [[maybe_unused]] int signal_number) {
             if (!ec) {
                 BOOST_LOG_TRIVIAL(info) << logware::CreateLogMessage("server exited"sv,
                                                                         logware::ExitCodeLogData(0));
+                application->SaveGame();
                 ioc.stop();
             }
         });

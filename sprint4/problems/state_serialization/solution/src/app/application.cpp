@@ -1,6 +1,7 @@
 #include "application.h"
 
 #include <boost/archive/text_oarchive.hpp>
+#include <boost/thread/future.hpp>
 #include <iostream>
 
 namespace app {
@@ -127,27 +128,26 @@ void Application::SaveGame() {
         boost::archive::text_oarchive oa{ss};
         oa << sessions_ser;
     }
-};
 
-std::vector<game_data_ser::GameSessionSerialization> Application::ThreadsafeGetSerializedData() {
-    using game_data_ser::GameSessionSerialization;
-    std::vector<GameSessionSerialization> sessions_ser;
-    std::ranges::transform(sessions_, std::back_inserter(sessions_ser),
-        [self = shared_from_this()](auto session_ptr)->GameSessionSerialization {
-            return GameSessionSerialization(*session_ptr, self->game_session_to_token_player_pair_.at(session_ptr));
-        }
-    );
-    return sessions_ser;
+    std::cout << "HELLO: " << ss.str() << std::endl;
 };
 
 std::vector<game_data_ser::GameSessionSerialization> Application::GetSerializedData() {
     using game_data_ser::GameSessionSerialization;
     std::vector<GameSessionSerialization> sessions_ser;
-    std::ranges::transform(sessions_, std::back_inserter(sessions_ser),
-        [self = shared_from_this()](auto session_ptr)->GameSessionSerialization {
-            return GameSessionSerialization(*session_ptr, self->game_session_to_token_player_pair_.at(session_ptr));
-        }
-    );
+    for(auto session_ptr : sessions_){
+        boost::promise<GameSessionSerialization> promise;
+        auto res_future = promise.get_future();
+        net::dispatch(*(session_ptr->GetStrand()),
+        [self = shared_from_this()
+        , &promise
+        , session_ptr] {
+            promise.set_value(
+                GameSessionSerialization(*session_ptr, self->game_session_to_token_player_pair_.at(session_ptr))
+            );
+        });
+        sessions_ser.push_back(std::move(res_future.get())); // todo: not parallel solution, need fix. 
+    };
     return sessions_ser;
 };
 
