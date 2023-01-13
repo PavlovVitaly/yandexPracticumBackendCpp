@@ -1,4 +1,8 @@
 #include "application.h"
+#include "game_session_serialization.h"
+
+#include <boost/archive/text_oarchive.hpp>
+#include <iostream>
 
 namespace app {
 
@@ -25,6 +29,7 @@ std::tuple<authentication::Token, Player::Id> Application::JoinGame(
     }
     auth_token_to_session_index_[token] = game_session;
     BoundPlayerAndGameSession(player, game_session);
+    game_session_to_token_player_pair_[game_session][token] = player;
     return std::tie(token, player->GetId());
 };
 
@@ -106,8 +111,25 @@ const std::vector< std::shared_ptr<GameSession> >& Application::GetSessions() {
     return sessions_;
 };
 
-void Application::SaveGameState(const std::chrono::milliseconds& delta_time) {
+void Application::SetSaveSettings(saving::SavingSettings saving_settings) {
+    saving_settings_ = std::move(saving_settings);
+};
 
+void Application::SaveGameState(const std::chrono::milliseconds& delta_time) {
+    SaveGame();
+};
+
+void Application::SaveGame() {
+    using game_data_ser::GameSessionSerialization;
+    std::vector<GameSessionSerialization> sessions_ser;
+    for(auto session : sessions_) {
+        sessions_ser.push_back(GameSessionSerialization(*session, game_session_to_token_player_pair_.at(session)));
+    };
+    std::stringstream ss;
+    {
+        boost::archive::text_oarchive oa{ss};
+        oa << sessions_ser;
+    }
 };
 
 }

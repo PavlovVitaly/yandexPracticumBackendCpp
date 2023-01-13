@@ -2,12 +2,13 @@
 
 #include <string>
 #include <chrono>
+#include <optional>
 
 namespace saving {
 
 struct SavingSettings {
-    std::string state_file_path;
-    std::chrono::milliseconds period;
+    std::optional<std::string> state_file_path;
+    std::optional<std::chrono::milliseconds> period;
 };
 
 }

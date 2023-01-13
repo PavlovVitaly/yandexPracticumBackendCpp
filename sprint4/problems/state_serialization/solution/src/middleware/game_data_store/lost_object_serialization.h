@@ -1,5 +1,6 @@
 #pragma once
 #include "lost_object.h"
+#include "misc_serialization.h"
 
 #include <boost/serialization/vector.hpp>
 

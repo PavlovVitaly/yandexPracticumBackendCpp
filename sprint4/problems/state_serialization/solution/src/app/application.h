@@ -15,7 +15,7 @@ namespace app {
 
 namespace net = boost::asio;
 
-class Application {
+class Application  : public std::enable_shared_from_this<GameSession>{
 public:
     using AppStrand = net::strand<net::io_context::executor_type>;
 
@@ -23,8 +23,7 @@ public:
             game_{std::move(game)},
             tick_period_{tick_period},
             randomize_spawn_points_{randomize_spawn_points},
-            ioc_{ioc},
-            strand_{std::make_shared<AppStrand>(net::make_strand(ioc))} {
+            ioc_{ioc} {
     };
     Application(const Application& other) = delete;
     Application(Application&& other) = delete;
@@ -44,6 +43,8 @@ public:
     std::shared_ptr<GameSession> FindGameSessionBy(const model::Map::Id& id) const noexcept;
     std::shared_ptr<GameSession> FindGameSessionBy(const authentication::Token& token) const noexcept;
     const std::vector< std::shared_ptr<app::GameSession> >& GetSessions();
+    void SetSaveSettings(saving::SavingSettings saving_settings);
+    void SaveGame();
 private:
     using GameSessionIdHasher = util::TaggedHasher<GameSession::Id>;
     using GameSessionIdToIndex = std::unordered_map<GameSession::Id,
@@ -51,7 +52,12 @@ private:
                                                     GameSessionIdHasher>;
     using MapIdHasher = util::TaggedHasher<model::Map::Id>;
     using MapIdToSessionIndex = std::unordered_map<model::Map::Id, size_t, MapIdHasher>;
-    using AuthTokenToSessionIndex = std::unordered_map<authentication::Token, std::shared_ptr<GameSession>, authentication::TokenHasher>;
+    using AuthTokenToSessionIndex = std::unordered_map<authentication::Token, std::shared_ptr<GameSession>,
+                                                        authentication::TokenHasher>;
+    using TokenToPlayer = std::unordered_map< authentication::Token, std::shared_ptr<app::Player>,
+                                    authentication::TokenHasher >;
+    using GameSessionToTokenPlayerPair = std::unordered_map<std::shared_ptr<GameSession>,
+                                                            TokenToPlayer>;
 
     model::Game game_;
     std::chrono::milliseconds tick_period_;
@@ -60,17 +66,17 @@ private:
     GameSessionIdToIndex session_id_to_players_;
     authentication::PlayerTokens player_tokens_;
     net::io_context& ioc_;
-    std::shared_ptr<AppStrand> strand_; // todo: temp implementation.
     std::vector< std::shared_ptr<app::GameSession> > sessions_;
     MapIdToSessionIndex map_id_to_session_index_;
     AuthTokenToSessionIndex auth_token_to_session_index_;
-    saving::SavingSettings saving_settings;
+    saving::SavingSettings saving_settings_;
+    GameSessionToTokenPlayerPair game_session_to_token_player_pair_;
 
     std::shared_ptr<Player> CreatePlayer(const std::string& player_name);
     void BoundPlayerAndGameSession(std::shared_ptr<Player> player,
                                     std::shared_ptr<GameSession> session);
     void SaveGameState(const std::chrono::milliseconds& delta_time);
-
+    void RestoreGame();
 };
 
 }
