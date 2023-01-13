@@ -9,11 +9,13 @@ namespace game_data_ser {
 
 class PlayerSerialization {
 public:
+    PlayerSerialization() = default;
     PlayerSerialization(app::Player& player, const authentication::Token& token):
         id_(*player.GetId()),
         name_(player.GetName()),
         dog_ser_(*player.GetDog().lock()),
         token_(*token) {};
+    PlayerSerialization(PlayerSerialization&& other) = default;        
 
     [[nodiscard]] app::Player Restore() const;
     [[nodiscard]] model::Dog RestoreDog() const;
@@ -24,6 +26,7 @@ public:
         ar& id_;
         ar& name_;
         ar& dog_ser_;
+        ar& token_;
     }
 private:
     size_t id_;

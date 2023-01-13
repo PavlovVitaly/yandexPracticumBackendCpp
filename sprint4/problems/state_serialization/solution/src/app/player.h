@@ -15,7 +15,11 @@ public:
         name_(name) {};
     Player(Id id, std::string name) :
         id_(id),
-        name_(name) {};
+        name_(name) {
+        if(*id_ >= Player::max_id_cont_){
+            Player::max_id_cont_ = *id_ + 1;
+        }
+    };
     Player(const Player& other) = default;
     Player(Player&& other) = default;
     Player& operator = (const Player& other) = default;

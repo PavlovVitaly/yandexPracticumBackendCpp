@@ -17,19 +17,24 @@ public:
     using Handler = std::function<void(const std::chrono::milliseconds& delta)>;
 
     Ticker(std::shared_ptr<Strand> strand, const std::chrono::milliseconds& period, Handler handler):
-        strand_{strand},
-        timer_{*strand_},
         period_{period},
-        handler_{handler}{
+        handler_{handler},
+        strand_{strand},
+        timer_{*strand_}{
+    };
+    Ticker(net::io_context& ioc, const std::chrono::milliseconds& period, Handler handler):
+        period_{period},
+        handler_{handler},
+        timer_(ioc){
     };
     ~Ticker() = default;
 
     void Start();
 private:
-    std::shared_ptr<Strand> strand_;;
-    net::steady_timer timer_;
     std::chrono::milliseconds period_;
     Handler handler_;
+    std::shared_ptr<Strand> strand_;;
+    net::steady_timer timer_;
     std::chrono::time_point<std::chrono::steady_clock> last_tick_;
 
     void ScheduleTick();

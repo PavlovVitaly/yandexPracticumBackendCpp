@@ -9,6 +9,7 @@ namespace game_data_ser {
 
 class DogSerialization {
 public:
+    DogSerialization() = default;
     DogSerialization(const model::Dog& dog):
         id_(*dog.GetId()),
         name_(dog.GetName()),

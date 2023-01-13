@@ -66,7 +66,7 @@ int main(int argc, const char* argv[]) {
             if(args.save_state_period != 0) {
                 saving_settings.period = std::chrono::milliseconds(args.save_state_period);
             }
-            application->SetSaveSettings(std::move(saving_settings));
+            application->RestoreGameState(std::move(saving_settings));
         }        
 
         // 6. Добавляем асинхронный обработчик сигналов SIGINT и SIGTERM

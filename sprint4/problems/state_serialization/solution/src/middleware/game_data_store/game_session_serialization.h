@@ -12,6 +12,7 @@ namespace game_data_ser {
 
 class GameSessionSerialization {
 public:
+    GameSessionSerialization() = default;
     GameSessionSerialization(
         app::GameSession& game_session,
         const std::unordered_map< authentication::Token, std::shared_ptr<app::Player>,
@@ -27,7 +28,6 @@ public:
                 return *id_to_lost_object.second;
             }
         );
-        
     };
 
     [[nodiscard]] model::Map::Id RestoreMapId() const;
@@ -38,7 +38,7 @@ public:
     void serialize(Archive& ar, [[maybe_unused]] const unsigned version) {
         ar& map_id_;
         ar& players_ser_;
-
+        ar& lost_objects_;
     }
 private:
     std::string map_id_;

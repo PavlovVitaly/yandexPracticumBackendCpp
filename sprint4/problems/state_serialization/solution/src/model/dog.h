@@ -27,7 +27,11 @@ public:
     Dog(Id id, std::string name, size_t bag_capacity) :
         id_(id),
         name_(name),
-        bag_capacity_(bag_capacity) {};
+        bag_capacity_(bag_capacity) {
+            if(*id_ >= Dog::max_id_cont_){
+                Dog::max_id_cont_ = *id_ + 1;
+            }
+        };
     Dog(const Dog& other) = default;
     Dog(Dog&& other) = default;
     Dog& operator = (const Dog& other) = default;

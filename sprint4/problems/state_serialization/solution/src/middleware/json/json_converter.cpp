@@ -1,11 +1,15 @@
 #include "json_converter.h"
 #include "model_key_storage.h"
 #include "json_key_storage.h"
+#include "json_model_converter.h"
+
 #include <map>
 #include <sstream>
 #include <boost/json/array.hpp>
 #include <boost/json.hpp>
-#include "json_model_converter.h"
+
+
+#include <iostream>
 
 namespace json_converter{
 
@@ -124,6 +128,9 @@ std::string CreateGameStateResponse(const std::vector< std::shared_ptr<app::Play
     json::object res;
     for(auto player : players) {
         auto dog = player->GetDog().lock();
+        if(!dog) {
+            std::cout << "HELLO: " << player->GetName() << std::endl;
+        }
         std::stringstream ss;
         ss << *(player->GetId());
         json::array pos = {dog->GetPosition().x, dog->GetPosition().y};

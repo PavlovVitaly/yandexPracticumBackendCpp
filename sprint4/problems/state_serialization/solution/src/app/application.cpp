@@ -1,6 +1,7 @@
 #include "application.h"
 
 #include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include <boost/thread/future.hpp>
 #include <iostream>
 
@@ -111,25 +112,49 @@ const std::vector< std::shared_ptr<GameSession> >& Application::GetSessions() {
     return sessions_;
 };
 
-void Application::SetSaveSettings(saving::SavingSettings saving_settings) {
+void Application::RestoreGameState(saving::SavingSettings saving_settings) {
     saving_settings_ = std::move(saving_settings);
+    RestoreGame();
+    if(!(saving_settings_.state_file_path
+        && saving_settings_.period)) {
+        return;
+    }
+    save_game_ticker_ = std::make_shared<time_m::Ticker>(
+        ioc_,
+        saving_settings_.period.value(),
+        [self = shared_from_this()](const std::chrono::milliseconds& delta_time) {
+            self->SaveGame();
+        }
+    );
+    save_game_ticker_->Start();
 };
 
 void Application::SaveGameState(const std::chrono::milliseconds& delta_time) {
-    SaveGame();
+    static int period = saving_settings_.period
+        ? saving_settings_.period.value().count() : 0;
+    if(!saving_settings_.period) {
+        return;
+    }
+    period -= delta_time.count();
+    if(period <= 0) {
+        SaveGame();
+        period = saving_settings_.period.value().count();
+    }
 };
 
 void Application::SaveGame() {
     using game_data_ser::GameSessionSerialization;
+    if(!saving_settings_.state_file_path){
+        return;
+    }
     std::vector<GameSessionSerialization> sessions_ser = GetSerializedData();
 
-    std::stringstream ss;
+    std::fstream output_fstream;
+    output_fstream.open(saving_settings_.state_file_path.value(), std::ios_base::out);
     {
-        boost::archive::text_oarchive oa{ss};
-        oa << sessions_ser;
+        boost::archive::text_oarchive oarchive{output_fstream};
+        oarchive << sessions_ser;
     }
-
-    std::cout << "HELLO: " << ss.str() << std::endl;
 };
 
 std::vector<game_data_ser::GameSessionSerialization> Application::GetSerializedData() {
@@ -149,6 +174,49 @@ std::vector<game_data_ser::GameSessionSerialization> Application::GetSerializedD
         sessions_ser.push_back(std::move(res_future.get())); // todo: not parallel solution, need fix. 
     };
     return sessions_ser;
+};
+
+void Application::RestoreGame() {
+    using game_data_ser::GameSessionSerialization;
+    if(!saving_settings_.state_file_path){
+        return;
+    }
+    std::vector<GameSessionSerialization> sessions_ser;
+
+    std::fstream input_fstream;
+    input_fstream.open(saving_settings_.state_file_path.value(), std::ios_base::in);
+    if(!input_fstream.is_open()) {
+        return;
+    }
+    
+    boost::archive::text_iarchive iarchive{input_fstream};
+    iarchive >> sessions_ser;
+    input_fstream.close();
+    
+    for(auto& item : sessions_ser) {
+        auto game_session = std::make_shared<GameSession>(game_.FindMap(item.RestoreMapId())
+                                                        , tick_period_
+                                                        , game_.GetLootGeneratorConfig()
+                                                        , ioc_);
+        for(auto& lost_obj_ser : item.GetLostObjectsSerialize()) {
+            game_session->AddLostObject(std::move(lost_obj_ser.Restore()));
+        }
+        for(auto& player_ser : item.GetPlayersSerialize()) {
+            auto player = std::make_shared<app::Player>(std::move(player_ser.Restore()));
+            auto dog = std::make_shared<model::Dog>(std::move(player_ser.RestoreDog()));
+            game_session->AddDog(dog);
+            player->SetDog(dog);
+            player->SetGameSession(game_session);
+            auto token = player_ser.RestoreToken();
+            auth_token_to_session_index_[token] = game_session;
+            game_session_to_token_player_pair_[game_session][token] = player;
+            player_tokens_.AddTokenPlayerPair(token, player);
+            auto session_id = game_session->GetId();
+            session_id_to_players_[session_id].push_back(player);
+        }
+        AddGameSession(game_session);
+        game_session->Run();
+    }
 };
 
 }

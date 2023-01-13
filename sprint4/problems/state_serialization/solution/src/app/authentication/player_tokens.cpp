@@ -16,6 +16,10 @@ Token PlayerTokens::AddPlayer(std::shared_ptr<app::Player> player) {
     return token;
 };
 
+void PlayerTokens::AddTokenPlayerPair(Token token, std::shared_ptr<app::Player> player) {
+    tokenToPalyer_[token] = player;
+};
+
 std::shared_ptr<app::Player> PlayerTokens::FindPlayerBy(Token token) {
     if(!tokenToPalyer_.contains(token)){
         return std::shared_ptr<app::Player>();

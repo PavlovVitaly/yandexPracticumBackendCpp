@@ -8,6 +8,7 @@ namespace game_data_ser {
 
 class LostObjectSerialization {
 public:
+    LostObjectSerialization() = default;
     LostObjectSerialization(const model::LostObject& lost_object):
         id_(*lost_object.GetId()),
         type_(lost_object.GetType()),

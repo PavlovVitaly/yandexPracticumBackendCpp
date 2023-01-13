@@ -60,6 +60,8 @@ public:
                                         bool randomize_spawn_points);
     void UpdateGameState(const TimeInterval& delta_time);
     const LostObjects& GetLostObjects();
+    void AddLostObject(model::LostObject lost_object);
+    void AddDog(std::shared_ptr<model::Dog> dog);
     
 private:
     std::shared_ptr<model::Map> map_;

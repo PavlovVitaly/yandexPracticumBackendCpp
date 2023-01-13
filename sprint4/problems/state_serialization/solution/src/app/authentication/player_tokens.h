@@ -24,6 +24,7 @@ public:
     virtual ~PlayerTokens() = default;
 
     Token AddPlayer(std::shared_ptr<app::Player> player);
+    void AddTokenPlayerPair(Token token, std::shared_ptr<app::Player> player);
     std::shared_ptr<app::Player> FindPlayerBy(Token token);
 private:
     std::unordered_map< Token, std::shared_ptr<app::Player>, TokenHasher > tokenToPalyer_;

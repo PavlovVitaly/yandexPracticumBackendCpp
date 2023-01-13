@@ -5,12 +5,14 @@
 #include "tagged.h"
 #include "saving_settings.h"
 #include "game_session_serialization.h"
+#include "ticker.h"
 
 #include <vector>
 #include <memory>
 #include <tuple>
 #include <unordered_map>
 #include <functional>
+#include <fstream>
 
 namespace app {
 
@@ -44,7 +46,7 @@ public:
     std::shared_ptr<GameSession> FindGameSessionBy(const model::Map::Id& id) const noexcept;
     std::shared_ptr<GameSession> FindGameSessionBy(const authentication::Token& token) const noexcept;
     const std::vector< std::shared_ptr<app::GameSession> >& GetSessions();
-    void SetSaveSettings(saving::SavingSettings saving_settings);
+    void RestoreGameState(saving::SavingSettings saving_settings);
     void SaveGame();
 private:
     using GameSessionIdHasher = util::TaggedHasher<GameSession::Id>;
@@ -72,12 +74,12 @@ private:
     AuthTokenToSessionIndex auth_token_to_session_index_;
     saving::SavingSettings saving_settings_;
     GameSessionToTokenPlayerPair game_session_to_token_player_pair_;
+    std::shared_ptr<time_m::Ticker> save_game_ticker_;
 
     std::shared_ptr<Player> CreatePlayer(const std::string& player_name);
     void BoundPlayerAndGameSession(std::shared_ptr<Player> player,
                                     std::shared_ptr<GameSession> session);
     void SaveGameState(const std::chrono::milliseconds& delta_time);
-    std::vector<game_data_ser::GameSessionSerialization> ThreadsafeGetSerializedData();
     std::vector<game_data_ser::GameSessionSerialization> GetSerializedData();
     void RestoreGame();
 };
