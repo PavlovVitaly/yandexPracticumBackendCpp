@@ -75,7 +75,17 @@ bool Application::IsManualTimeManagement() {
 
 void Application::UpdateGameState(const std::chrono::milliseconds& delta_time) {
     for(auto session : sessions_) {
-        session->UpdateGameState(delta_time);
+        boost::promise<void> res_promise;
+        auto res_future = res_promise.get_future();
+        net::dispatch(*(session->GetStrand()),
+            [session
+            , &delta_time
+            , &res_promise] {
+                session->UpdateGameState(delta_time);
+                res_promise.set_value();
+            }
+        );
+        res_future.get();
     }
     SaveGameState(delta_time);
 };
@@ -116,7 +126,7 @@ void Application::RestoreGameState(saving::SavingSettings saving_settings) {
     saving_settings_ = std::move(saving_settings);
     RestoreGame();
     if(!(saving_settings_.state_file_path
-        && saving_settings_.period)) {
+        && saving_settings_.period) || IsManualTimeManagement()) {
         return;
     }
     save_game_ticker_ = std::make_shared<time_m::Ticker>(

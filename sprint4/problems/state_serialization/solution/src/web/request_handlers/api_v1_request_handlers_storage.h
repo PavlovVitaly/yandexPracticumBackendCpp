@@ -305,16 +305,15 @@ std::optional<size_t> GetPlayersListHandler(
         std::shared_ptr<app::Application> application,
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
+    if(!application->IsExistPlayer(token)) {
+        return 0;
+    }
     boost::promise<std::variant<std::string, size_t>> res_promise;
     auto res_future = res_promise.get_future();
     net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
         [&res_promise
         , &token
         , application]{
-        if(!application->IsExistPlayer(token)) {
-            res_promise.set_value(0ul);
-            return;
-        }
         auto players = application->GetPlayersFromGameSession(token);
         res_promise.set_value(json_converter::CreatePlayersListOnMapResponse(players));
     });
@@ -360,16 +359,15 @@ std::optional<size_t> GetGameStateHandler(
         std::shared_ptr<app::Application> application,
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
+    if(!application->IsExistPlayer(token)) {
+        return 0;
+    }
     boost::promise<std::variant<std::string, size_t>> res_promise;
     auto res_future = res_promise.get_future();
     net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
         [&res_promise
         , &token
         , application] {
-        if(!application->IsExistPlayer(token)) {
-            res_promise.set_value(0ul);
-            return;
-        }
         auto players = application->GetPlayersFromGameSession(token);
         res_promise.set_value(json_converter::CreateGameStateResponse(
             players,
@@ -450,6 +448,9 @@ std::optional<size_t> PlayerActionHandler(
         std::shared_ptr<app::Application> application,
         Send&& send) {
     authentication::Token token{GetTokenString(req[http::field::authorization])};
+    if(!application->IsExistPlayer(token)) {
+        return 0;
+    }
     boost::promise<std::optional<size_t>> res_promise;
     auto res_future = res_promise.get_future();
     net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
@@ -457,10 +458,6 @@ std::optional<size_t> PlayerActionHandler(
         , &token
         , &req
         , application]{
-        if(!application->IsExistPlayer(token)) {
-            res_promise.set_value(0);
-            return;
-        }
         std::string directionStr = json_converter::ParsePlayerActionRequest(req.body()).value();
         application->SetPlayerAction(token, model::STRING_TO_DIRECTION.at(directionStr));
         res_promise.set_value(std::nullopt);
@@ -552,14 +549,8 @@ std::optional<size_t> TimeTickHandler(
     if(!application->IsManualTimeManagement()) {
         return 0;
     }
-    for(auto session : application->GetSessions()) {
-        net::dispatch(*(session->GetStrand()),
-            [&req
-            , session]{
-            std::chrono::milliseconds dtime(json_converter::ParseSetDeltaTimeRequest(req.body()).value());
-            session->UpdateGameState(dtime);
-        });
-    }
+    std::chrono::milliseconds dtime(json_converter::ParseSetDeltaTimeRequest(req.body()).value());
+    application->UpdateGameState(dtime);
     StringResponse response(http::status::ok, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
