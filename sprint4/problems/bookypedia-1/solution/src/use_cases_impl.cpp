@@ -52,4 +52,18 @@ std::vector<std::string> UseCasesImpl::GetAllBooks() {
     return list_of_books;
 };
 
+std::vector<std::string> UseCasesImpl::GetBooksBy(const std::string& author_name) {
+    std::vector<std::string> list_of_books;
+    std::ranges::transform(
+        books_.GetBooksBy(author_name),
+        std::back_inserter(list_of_books),
+        [](auto& book) -> std::string {
+            std::stringstream ss;
+            ss << book.GetTitle() << ", " << book.GetPublicationYear();
+            return ss.str();
+        }
+    );
+    return list_of_books;
+};
+
 }  // namespace app

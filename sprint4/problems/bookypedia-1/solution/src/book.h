@@ -49,6 +49,7 @@ class BookRepository {
 public:
     virtual void Save(const Book& book) = 0;
     virtual std::vector<Book> GetAllBooks() = 0;
+    virtual std::vector<Book> GetBooksBy(const std::string& author_name) = 0;
 
 protected:
     ~BookRepository() = default;

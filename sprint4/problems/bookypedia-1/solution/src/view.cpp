@@ -23,14 +23,17 @@ View::View(menu::Menu& menu, app::UseCases& use_cases, std::istream& input, std:
         // ����
          [this](auto& cmd_input) { return AddAuthor(cmd_input); }
     );
-    menu_.AddAction(  //
+    menu_.AddAction(
         "ShowAuthors"s, ""s, "Show authors"s, [this](auto& cmd_input) { return ShowAuthors(); }
     );
-    menu_.AddAction(  //
+    menu_.AddAction(
         "AddBook"s, "title, year"s, "Adds book"s, [this](auto& cmd_input) { return AddBook(cmd_input); }
     );
-    menu_.AddAction(  //
+    menu_.AddAction(
         "ShowBooks"s, ""s, "Show books"s, [this](auto& cmd_input) { return ShowBooks(); }
+    );
+    menu_.AddAction(
+        "ShowAuthorBooks"s, ""s, "Show books with selected author"s, [this](auto& cmd_input) { return ShowAuthorBooks(); }
     );
 }
 
@@ -120,5 +123,44 @@ bool View::ShowBooks() {
     }
     return true;
 }
+
+bool View::ShowAuthorBooks() {
+    try {
+        size_t count = 1;
+        auto list_of_authors = use_cases_.GetAllAuthors();
+        output_ << "Select author:" << std::endl;
+        for(auto& item : list_of_authors) {
+            output_ << count++ << ". " << item << std::endl; 
+        }
+        output_ << "Enter author # or empty line to cancel" << std::endl;
+
+        int index_of_choosed_author{0};
+        do {
+            std::string tmp;
+            std::getline(std::cin, tmp);
+            boost::algorithm::trim(tmp);
+            if(tmp.empty()) {
+                return true;
+            }
+            std::stringstream ss;
+            ss << tmp;
+            ss >> index_of_choosed_author;
+            if((index_of_choosed_author <= 0)
+                or (index_of_choosed_author > list_of_authors.size())) {
+                output_ << "Invalid author. Retry attempt."sv << std::endl;
+            }
+        } while((index_of_choosed_author <= 0)
+                or (index_of_choosed_author > list_of_authors.size()));
+        
+        auto books = use_cases_.GetBooksBy(list_of_authors[index_of_choosed_author - 1]);
+        for(auto& item : books) {
+            output_ << count++ << ". " << item << std::endl; 
+        }
+    } catch (const std::exception&) {
+        output_ << "Failed to show books"sv << std::endl;
+        return false;
+    }
+    return true;
+};
 
 }  // namespace ui

@@ -20,6 +20,7 @@ private:
     bool ShowAuthors();
     bool AddBook(std::istream& cmd_input);
     bool ShowBooks();
+    bool ShowAuthorBooks();
 
     menu::Menu& menu_;
     app::UseCases& use_cases_;

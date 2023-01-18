@@ -18,6 +18,7 @@ public:
     std::optional<std::string> GetAuthorIdBy(const std::string& author_name) override;
     void AddBook(const std::string& author_id, const std::string& title, int year) override;
     std::vector<std::string> GetAllBooks() override;
+    std::vector<std::string> GetBooksBy(const std::string& author_name) override;
 private:
     domain::AuthorRepository& authors_;
     domain::BookRepository& books_;

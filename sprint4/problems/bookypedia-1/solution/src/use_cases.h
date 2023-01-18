@@ -13,6 +13,7 @@ public:
     virtual std::optional<std::string> GetAuthorIdBy(const std::string& author_name) = 0;
     virtual void AddBook(const std::string& author_id, const std::string& title, int year) = 0;
     virtual std::vector<std::string> GetAllBooks() = 0;
+    virtual std::vector<std::string> GetBooksBy(const std::string& author_name) = 0;
 
 protected:
     ~UseCases() = default;
