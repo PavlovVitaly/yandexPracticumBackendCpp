@@ -5,4 +5,4 @@ catch2/3.2.0
 gtest/1.12.1
 
 [generators]
-cmake
+cmake_multi
