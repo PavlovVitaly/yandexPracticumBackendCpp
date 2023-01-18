@@ -42,6 +42,10 @@ bool View::AddAuthor(std::istream& cmd_input) {
         std::string name;
         std::getline(cmd_input, name);
         boost::algorithm::trim(name);
+        if(name.empty()) {
+            output_ << "Failed to add author"sv << std::endl;
+            return true;
+        }
         use_cases_.AddAuthor(std::move(name));
     } catch (const std::exception&) {
         output_ << "Failed to add author"sv << std::endl;
@@ -54,7 +58,7 @@ bool View::ShowAuthors() {
         size_t count = 1;
         auto list_of_authors = use_cases_.GetAllAuthors();
         for(auto& item : list_of_authors) {
-            output_ << count++ << ". " << item << std::endl; 
+            output_ << count++ << " " << item << std::endl; 
         }
     } catch (const std::exception&) {
         output_ << "Failed to show authors"sv << std::endl;
@@ -79,13 +83,12 @@ bool View::AddBook(std::istream& cmd_input) {
         auto id_of_choosed_author = use_cases_.GetAuthorIdBy(list_of_authors[*index_of_choosed_author - 1]);
         if(!id_of_choosed_author){
             output_ << "Author doesn't exist. Failed to add book"sv << std::endl;
-            return false;
+            return true;
         }
         
         use_cases_.AddBook(*id_of_choosed_author, std::move(title), year);
     } catch (const std::exception&) {
         output_ << "Failed to add book"sv << std::endl;
-        return false;
     }
     return true;
 }
@@ -95,7 +98,7 @@ bool View::ShowBooks() {
         size_t count = 1;
         auto list_of_books = use_cases_.GetAllBooks();
         for(auto& item : list_of_books) {
-            output_ << count++ << ". " << item << std::endl; 
+            output_ << count++ << " " << item << std::endl; 
         }
     } catch (const std::exception&) {
         output_ << "Failed to show books"sv << std::endl;
@@ -117,7 +120,6 @@ bool View::ShowAuthorBooks() {
         }
     } catch (const std::exception&) {
         output_ << "Failed to show books"sv << std::endl;
-        return false;
     }
     return true;
 };
