@@ -24,12 +24,12 @@ bookypedia::AppConfig GetConfigFromEnv() {
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char* argv[]) {
     try {
-        //bookypedia::Application app{GetConfigFromEnv()};
+        bookypedia::Application app{GetConfigFromEnv()};
 
         //for testing
-        bookypedia::AppConfig config;
-        config.db_url = "postgres://postgres:Mys3Cr3t@localhost:30432/yandex_test";
-        bookypedia::Application app{config};
+        //bookypedia::AppConfig config;
+        //config.db_url = "postgres://postgres:Mys3Cr3t@localhost:30432/yandex_test";
+        //bookypedia::Application app{config};
         
         app.Run();
     } catch (const std::exception& e) {
