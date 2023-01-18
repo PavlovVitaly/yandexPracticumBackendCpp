@@ -3,6 +3,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #include "menu.h"
 #include "use_cases.h"
@@ -73,10 +74,16 @@ bool View::AddBook(std::istream& cmd_input) {
         for(auto& item : list_of_authors) {
             output_ << count++ << ". " << item << std::endl; 
         }
+        output_ << "Enter author # or empty line to cancel" << std::endl;
 
         int index_of_choosed_author{0};
         do {
-            std::cin >> index_of_choosed_author;
+            std::string tmp;
+            std::getline(std::cin, tmp);
+            boost::algorithm::trim(tmp);
+            std::stringstream ss;
+            ss << tmp;
+            ss >> index_of_choosed_author;
             if((index_of_choosed_author <= 0)
                 or (index_of_choosed_author > list_of_authors.size())) {
                 output_ << "Invalid author. Retry attempt."sv << std::endl;
