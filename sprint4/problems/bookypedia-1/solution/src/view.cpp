@@ -81,6 +81,9 @@ bool View::AddBook(std::istream& cmd_input) {
             std::string tmp;
             std::getline(std::cin, tmp);
             boost::algorithm::trim(tmp);
+            if(tmp.empty()) {
+                return true;
+            }
             std::stringstream ss;
             ss << tmp;
             ss >> index_of_choosed_author;
