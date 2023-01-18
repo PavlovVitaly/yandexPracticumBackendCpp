@@ -57,7 +57,7 @@ ON CONFLICT (id) DO UPDATE SET author_id=$2, title=$3, publication_year=$4;
 std::vector<domain::Book> BookRepositoryImpl::GetAllBooks() {
     std::vector<domain::Book> books;
     pqxx::read_transaction read_transaction_{connection_};
-    auto query_text = "SELECT (id, author_id, title, publication_year) FROM books ORDER BY title ASC"_zv;
+    auto query_text = "SELECT id, author_id, title, publication_year FROM books ORDER BY title ASC"_zv;
     for (auto [id, author_id, title, year] : read_transaction_.query<std::string, std::string, std::string, int>(query_text)) {
         books.emplace_back(
             domain::BookId::FromString(id),
@@ -72,7 +72,7 @@ std::vector<domain::Book> BookRepositoryImpl::GetAllBooks() {
 std::vector<domain::Book> BookRepositoryImpl::GetBooksBy(const std::string& author_name) {
     std::vector<domain::Book> books;
     pqxx::read_transaction read_transaction_{connection_};
-    auto query_text = "SELECT (id, author_id, title, publication_year) FROM books WHERE author_id=(SELECT id FROM authors WHERE name="
+    auto query_text = "SELECT id, author_id, title, publication_year FROM books WHERE author_id=(SELECT id FROM authors WHERE name="
         + read_transaction_.quote(author_name)
         + " LIMIT 1) ORDER BY publication_year ASC, title ASC";
     for (auto [id, author_id, title, year] : read_transaction_.query<std::string, std::string, std::string, int>(query_text)) {
