@@ -100,8 +100,8 @@ bool View::ShowBooks() {
         for(auto& item : list_of_books) {
             output_ << count++ << " " << item << std::endl; 
         }
-    } catch (const std::exception&) {
-        output_ << "Failed to show books"sv << std::endl;
+    } catch (const std::exception& e) {
+        output_ << "Failed to show books "sv << e.what() << std::endl;
     }
     return true;
 }
@@ -118,8 +118,8 @@ bool View::ShowAuthorBooks() {
         for(auto& item : books) {
             output_ << count++ << " " << item << std::endl; 
         }
-    } catch (const std::exception&) {
-        output_ << "Failed to show books"sv << std::endl;
+    } catch (const std::exception& e) {
+        output_ << "Failed to show books"sv << e.what() << std::endl;
     }
     return true;
 };
@@ -140,6 +140,7 @@ std::optional<size_t> View::ChooseAuthor(const std::vector<std::string>& authors
     do {
         std::string tmp;
         std::getline(std::cin, tmp);
+        output_ << "HELLO " << tmp << std::endl;
         boost::algorithm::trim(tmp);
         if(tmp.empty()) {
             return std::nullopt;
