@@ -116,7 +116,7 @@ bool View::ShowAuthorBooks() {
         auto books = use_cases_.GetBooksBy(list_of_authors[*index_of_choosed_author - 1]);
         size_t count = 1;
         for(auto& item : books) {
-            output_ << count++ << ". " << item << std::endl; 
+            output_ << count++ << " " << item << std::endl; 
         }
     } catch (const std::exception&) {
         output_ << "Failed to show books"sv << std::endl;
@@ -129,7 +129,7 @@ std::vector<std::string> View::ShowAuthorsList() {
     size_t count = 1;
     output_ << "Select author:" << std::endl;
     for(auto& item : list_of_authors) {
-        output_ << count++ << ". " << item << std::endl; 
+        output_ << count++ << " " << item << std::endl; 
     }
     output_ << "Enter author # or empty line to cancel" << std::endl;
     return list_of_authors;
