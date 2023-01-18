@@ -71,33 +71,12 @@ bool View::AddBook(std::istream& cmd_input) {
         boost::algorithm::trim(title);
         output_ << std::endl;
         
-        size_t count = 1;
-        auto list_of_authors = use_cases_.GetAllAuthors();
-        output_ << "Select author:" << std::endl;
-        for(auto& item : list_of_authors) {
-            output_ << count++ << ". " << item << std::endl; 
+        auto list_of_authors = ShowAuthorsList();
+        auto index_of_choosed_author = ChooseAuthor(list_of_authors);
+        if(!index_of_choosed_author){
+            return true;
         }
-        output_ << "Enter author # or empty line to cancel" << std::endl;
-
-        int index_of_choosed_author{0};
-        do {
-            std::string tmp;
-            std::getline(std::cin, tmp);
-            boost::algorithm::trim(tmp);
-            if(tmp.empty()) {
-                return true;
-            }
-            std::stringstream ss;
-            ss << tmp;
-            ss >> index_of_choosed_author;
-            if((index_of_choosed_author <= 0)
-                or (index_of_choosed_author > list_of_authors.size())) {
-                output_ << "Invalid author. Retry attempt."sv << std::endl;
-            }
-        } while((index_of_choosed_author <= 0)
-                or (index_of_choosed_author > list_of_authors.size()));
-        
-        auto id_of_choosed_author = use_cases_.GetAuthorIdBy(list_of_authors[index_of_choosed_author - 1]);
+        auto id_of_choosed_author = use_cases_.GetAuthorIdBy(list_of_authors[*index_of_choosed_author - 1]);
         if(!id_of_choosed_author){
             output_ << "Author doesn't exist. Failed to add book"sv << std::endl;
             return false;
@@ -126,33 +105,13 @@ bool View::ShowBooks() {
 
 bool View::ShowAuthorBooks() {
     try {
-        size_t count = 1;
-        auto list_of_authors = use_cases_.GetAllAuthors();
-        output_ << "Select author:" << std::endl;
-        for(auto& item : list_of_authors) {
-            output_ << count++ << ". " << item << std::endl; 
+        auto list_of_authors = ShowAuthorsList();
+        auto index_of_choosed_author = ChooseAuthor(list_of_authors);
+        if(!index_of_choosed_author){
+            return true;
         }
-        output_ << "Enter author # or empty line to cancel" << std::endl;
-
-        int index_of_choosed_author{0};
-        do {
-            std::string tmp;
-            std::getline(std::cin, tmp);
-            boost::algorithm::trim(tmp);
-            if(tmp.empty()) {
-                return true;
-            }
-            std::stringstream ss;
-            ss << tmp;
-            ss >> index_of_choosed_author;
-            if((index_of_choosed_author <= 0)
-                or (index_of_choosed_author > list_of_authors.size())) {
-                output_ << "Invalid author. Retry attempt."sv << std::endl;
-            }
-        } while((index_of_choosed_author <= 0)
-                or (index_of_choosed_author > list_of_authors.size()));
-        
-        auto books = use_cases_.GetBooksBy(list_of_authors[index_of_choosed_author - 1]);
+        auto books = use_cases_.GetBooksBy(list_of_authors[*index_of_choosed_author - 1]);
+        size_t count = 1;
         for(auto& item : books) {
             output_ << count++ << ". " << item << std::endl; 
         }
@@ -161,6 +120,38 @@ bool View::ShowAuthorBooks() {
         return false;
     }
     return true;
+};
+
+std::vector<std::string> View::ShowAuthorsList() {
+    auto list_of_authors = use_cases_.GetAllAuthors();
+    size_t count = 1;
+    output_ << "Select author:" << std::endl;
+    for(auto& item : list_of_authors) {
+        output_ << count++ << ". " << item << std::endl; 
+    }
+    output_ << "Enter author # or empty line to cancel" << std::endl;
+    return list_of_authors;
+};
+
+std::optional<size_t> View::ChooseAuthor(const std::vector<std::string>& authors) {
+    int index_of_choosed_author{0};
+    do {
+        std::string tmp;
+        std::getline(std::cin, tmp);
+        boost::algorithm::trim(tmp);
+        if(tmp.empty()) {
+            return std::nullopt;
+        }
+        std::stringstream ss;
+        ss << tmp;
+        ss >> index_of_choosed_author;
+        if((index_of_choosed_author <= 0)
+            or (index_of_choosed_author > authors.size())) {
+            output_ << "Invalid author. Retry attempt."sv << std::endl;
+        }
+    } while((index_of_choosed_author <= 0)
+            or (index_of_choosed_author > authors.size()));
+    return index_of_choosed_author;
 };
 
 }  // namespace ui
