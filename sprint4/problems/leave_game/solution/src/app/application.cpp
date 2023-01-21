@@ -115,7 +115,8 @@ void Application::AddGameSession(std::shared_ptr<GameSession> session) {
         }
     }
     session->SetHandlerForRemoveInactiveDogsEvent(
-        [self = shared_from_this()](const GameSession::Id& session_id) {
+        [self = shared_from_this()](const GameSession::Id& session_id, const std::vector<model::DogRecord>& dog_records) {
+            self->CommitGameRecords(dog_records);
             self->RemoveInactivePlayers(session_id);
         }
     );
@@ -260,6 +261,10 @@ std::shared_ptr<Player> Application::FindPlayerBy(authentication::Token token) {
         }
     }
     return std::shared_ptr<Player>();
+};
+
+void Application::CommitGameRecords(const std::vector<model::DogRecord>& dog_record) {
+
 };
 
 void Application::RemoveInactivePlayers(const GameSession::Id& session_id) {

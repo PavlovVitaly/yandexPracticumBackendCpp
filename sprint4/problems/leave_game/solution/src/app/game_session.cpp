@@ -2,6 +2,9 @@
 #include "random_generators.h"
 #include "support_types.h"
 
+#include <ranges>
+#include <algorithm>
+
 namespace app {
 
 void GameSession::Run() {
@@ -170,18 +173,40 @@ void GameSession::AddDog(std::shared_ptr<model::Dog> dog) {
     dogs_[dog->GetId()] = dog;
 };
 
-void GameSession::SetHandlerForRemoveInactiveDogsEvent(std::function<void(const GameSession::Id&)> handler) {
+void GameSession::SetHandlerForRemoveInactiveDogsEvent(
+    std::function<void(const GameSession::Id&,
+    const std::vector<model::DogRecord>&)> handler) {
     remove_inactive_dogs_handler = handler;
 };
 
 void GameSession::RemoveInactiveDogs() {
-    auto count = std::erase_if(dogs_, [](const auto& item) {
+    std::vector<model::DogRecord> dog_records;
+
+    std::ranges::copy(
+        dogs_
+        | std::views::values
+        | std::views::filter(
+            [](auto dog) {
+                return static_cast<bool>(dog->GetPlayTime());
+            }
+        ) | std::views::transform(
+            [](auto dog)->model::DogRecord {
+                return model::DogRecord{dog->GetName(),
+                                        dog->GetScore(),
+                                        dog->GetPlayTime().value().count()};
+            }
+        ), std::back_inserter(dog_records)
+    );
+
+    if(dog_records.empty()) {
+        return;
+    }
+
+    std::erase_if(dogs_, [](const auto& item) {
         auto const& [dog_id, dog] = item;
         return dog->GetPlayTime();
     });
-    if(count) {
-        remove_inactive_dogs_handler(id_);
-    }
+    remove_inactive_dogs_handler(id_, std::move(dog_records));
 };
 
 }

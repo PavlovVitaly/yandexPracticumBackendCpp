@@ -23,8 +23,9 @@ public:
     using Id = util::Tagged<size_t, Dog>;
     using BagType = std::vector< std::shared_ptr<LostObject> >;
 
-    static void SetMaxInactiveTime(const std::chrono::seconds& max_inactive_time);
+    static void SetMaxInactiveTime(size_t max_inactive_time_in_seconds);
 
+    Dog() = default;
     Dog(std::string name, size_t bag_capacity) : 
         id_(Id{Dog::max_id_cont_++}),
         name_(name),

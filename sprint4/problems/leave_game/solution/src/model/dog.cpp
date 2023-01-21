@@ -3,8 +3,8 @@
 
 namespace model {
 
-void Dog::SetMaxInactiveTime(const std::chrono::seconds& max_inactive_time) {
-    max_inactive_time_ = max_inactive_time;
+void Dog::SetMaxInactiveTime(size_t max_inactive_time_in_seconds) {
+    max_inactive_time_ = std::chrono::seconds(max_inactive_time_in_seconds);
 };
 
 const Dog::Id& Dog::GetId() const {

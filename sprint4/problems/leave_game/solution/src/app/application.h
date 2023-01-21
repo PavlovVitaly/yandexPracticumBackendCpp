@@ -1,7 +1,7 @@
 #pragma once
 #include "game.h"
 #include "player.h"
-#include "player_tokens.h"
+#include "token_generator.h"
 #include "tagged.h"
 #include "saving_settings.h"
 #include "game_session_serialization.h"
@@ -94,6 +94,7 @@ private:
 
     std::shared_ptr<app::Player> FindPlayerBy(authentication::Token token);
     void RemoveInactivePlayers(const GameSession::Id& session_id);
+    void CommitGameRecords(const std::vector<model::DogRecord>& dog_record);
 };
 
 }

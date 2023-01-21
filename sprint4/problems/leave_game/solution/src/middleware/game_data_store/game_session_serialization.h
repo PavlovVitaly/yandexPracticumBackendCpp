@@ -2,7 +2,7 @@
 #include "game_session.h"
 #include "player_serialization.h"
 #include "map.h"
-#include "player_tokens.h"
+#include "token_generator.h"
 #include "lost_object_serialization.h"
 
 #include <vector>

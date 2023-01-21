@@ -1,6 +1,6 @@
 #pragma once
 #include "application.h"
-#include "player_tokens.h"
+#include "token_generator.h"
 #include "json_converter.h"
 #include "request_handlers_utils.h"
 #include "api_url_storage.h"

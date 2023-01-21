@@ -62,7 +62,7 @@ add_executable(game_server
 	src/middleware/game_data_store/game_session_serialization.cpp
 	src/web/request_handlers/request_handler.cpp
 	src/web/server/http_server.cpp
-	src/app/authentication/player_tokens.cpp
+	src/app/authentication/token_generator.cpp
 	src/app/application.cpp
 	src/app/game_session.cpp
 	src/app/player.cpp

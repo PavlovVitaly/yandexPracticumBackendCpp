@@ -1,7 +1,7 @@
 #pragma once
 #include "player.h"
 #include "dog_serialization.h"
-#include "player_tokens.h"
+#include "token_generator.h"
 
 #include <boost/serialization/vector.hpp>
 
