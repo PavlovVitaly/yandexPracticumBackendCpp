@@ -6,6 +6,8 @@
 #include "saving_settings.h"
 #include "game_session_serialization.h"
 #include "ticker.h"
+#include "connection_pool.h"
+#include "database_connection_settings.h"
 
 #include <vector>
 #include <memory>
@@ -23,11 +25,22 @@ class Application  : public std::enable_shared_from_this<Application>{
 public:
     using AppStrand = net::strand<net::io_context::executor_type>;
 
-    Application(model::Game game, size_t tick_period, bool randomize_spawn_points, net::io_context& ioc) :
+    Application(
+        model::Game game,
+        size_t tick_period,
+        bool randomize_spawn_points, 
+        net::io_context& ioc,
+        const db_conn_settings::DbConnectrioSettings& db_settings) :
             game_{std::move(game)},
             tick_period_{tick_period},
             randomize_spawn_points_{randomize_spawn_points},
             ioc_{ioc} {
+        db_conn_pool_ = std::make_shared<db::ConnectionPool>(
+            db_settings.number_of_connection,
+            [db_url = std::move(db_settings.db_url)]() {
+                return std::make_shared<pqxx::connection>(db_url);
+            }
+        );
     };
     Application(const Application& other) = delete;
     Application(Application&& other) = delete;
@@ -84,6 +97,7 @@ private:
     net::io_context& ioc_;
     saving::SavingSettings saving_settings_;
     std::shared_ptr<time_m::Ticker> save_game_ticker_;
+    std::shared_ptr<db::ConnectionPool> db_conn_pool_;
 
     std::shared_ptr<Player> CreatePlayer(const std::string& player_name);
     void BoundPlayerAndGameSession(std::shared_ptr<Player> player,
@@ -94,7 +108,7 @@ private:
 
     std::shared_ptr<app::Player> FindPlayerBy(authentication::Token token);
     void RemoveInactivePlayers(const GameSession::Id& session_id);
-    void CommitGameRecords(const std::vector<model::DogRecord>& dog_record);
+    void CommitGameRecords(const std::vector<domen::PlayerRecord>& dog_record);
 };
 
 }

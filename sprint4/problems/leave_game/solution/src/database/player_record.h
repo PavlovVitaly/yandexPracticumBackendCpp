@@ -1,0 +1,44 @@
+#pragma once
+
+#include <string>
+
+namespace domen {
+
+struct PlayerRecord {
+public:
+    PlayerRecord(std::string name, size_t score, int64_t play_time)
+        : name_(std::move(name))
+        , score_(score)
+        , play_time_(play_time) {
+
+    };
+
+    const std::string& GetName() const noexcept {
+        return name_;
+    }
+
+    size_t GetScore() const noexcept {
+        return score_;
+    }
+
+    int64_t GetPlayTime() const noexcept {
+        return play_time_;
+    }
+
+private:
+    std::string name_{};
+    size_t score_{0};
+    int64_t play_time_{0};
+};
+
+
+class PlayerRecordRepository {
+public:
+    virtual void Save(const PlayerRecord& player_record) = 0;
+    virtual std::vector<PlayerRecord> GetRecordsTable() = 0;
+
+protected:
+    ~PlayerRecordRepository() = default;
+};
+
+}

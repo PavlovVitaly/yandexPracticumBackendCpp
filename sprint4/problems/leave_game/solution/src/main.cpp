@@ -6,6 +6,9 @@
 #include "application.h"
 #include "program_options.h"
 #include "saving_settings.h"
+#include "database_invariants.h"
+#include "database_exceptions.h"
+#include "database_connection_settings.h"
 
 #include <boost/asio/io_context.hpp>
 #include <thread>
@@ -40,26 +43,33 @@ int main(int argc, const char* argv[]) {
     // 0. Инициализация логгера.
     logware::InitLogger();
     prog_opt::Args args = prog_opt::ParseCommandLine(argc, argv);
+    const unsigned num_threads = std::thread::hardware_concurrency();
     try {
-        // 1. Загружаем карту из файла и построить модель игры
+        // 1. Прочитать из переменной среды url базы данных
+        const char* db_url = std::getenv(db_invariants::DB_URL.c_str());
+        if (!db_url) {
+            throw db_ex::EmptyDatabaseUrl();
+        }
+        db_conn_settings::DbConnectrioSettings db_settings{num_threads, std::move(db_url)};
+        
+        // 2. Загружаем карту из файла и построить модель игры
         model::Game game = json_loader::LoadGame(args.config_file);
-        //model::Game game = json_loader::LoadGame("../../data/config.json"); // for debug
 
-        // 2. Устанавливаем путь до статического контента.
+        // 3. Устанавливаем путь до статического контента.
         fs::path sc_root_path{args.www_root};
         //fs::path sc_root_path{"../../static"};
 
-        // 3. Инициализируем io_context
-        const unsigned num_threads = std::thread::hardware_concurrency();
+        // 4. Инициализируем io_context
         net::io_context ioc(num_threads);
 
-        // 4. Создание application
+        // 5. Создание application
         auto application = std::make_shared<app::Application>(std::move(game)
                                                             , args.tick_period
                                                             , args.randomize_spawn_points
-                                                            , ioc);
+                                                            , ioc
+                                                            , std::move(db_settings));
 
-        // 5. Инициализация настроек сохранения игрового состояния.
+        // 6. Инициализация настроек сохранения игрового состояния.
         saving::SavingSettings saving_settings;
         if(!args.state_file.empty()) {
             saving_settings.state_file_path = args.state_file;
@@ -69,7 +79,7 @@ int main(int argc, const char* argv[]) {
             application->RestoreGameState(std::move(saving_settings));
         }        
 
-        // 6. Добавляем асинхронный обработчик сигналов SIGINT и SIGTERM
+        // 7. Добавляем асинхронный обработчик сигналов SIGINT и SIGTERM
         net::signal_set signals(ioc, SIGINT, SIGTERM);
         signals.async_wait([&ioc, application](const sys::error_code& ec, [[maybe_unused]] int signal_number) {
             if (!ec) {
@@ -80,10 +90,10 @@ int main(int argc, const char* argv[]) {
             }
         });
 
-        // 7. Создаём обработчик HTTP-запросов и связываем его с моделью игры, задаем путь до статического контента.
+        // 8. Создаём обработчик HTTP-запросов и связываем его с моделью игры, задаем путь до статического контента.
         http_handler::RequestHandler handler{application, sc_root_path};
 
-        // 8. Запустить обработчик HTTP-запросов, делегируя их обработчику запросов
+        // 9. Запустить обработчик HTTP-запросов, делегируя их обработчику запросов
         const auto address = net::ip::make_address("0.0.0.0");
         constexpr net::ip::port_type port = 8080;
         http_server::ServeHttp(ioc, {address, port}, [&handler](auto&& req, auto&& send) {
@@ -94,7 +104,7 @@ int main(int argc, const char* argv[]) {
         BOOST_LOG_TRIVIAL(info) << logware::CreateLogMessage("Server has started..."sv,
                                                                 logware::ServerAddressLogData(address.to_string(), port));
 
-        // 9. Запускаем обработку асинхронных операций
+        // 10. Запускаем обработку асинхронных операций
         RunWorkers(std::max(1u, num_threads), [&ioc] {
             ioc.run();
         });

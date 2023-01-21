@@ -175,12 +175,12 @@ void GameSession::AddDog(std::shared_ptr<model::Dog> dog) {
 
 void GameSession::SetHandlerForRemoveInactiveDogsEvent(
     std::function<void(const GameSession::Id&,
-    const std::vector<model::DogRecord>&)> handler) {
+    const std::vector<domen::PlayerRecord>&)> handler) {
     remove_inactive_dogs_handler = handler;
 };
 
 void GameSession::RemoveInactiveDogs() {
-    std::vector<model::DogRecord> dog_records;
+    std::vector<domen::PlayerRecord> player_records;
 
     std::ranges::copy(
         dogs_
@@ -190,15 +190,15 @@ void GameSession::RemoveInactiveDogs() {
                 return static_cast<bool>(dog->GetPlayTime());
             }
         ) | std::views::transform(
-            [](auto dog)->model::DogRecord {
-                return model::DogRecord{dog->GetName(),
+            [](auto dog)->domen::PlayerRecord {
+                return domen::PlayerRecord{dog->GetName(),
                                         dog->GetScore(),
                                         dog->GetPlayTime().value().count()};
             }
-        ), std::back_inserter(dog_records)
+        ), std::back_inserter(player_records)
     );
 
-    if(dog_records.empty()) {
+    if(player_records.empty()) {
         return;
     }
 
@@ -206,7 +206,7 @@ void GameSession::RemoveInactiveDogs() {
         auto const& [dog_id, dog] = item;
         return dog->GetPlayTime();
     });
-    remove_inactive_dogs_handler(id_, std::move(dog_records));
+    remove_inactive_dogs_handler(id_, std::move(player_records));
 };
 
 }
