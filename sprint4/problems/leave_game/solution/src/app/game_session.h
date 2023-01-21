@@ -63,7 +63,7 @@ public:
     const LostObjects& GetLostObjects();
     void AddLostObject(model::LostObject lost_object);
     void AddDog(std::shared_ptr<model::Dog> dog);
-    void SetHandlerForRemoveInactiveDogsEvent(std::function<void(GameSession::Id)> handler);
+    void SetHandlerForRemoveInactiveDogsEvent(std::function<void(const GameSession::Id&)> handler);
     
 private:
     std::shared_ptr<model::Map> map_;
@@ -76,7 +76,7 @@ private:
     TimeInterval period_of_update_game_state_;
     std::shared_ptr<time_m::Ticker> update_game_state_ticker_;
     std::shared_ptr<time_m::Ticker> generate_loot_ticker_;
-    std::function<void(GameSession::Id)> remove_inactive_dogs_handler;
+    std::function<void(const GameSession::Id&)> remove_inactive_dogs_handler;
     
     void GenerateLoot(const TimeInterval& delta_time);
     void CreateLostObject();

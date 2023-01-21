@@ -170,11 +170,18 @@ void GameSession::AddDog(std::shared_ptr<model::Dog> dog) {
     dogs_[dog->GetId()] = dog;
 };
 
+void GameSession::SetHandlerForRemoveInactiveDogsEvent(std::function<void(const GameSession::Id&)> handler) {
+    remove_inactive_dogs_handler = handler;
+};
+
 void GameSession::RemoveInactiveDogs() {
-    std::erase_if(dogs_, [](const auto& item) {
+    auto count = std::erase_if(dogs_, [](const auto& item) {
         auto const& [dog_id, dog] = item;
         return dog->GetPlayTime();
     });
+    if(count) {
+        remove_inactive_dogs_handler(id_);
+    }
 };
 
 }

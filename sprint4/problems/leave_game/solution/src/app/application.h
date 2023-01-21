@@ -46,7 +46,6 @@ public:
     void AddGameSession(std::shared_ptr<GameSession> session);
     std::shared_ptr<GameSession> FindGameSessionBy(const model::Map::Id& id) const noexcept;
     std::shared_ptr<GameSession> FindGameSessionBy(const authentication::Token& token) const noexcept;
-    const std::vector< std::shared_ptr<app::GameSession> >& GetSessions();
     void RestoreGameState(saving::SavingSettings saving_settings);
     void SaveGame();
 private:
@@ -55,13 +54,15 @@ private:
                                     std::shared_ptr<Player>,
                                     PlayerIdHasher>;
     
+    using GameSessionIdHasher = util::TaggedHasher<GameSession::Id>;
+    using GameSessions = std::unordered_map<GameSession::Id,
+                                    std::shared_ptr<GameSession>,
+                                    GameSessionIdHasher>;
+    
     using MapIdHasher = util::TaggedHasher<model::Map::Id>;
-    using MapIdToSessionIndex = std::unordered_map<model::Map::Id, size_t, MapIdHasher>;
+    using MapIdToSessionIndex = std::unordered_map<model::Map::Id, GameSession::Id, MapIdHasher>;
     using AuthTokenToSessionIndex = std::unordered_map<authentication::Token, std::shared_ptr<GameSession>,
                                                         authentication::TokenHasher>;
-
-
-    using GameSessionIdHasher = util::TaggedHasher<GameSession::Id>;
 
     using GameSessionIdToTokenPlayerPairs = std::unordered_map<GameSession::Id,
                                                     std::unordered_map< authentication::Token,
@@ -74,9 +75,8 @@ private:
 
     authentication::TokenGenerator token_generator_;
 
-    std::vector< std::shared_ptr<app::GameSession> > sessions_;
+    GameSessions sessions_;
     MapIdToSessionIndex map_id_to_session_index_;
-    AuthTokenToSessionIndex auth_token_to_session_index_;
 
     model::Game game_;
     std::chrono::milliseconds tick_period_;
@@ -93,7 +93,7 @@ private:
     void RestoreGame();
 
     std::shared_ptr<app::Player> FindPlayerBy(authentication::Token token);
-    void RemoveInactivePlayers(GameSession::Id session_id);
+    void RemoveInactivePlayers(const GameSession::Id& session_id);
 };
 
 }

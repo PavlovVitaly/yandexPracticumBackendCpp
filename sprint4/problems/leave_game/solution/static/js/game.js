@@ -7,10 +7,15 @@ let playerId;
 let camera;
 let lootTypesLoaded = false;
 const lootRotationSpeed = 0.0025;
+const lootWaiwingSpeed = 0.005;
 
 let pos_arr = [];
 
 const objLoader = new THREE.OBJLoader();
+
+function goToRecords() {
+  window.location.replace('/hall_of_fame.html');
+}
 
 function loadLootType(loot, then) {
   if(loot['type'] == 'obj') {
@@ -59,6 +64,15 @@ function vec_mul(v1, s1) {
 function vec_div(v1, s1) {
   return vec_mul(v1, 1/s1);
 }
+function vec3_diff(v1,v2) {
+  return [v1[0]-v2[0],v1[1]-v2[1],v1[2]-v2[2]];
+}
+function vec3_sum(v1,v2) {
+  return [v1[0]+v2[0],v1[1]+v2[1],v1[2]+v2[2]];
+}
+function vec3_mul(v1,s2) {
+  return [v1[0]*s2,v1[1]*s2,v1[2]*s2];
+}
 
 const roadEdge = new THREE.MeshPhongMaterial({color: '#AAA'});
 const roadH = 0.55;
@@ -71,6 +85,30 @@ function convDirection(d) {
     D:0
   };
   return dict[d];
+}
+
+//var i = 0;
+
+class MovingObject {
+  constructor(speed_coeff, init_pos) {
+    this.pos = init_pos;
+    this.speed_coeff = speed_coeff;
+    this.target_pos = init_pos;
+    //this.idx = i++;
+  }
+
+  setTarget(target_pos) {
+    this.target_pos = target_pos;
+  }
+
+  doMove(time) {
+    const vec = vec3_diff(this.target_pos, this.pos);
+    //const vec_len = vec3_len(vec);
+    //const speed = vec3_len(vec) * this.speed_coeff;
+    const c_move = Math.min(this.speed_coeff * time, 1);
+    this.pos = vec3_sum(this.pos, vec3_mul(vec, c_move));
+    //if (this.idx==1 && c_move != 0) console.log(this.pos[2]);
+  }
 }
 
 class KeyState {
@@ -120,10 +158,12 @@ class GameState {
     this.posUpdateInterval = 5;
     this.playersUpdateInterval = 50;
     this.keyState = new KeyState();
-    this.currentState = {};
+    this.currentState = {players: {}};
     this.requestInstantUpdate = false;
     this.cameraPos = undefined;
     this.lostObjects = {};
+    this.disappearingLoot = {};
+    this.player_elems = {};
 
     this._updateState(function() {
       self.stateLoaded = true;
@@ -147,7 +187,6 @@ class GameState {
       this.requestInstantUpdate = false;
       this._updateState(function() {
         self._applyDesiredState();
-        //self._instantApplyState();
       });
     }
 
@@ -211,14 +250,16 @@ class GameState {
     const nextTime = performance.now();
     const delta = performance.now() - this.stateTime;
     const speedMul = 1/1000;
+    this.stateTime = nextTime;
 
     Object.entries(this.desiredState['players']).forEach(([id, playerPos]) => {
-      this.currentState.players[id].pos = vec_sum(this.currentState.players[id].pos, vec_mul(
-          this.currentState['players'][id].speed, delta * speedMul
-      ));
+      const player = this.currentState.players[id];
+      player.pos = vec_sum(player.pos, vec_mul(player.speed, delta * speedMul));
+
+      this._movePlayersLoot(player, delta);
     });
 
-    this.stateTime = nextTime;
+    this._processDisappearingLoot();
   }
 
   _syncPlayers(then) {
@@ -233,6 +274,9 @@ class GameState {
     }).done(function(x){
       self._updatePlayersList(x);
       then();
+    }).fail(function(xhr, status, err) {
+      if (err!='Unauthorized') return;
+      goToRecords();
     })
 
     this.playersSuncInProgress = false;
@@ -269,19 +313,31 @@ class GameState {
     let self = this;
     self.players[id] = {
       object: addActor(this.scene),
-      data: playerData
+      playerData: playerData,
+      data: self.currentState.players[id] !== undefined ? self.currentState.players[id].data : undefined
     };
+    self._addPlayerElem(id, playerData['name']);
   }
 
   _deletePlayer(id) {
     let self = this;
+    this.scene.remove(self.players[id].object.object);
+    if (self.players[id].data !== undefined) {
+      const bag = self.players[id].data.bag;
+      for(var key in bag) {
+        this.scene.remove(bag[key].object);
+      }
+    }
     delete self.players[id];
+    self._delPlayerElem(id);
   }
 
   _movePlayerTo(id, playerPos) {
     let self = this;
     moveActor(self.players[id].object, playerPos['pos'][0], playerPos['pos'][1], playerPos['converted_dir']);
-    setAnimation(self.players[id].object, playerPos['speed'][0] != 0 || playerPos['speed'][1] != 0)
+    setAnimation(self.players[id].object, playerPos['speed'][0] != 0 || playerPos['speed'][1] != 0);
+
+    //self._moveLootForPlayer(self.players[id]);
 
     if(id == playerId) {
       moveCameraTo(playerPos.pos[0], playerPos.pos[1]);
@@ -314,22 +370,26 @@ class GameState {
     //self._moveCamera();
   }
 
-  _showLostObjects(objects) {
+  _createLoot(data) {
+    const object = THREE.SkeletonUtils.clone(loadedLootTypes[data['type']]['obj']);
+    this.scene.add(object);
+    return {
+      object:object,
+      data:data
+    };
+  }
+
+  _processLostObjects(objects) {
     let self = this;
     const nowTime = performance.now();
 
     Object.entries(objects).forEach(([id, data]) => {
       if (self.lostObjects[id] === undefined) {
-        const object = THREE.SkeletonUtils.clone(loadedLootTypes[data['type']]['obj']);
-        self.lostObjects[id] = {
-          object:object,
-          data:data
-        };
-        //paint(object, getRandomColor(127));
-        self.scene.add(object);
+        self.lostObjects[id] = self._createLoot(data);
       }
-      self.lostObjects[id].object.position.set(data["pos"][0] + .5, roadH + 0.2, data["pos"][1] + .5);
-      self.lostObjects[id].object.rotation.z = lootRotationSpeed * nowTime;
+      const posY = roadH + 0.3 + 0.2 * Math.sin(nowTime * lootWaiwingSpeed);
+      self.lostObjects[id].object.position.set(data["pos"][0] + .5, posY, data["pos"][1] + .5);
+      //self.lostObjects[id].object.position.y = lootRotationSpeed * nowTime;
     });
 
     const objsToDelete = [];
@@ -340,9 +400,13 @@ class GameState {
       }
     }
 
+    const abandonedLoot = {};
     for(var id of objsToDelete) {
+      abandonedLoot[id] = self.lostObjects[id];
       delete self.lostObjects[id];
     }
+
+    return abandonedLoot;
   }
 
   _updateState(then) {
@@ -350,8 +414,8 @@ class GameState {
     $.get({
       url: '/api/v1/game/state',
       dataType: 'json',
-      beforeSend: function (xhr) {
-        xhr.setRequestHeader ("Authorization", "Bearer " + Cookies.get('authToken'));
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Authorization", "Bearer " + Cookies.get('authToken'));
       }
     }).done(function(x){
       self.desiredState = x;
@@ -415,12 +479,37 @@ class GameState {
     new_pos.speed = vec_mul(dest_dir, 1/dest_t);
   }
 
+  _setPlayerScore(id, score) {
+    if (this.player_elems[id] == undefined) return;
+
+    this.player_elems[id].score.text(score);
+  }
+
+  _addPlayerElem(id, name) {
+    const obj = new Object();
+    this.player_elems[id] = obj;
+    obj.elem = $('<div>');
+    obj.elem.text(name + ': ');
+    obj.score = $('<span>');
+    obj.elem.append(obj.score);
+
+    const tab = $('#score_table');
+    tab.append(obj.elem);
+  }
+
+  _delPlayerElem(id) {
+    this.player_elems[id].elem.remove();
+    delete this.player_elems[id];
+  }
+
   _applyDesiredState() {
     let self = this;
 
     const old_players = this.currentState['players'] !== undefined ? this.currentState['players'] : {};
     const new_players = {};
     const new_update_time = performance.now();
+
+    const abandonedLoot = self._processLostObjects(this.desiredState['lostObjects']);
 
     const lastP = Object.keys(this.desiredState.players)[Object.keys(this.desiredState.players).length - 1];
     const p = this.desiredState.players[lastP].pos;
@@ -430,10 +519,12 @@ class GameState {
       new_players[id] = playerPos;
 
       const newDir = convDirection(playerPos['dir']);
+      self._setPlayerScore(id, playerPos['score']);
 
       if (old_players[id] !== undefined) {
         self._interpolateRotation(old_players[id], new_players[id]);
         self._interpolatePosition(old_players[id], new_players[id], new_update_time - this.currentState['update_time']);
+        new_players[id].data = old_players[id].data;
       }
       else {
         const newDir = convDirection(playerPos['dir']);
@@ -441,6 +532,12 @@ class GameState {
         new_players[id]['desired_dir'] = newDir;
         new_players[id]['base_dir'] = newDir;
         new_players[id]['dir_time'] = performance.now();
+        new_players[id].data = {
+          "bag": {}
+        };
+
+        if (self.players[id]!==undefined)
+          self.players[id].data = new_players[id].data;
       }
     });
 
@@ -448,7 +545,95 @@ class GameState {
     this.currentState['players'] = new_players;
     this.currentState['lostObjects'] = this.desiredState['lostObjects'];
 
-    self._showLostObjects(this.currentState['lostObjects']);
+    self._attachLootToPlayers(abandonedLoot);
+  }
+
+  _movePlayersLoot(player, delta) {
+    const self = this;
+
+    const lootSpacing = 0.4;
+    const baseShiftX = -Math.sin(player.converted_dir) * lootSpacing;
+    const baseShiftY = -Math.cos(player.converted_dir) * lootSpacing;
+    const shiftZ = 0.2 * Math.sin(this.stateTime * lootWaiwingSpeed);
+
+    for(var i in player.bag) {
+      const elem = player.bag[i];
+      const id = elem['id'];
+      if (player.data.bag[id] === undefined)
+        continue;
+
+      const mover = player.data.bag[id].mover;
+      mover.setTarget([player.pos[0] + 0.5 + baseShiftX*(i), 1.5 + shiftZ, player.pos[1] + 0.5 + baseShiftY*(i)]);
+      mover.doMove(delta);
+      player.data.bag[id].object.position.set(mover.pos[0],mover.pos[1],mover.pos[2]);
+    }
+  }
+
+  _attachLootToPlayers(abandonedLoot) {
+    const self = this;
+
+    Object.entries(this.currentState['players']).forEach(([id, player]) => {
+      const all_ids = new Set();
+      for(var elem of player.bag) {
+        var id = elem['id'];
+        all_ids.add(id);
+        if (player.data.bag[id] === undefined) {
+          if (abandonedLoot[id] !== undefined) {
+            player.data.bag[id] = abandonedLoot[id];
+            delete abandonedLoot[id];
+          }
+          else {
+            player.data.bag[id] = self._createLoot(elem);
+            player.data.bag[id].object.position.set(player.pos[0] + 0.5, roadH + 0.3, player.pos[1] + 0.5);
+          }
+          const pos = player.data.bag[id].object.position;
+          player.data.bag[id].mover = new MovingObject(0.01, [pos.x, pos.y, pos.z]);
+        }
+      }
+
+      const ids_to_delete = [];
+      for (var id in player.data.bag) {
+        if (!all_ids.has(parseInt(id))) {
+          ids_to_delete.push(id);
+        }
+      }
+      for (var id of ids_to_delete) {
+        self._dropLoot(id, player.data.bag[id]);
+        delete player.data.bag[id];
+      }
+    });
+
+    for(var id in abandonedLoot) {
+      self._dropLoot(id, abandonedLoot[id]);
+    }
+  }
+
+  _dropLoot(id, lootObj) {
+    lootObj.disappearingTime = this.stateTime;
+    lootObj.prevTime = lootObj.disappearingTime;
+    this.disappearingLoot[id] = lootObj;
+  }
+
+  _processDisappearingLoot() {
+    const max_time = 1000;
+    const ids_to_delete = [];
+    for(var id in this.disappearingLoot) {
+      const obj = this.disappearingLoot[id];
+      const time_total = this.stateTime - obj.disappearingTime;
+      if(time_total >= max_time) {
+        ids_to_delete.push(id);
+        continue;
+      }
+      const time_prev = obj.prevTime - obj.disappearingTime;
+      obj.object.position.y += (time_total * time_total - time_prev * time_prev)/200000;
+      obj.prevTime = this.stateTime;
+    }
+
+    for(var id of ids_to_delete) {
+      const obj = this.disappearingLoot[id];
+      this.scene.remove(obj.object);
+      delete this.disappearingLoot[id];
+    }
   }
 }
 
@@ -511,6 +696,31 @@ function makeBuildings(scene) {
     const mesh = new THREE.Mesh(geo, materials);
     mesh.position.set(x+w/2., buildingH/2., y+h/2.);
     scene.add(mesh);
+  }
+}
+
+function makeOffices(scene) {
+  const buildingH = 3;
+  const material = new THREE.MeshPhongMaterial({color: '#afa'});
+  const cone_material = new THREE.MeshPhongMaterial({color: '#faa'});
+
+  for(const b of map['offices']) {
+    const x = b['x'] + b['offsetX'];
+    const y = b['y'] + b['offsetY'];
+    const w = 1;
+    const h = 1;
+    const z = 3;
+    const geo = new THREE.BoxBufferGeometry(w, z , h);
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.position.set(x+w/2., z/2., y+h/2.);
+    scene.add(mesh);
+
+    const geometry = new THREE.ConeGeometry( .2, 1, 32 );
+    //const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    const cone = new THREE.Mesh( geometry, cone_material );
+    cone.position.set(x+w/2., z/2. + 2, y+h/2.);
+    cone.rotation.set(0, 0, Math.PI);
+    scene.add( cone );
   }
 }
 
@@ -672,7 +882,7 @@ function gameserverMain() {
     const basementMat = new THREE.MeshPhongMaterial({color: '#8AC'});
     const mesh = new THREE.Mesh(basementGeo, basementMat);
     mesh.receiveShadow = true;
-    mesh.position.set(w/2., basementH/2., h/2.);
+    mesh.position.set(xmin + w/2., basementH/2., ymin + h/2.);
     scene.add(mesh);
   }
 
@@ -687,6 +897,7 @@ function gameserverMain() {
 
   makeRoads(scene);
   makeBuildings(scene);
+  makeOffices(scene);
 
   {
     const color = 0xFFFFFF;

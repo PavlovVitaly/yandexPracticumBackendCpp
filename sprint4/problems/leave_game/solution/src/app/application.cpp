@@ -30,7 +30,6 @@ std::tuple<authentication::Token, Player::Id> Application::JoinGame(
         AddGameSession(game_session);
         game_session->Run();
     }
-    auth_token_to_session_index_[token] = game_session;
     BoundPlayerAndGameSession(player, game_session);
     session_id_to_token_player_pairs_[game_session->GetId()][token] = player->GetId();
     return std::tie(token, player->GetId());
@@ -60,8 +59,8 @@ std::vector< std::shared_ptr<Player> > Application::GetPlayersFromGameSession(co
     std::ranges::transform(
         session_id_to_token_player_pairs_.at(session_id),
         std::back_inserter(players),
-        [self = shared_from_this()](auto& token_to_player_id) {
-            auto& [token, player_id] = token_to_player_id;
+        [self = shared_from_this()](const auto& token_to_player_id) {
+            const auto& [token, player_id] = token_to_player_id;
             if(self->players_.contains(player_id)) {
                 return self->players_[player_id];
             }
@@ -87,7 +86,8 @@ bool Application::IsManualTimeManagement() {
 };
 
 void Application::UpdateGameState(const std::chrono::milliseconds& delta_time) {
-    for(auto session : sessions_) {
+    for(auto item : sessions_) {
+        auto [session_id, session] = item;
         boost::promise<void> res_promise;
         auto res_future = res_promise.get_future();
         net::dispatch(*(session->GetStrand()),
@@ -104,17 +104,21 @@ void Application::UpdateGameState(const std::chrono::milliseconds& delta_time) {
 };
 
 void Application::AddGameSession(std::shared_ptr<GameSession> session) {
-    const size_t index = sessions_.size();
-    if (auto [it, inserted] = map_id_to_session_index_.emplace(session->GetMap()->GetId(), index); !inserted) {
+    if (auto [it, inserted] = map_id_to_session_index_.emplace(session->GetMap()->GetId(), session->GetId()); !inserted) {
         throw std::invalid_argument("Game session with map id "s + *(session->GetMap()->GetId()) + " already exists"s);
     } else {
         try {
-            sessions_.push_back(session);
+            sessions_[session->GetId()] = session;
         } catch (...) {
             map_id_to_session_index_.erase(it);
             throw;
         }
     }
+    session->SetHandlerForRemoveInactiveDogsEvent(
+        [self = shared_from_this()](const GameSession::Id& session_id) {
+            self->RemoveInactivePlayers(session_id);
+        }
+    );
 };
 
 std::shared_ptr<GameSession> Application::FindGameSessionBy(const model::Map::Id& id) const noexcept {
@@ -125,20 +129,12 @@ std::shared_ptr<GameSession> Application::FindGameSessionBy(const model::Map::Id
 };
 
 std::shared_ptr<GameSession> Application::FindGameSessionBy(const authentication::Token& token) const noexcept {
-    if (auto it = auth_token_to_session_index_.find(token); it != auth_token_to_session_index_.end()) {
-        return it->second;
+    for(const auto& [session_id, token_to_player] : session_id_to_token_player_pairs_) {
+        if(token_to_player.contains(token)) {
+            return sessions_.at(session_id);
+        }
     }
-    //todo:
-    //for(const auto& [session_id, token_to_player] : session_id_to_token_player_pairs_) {
-    //    if(token_to_player.contains(token)) {
-    //        return players_.at(token_to_player.at(token));
-    //    }
-    //}
     return nullptr;
-};
-
-const std::vector< std::shared_ptr<GameSession> >& Application::GetSessions() {
-    return sessions_;
 };
 
 void Application::RestoreGameState(saving::SavingSettings saving_settings) {
@@ -189,27 +185,28 @@ void Application::SaveGame() {
 std::vector<game_data_ser::GameSessionSerialization> Application::GetSerializedData() {
     using game_data_ser::GameSessionSerialization;
     std::vector<GameSessionSerialization> sessions_ser;
-    for(auto session_ptr : sessions_){
+    for(auto& item : sessions_){
+        auto [session_id, session] = item;
         boost::promise<GameSessionSerialization> promise;
         auto res_future = promise.get_future();
-        net::dispatch(*(session_ptr->GetStrand()),
+        net::dispatch(*(session->GetStrand()),
         [self = shared_from_this()
         , &promise
-        , session_ptr] {
+        , session] {
             std::unordered_map< authentication::Token,
                                 std::shared_ptr<app::Player>,
                                 authentication::TokenHasher > token_to_palyer;
             std::ranges::transform(
-                self->session_id_to_token_player_pairs_.at(session_ptr->GetId()),
+                self->session_id_to_token_player_pairs_.at(session->GetId()),
                 std::inserter(token_to_palyer, token_to_palyer.end()),
                 [self = self->shared_from_this()](const auto& token_to_player_id) {
-                    auto& [token, player_id] = token_to_player_id;
+                    const auto& [token, player_id] = token_to_player_id;
                     auto player = self->players_.at(player_id);
                     return std::make_pair(token, player);
                 }
             );
             promise.set_value(
-                GameSessionSerialization(*session_ptr, std::move(token_to_palyer))
+                GameSessionSerialization(*session, std::move(token_to_palyer))
             );
         });
         sessions_ser.push_back(std::move(res_future.get())); // todo: not parallel solution, need fix. 
@@ -249,7 +246,6 @@ void Application::RestoreGame() {
             player->SetDog(dog);
             player->SetGameSession(game_session);
             auto token = player_ser.RestoreToken();
-            auth_token_to_session_index_[token] = game_session;
             session_id_to_token_player_pairs_[game_session->GetId()][token] = player->GetId();
         }
         AddGameSession(game_session);
@@ -266,23 +262,30 @@ std::shared_ptr<Player> Application::FindPlayerBy(authentication::Token token) {
     return std::shared_ptr<Player>();
 };
 
-void Application::RemoveInactivePlayers(GameSession::Id session_id) {
-    std::unordered_set<Player::Id, PlayerIdHasher> player_ids_for_delete;
+void Application::RemoveInactivePlayers(const GameSession::Id& session_id) {
+    std::unordered_map< authentication::Token,
+                        Player::Id,
+                        authentication::TokenHasher > token_to_player_id_for_delete;
     
-    //std::ranges::copy(
-    //    session_id_to_player_ids_.at(session_id) 
-    //    | std::ranges::views::filter(
-    //        [self = shared_from_this()](const auto& player_id) {
-    //            return self->players_.at(player_id)->GetDog().expired();
-    //        }
-    //    ), std::inserter(player_ids_for_delete, player_ids_for_delete.end())
-    //);
-//
-    //std::erase_if(session_id_to_player_ids_.at(session_id),
-    //    [&player_ids_for_delete](const auto& player_id) {
-    //    return player_ids_for_delete.contains(player_id);
-    //});
+    std::ranges::copy(
+        session_id_to_token_player_pairs_.at(session_id) 
+        | std::ranges::views::filter(
+            [self = shared_from_this()](const auto& item) {
+                const auto& [token, player_id] = item;
+                return self->players_.at(player_id)->GetDog().expired();
+            }
+        ), std::inserter(token_to_player_id_for_delete, token_to_player_id_for_delete.end())
+    );
 
+    std::erase_if(session_id_to_token_player_pairs_.at(session_id),
+        [&token_to_player_id_for_delete](const auto& item) {
+            const auto& [token, player_id] = item;
+            return token_to_player_id_for_delete.contains(token);
+    });
+
+    for(const auto& [token, player_id] : token_to_player_id_for_delete) {
+        players_.erase(player_id);
+    }
 };
 
 }
