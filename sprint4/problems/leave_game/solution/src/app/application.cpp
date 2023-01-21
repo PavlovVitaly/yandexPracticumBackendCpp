@@ -32,8 +32,7 @@ std::tuple<authentication::Token, Player::Id> Application::JoinGame(
     }
     auth_token_to_session_index_[token] = game_session;
     BoundPlayerAndGameSession(player, game_session);
-    game_session_to_token_[game_session].insert(token);
-    AddTokenPlayerPair(token, player->GetId());
+    session_id_to_token_player_pairs_[game_session->GetId()][token] = player->GetId();
     return std::tie(token, player->GetId());
 };
 
@@ -45,7 +44,6 @@ std::shared_ptr<Player> Application::CreatePlayer(const std::string& player_name
 
 void Application::BoundPlayerAndGameSession(std::shared_ptr<Player> player,
                                     std::shared_ptr<GameSession> session){
-    session_id_to_player_ids_[session->GetId()].insert(player->GetId());
     player->SetGameSession(session);
     auto dog = session->CreateDog(player->GetName(), *(session->GetMap()), randomize_spawn_points_);
     player->SetDog(dog);
@@ -55,14 +53,15 @@ std::vector< std::shared_ptr<Player> > Application::GetPlayersFromGameSession(co
     static const std::vector< std::shared_ptr<Player> > emptyPlayerList;
     auto player = FindPlayerBy(token);
     auto session_id = player->GetGameSessionId();
-    if(!session_id_to_player_ids_.contains(session_id)) {
+    if(!session_id_to_token_player_pairs_.contains(session_id)) {
         return emptyPlayerList;
     }
     std::vector< std::shared_ptr<Player> > players;
     std::ranges::transform(
-        session_id_to_player_ids_[session_id],
+        session_id_to_token_player_pairs_.at(session_id),
         std::back_inserter(players),
-        [self = shared_from_this()](auto& player_id) {
+        [self = shared_from_this()](auto& token_to_player_id) {
+            auto& [token, player_id] = token_to_player_id;
             if(self->players_.contains(player_id)) {
                 return self->players_[player_id];
             }
@@ -129,6 +128,12 @@ std::shared_ptr<GameSession> Application::FindGameSessionBy(const authentication
     if (auto it = auth_token_to_session_index_.find(token); it != auth_token_to_session_index_.end()) {
         return it->second;
     }
+    //todo:
+    //for(const auto& [session_id, token_to_player] : session_id_to_token_player_pairs_) {
+    //    if(token_to_player.contains(token)) {
+    //        return players_.at(token_to_player.at(token));
+    //    }
+    //}
     return nullptr;
 };
 
@@ -195,10 +200,11 @@ std::vector<game_data_ser::GameSessionSerialization> Application::GetSerializedD
                                 std::shared_ptr<app::Player>,
                                 authentication::TokenHasher > token_to_palyer;
             std::ranges::transform(
-                self->game_session_to_token_.at(session_ptr),
+                self->session_id_to_token_player_pairs_.at(session_ptr->GetId()),
                 std::inserter(token_to_palyer, token_to_palyer.end()),
-                [self = self->shared_from_this()](const auto& token) {
-                    auto player = self->FindPlayerBy(token);
+                [self = self->shared_from_this()](const auto& token_to_player_id) {
+                    auto& [token, player_id] = token_to_player_id;
+                    auto player = self->players_.at(player_id);
                     return std::make_pair(token, player);
                 }
             );
@@ -244,46 +250,38 @@ void Application::RestoreGame() {
             player->SetGameSession(game_session);
             auto token = player_ser.RestoreToken();
             auth_token_to_session_index_[token] = game_session;
-            game_session_to_token_[game_session].insert(token);
-            AddTokenPlayerPair(token, player->GetId());
-            auto session_id = game_session->GetId();
-            session_id_to_player_ids_[session_id].insert(player->GetId());
+            session_id_to_token_player_pairs_[game_session->GetId()][token] = player->GetId();
         }
         AddGameSession(game_session);
         game_session->Run();
     }
 };
 
-void Application::AddTokenPlayerPair(const authentication::Token& token, const Player::Id& player_id) {
-    tokenToPalyer_[token] = player_id;
-};
-
-std::shared_ptr<app::Player> Application::FindPlayerBy(authentication::Token token) {
-    if(!tokenToPalyer_.contains(token)){
-        return std::shared_ptr<app::Player>();
+std::shared_ptr<Player> Application::FindPlayerBy(authentication::Token token) {
+    for(const auto& [session_id, token_to_player] : session_id_to_token_player_pairs_) {
+        if(token_to_player.contains(token)) {
+            return players_.at(token_to_player.at(token));
+        }
     }
-    if(!players_.contains(tokenToPalyer_[token])){
-        return std::shared_ptr<app::Player>();
-    }
-    return players_[tokenToPalyer_[token]];
+    return std::shared_ptr<Player>();
 };
 
 void Application::RemoveInactivePlayers(GameSession::Id session_id) {
     std::unordered_set<Player::Id, PlayerIdHasher> player_ids_for_delete;
     
-    std::ranges::copy(
-        session_id_to_player_ids_.at(session_id) 
-        | std::ranges::views::filter(
-            [self = shared_from_this()](const auto& player_id) {
-                return self->players_.at(player_id)->GetDog().expired();
-            }
-        ), std::inserter(player_ids_for_delete, player_ids_for_delete.end())
-    );
-
-    std::erase_if(session_id_to_player_ids_.at(session_id),
-        [&player_ids_for_delete](const auto& player_id) {
-        return player_ids_for_delete.contains(player_id);
-    });
+    //std::ranges::copy(
+    //    session_id_to_player_ids_.at(session_id) 
+    //    | std::ranges::views::filter(
+    //        [self = shared_from_this()](const auto& player_id) {
+    //            return self->players_.at(player_id)->GetDog().expired();
+    //        }
+    //    ), std::inserter(player_ids_for_delete, player_ids_for_delete.end())
+    //);
+//
+    //std::erase_if(session_id_to_player_ids_.at(session_id),
+    //    [&player_ids_for_delete](const auto& player_id) {
+    //    return player_ids_for_delete.contains(player_id);
+    //});
 
 };
 

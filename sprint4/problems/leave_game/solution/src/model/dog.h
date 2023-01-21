@@ -18,7 +18,7 @@ namespace model {
 class Dog {
     enum class DogState {ACTIVE, INACTIVE};
     inline static size_t max_id_cont_{0};
-    inline static std::chrono::seconds max_inactive_time_{5};//{ONE_MINUTE_IN_SECONDS};
+    inline static std::chrono::seconds max_inactive_time_{ONE_MINUTE_IN_SECONDS};
 public:
     using Id = util::Tagged<size_t, Dog>;
     using BagType = std::vector< std::shared_ptr<LostObject> >;

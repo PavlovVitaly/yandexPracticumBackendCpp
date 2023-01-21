@@ -54,22 +54,23 @@ private:
     using Players = std::unordered_map<Player::Id,
                                     std::shared_ptr<Player>,
                                     PlayerIdHasher>;
-    using GameSessionIdHasher = util::TaggedHasher<GameSession::Id>;
-    using GameSessionIdToPlayerIds = std::unordered_map<GameSession::Id,
-                                                    std::unordered_set< Player::Id, PlayerIdHasher>,
-                                                    GameSessionIdHasher>;
+    
     using MapIdHasher = util::TaggedHasher<model::Map::Id>;
     using MapIdToSessionIndex = std::unordered_map<model::Map::Id, size_t, MapIdHasher>;
     using AuthTokenToSessionIndex = std::unordered_map<authentication::Token, std::shared_ptr<GameSession>,
                                                         authentication::TokenHasher>;
-    using GameSessionToPlayerTokens = std::unordered_map<std::shared_ptr<GameSession>,
-                                                        std::unordered_set<authentication::Token,
-                                                                    authentication::TokenHasher>>;
+
+
+    using GameSessionIdHasher = util::TaggedHasher<GameSession::Id>;
+
+    using GameSessionIdToTokenPlayerPairs = std::unordered_map<GameSession::Id,
+                                                    std::unordered_map< authentication::Token,
+                                                                        Player::Id,
+                                                                        authentication::TokenHasher >,
+                                                    GameSessionIdHasher>;
 
     Players players_;
-    std::unordered_map< authentication::Token, Player::Id, authentication::TokenHasher > tokenToPalyer_;
-    GameSessionIdToPlayerIds session_id_to_player_ids_;
-    GameSessionToPlayerTokens game_session_to_token_;
+    GameSessionIdToTokenPlayerPairs session_id_to_token_player_pairs_;
 
     authentication::TokenGenerator token_generator_;
 
@@ -91,7 +92,6 @@ private:
     std::vector<game_data_ser::GameSessionSerialization> GetSerializedData();
     void RestoreGame();
 
-    void AddTokenPlayerPair(const authentication::Token&, const Player::Id& player_id);
     std::shared_ptr<app::Player> FindPlayerBy(authentication::Token token);
     void RemoveInactivePlayers(GameSession::Id session_id);
 };

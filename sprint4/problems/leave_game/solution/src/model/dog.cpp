@@ -147,8 +147,9 @@ const collision_detector::Gatherer& Dog::AsGatherer() const {
 void Dog::UpdateDogState(const Velocity& new_velocity) {
     if(new_velocity != Velocity{0, 0}) {
         state_ = DogState::ACTIVE;
+    } else {
+        state_ = DogState::INACTIVE;
     }
-    state_ = DogState::INACTIVE;
 };
 
 }
