@@ -9,7 +9,7 @@ conan_basic_setup(TARGETS)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(Boost 1.78.0 REQUIRED)
+find_package(Boost 1.81.0 REQUIRED)
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif()
@@ -93,6 +93,8 @@ target_link_libraries(game_server PRIVATE
 	game_model_lib
 )
 
+#SET(GCC_COVERAGE_LINK_FLAGS    "-lboost_url")
+
 include(CTest)
 include(${CONAN_BUILD_DIRS_CATCH2}/Catch.cmake)
 
@@ -120,6 +122,4 @@ target_include_directories(state_serialization_tests PRIVATE
 target_link_libraries(state_serialization_tests CONAN_PKG::catch2 collision_detection_lib)
 catch_discover_tests(state_serialization_tests)
 
-# Boost.Beast будет использовать std::string_view вместо boost::string_view
-add_compile_definitions(BOOST_BEAST_USE_STD_STRING_VIEW)
 add_compile_definitions(BOOST_THREAD_PROVIDES_FUTURE)

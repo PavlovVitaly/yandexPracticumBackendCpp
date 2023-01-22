@@ -4,14 +4,18 @@
 #include "json_converter.h"
 #include "request_handlers_utils.h"
 #include "api_url_storage.h"
+#include "url_invariants.h"
 
 #include <vector>
 #include <optional>
 #include <variant>
 #include <chrono>
 #include <unordered_set>
+#include <sstream>
 #include <boost/beast/http.hpp>
 #include <boost/thread/future.hpp>
+#include <boost/url/url_view.hpp>
+#include <boost/url/parse.hpp>
 
 #include <iostream>
 
@@ -51,7 +55,7 @@ const std::string NO_CACHE_CONTROL = "no-cache";
 
 template <typename Request>
 bool BadRequestActivator(const Request& req) {
-    auto url = SplitUrl(req.target());
+    auto url = SplitUrl(boost::urls::url_view{req.target()}.path());
     return !url.empty() &&
             url[0] == "api" &&
             (
@@ -582,7 +586,7 @@ std::optional<size_t> InvalidEndpointHandler(
 
 template <typename Request>
 bool GetRecordsActivator(const Request& req) {
-    return IsEqualUrls(api_urls::GET_RECORDS_API, req.target());
+    return IsEqualUrls(api_urls::GET_RECORDS_API, boost::urls::url_view{req.target()}.path());
 }
 
 template <typename Request, typename Send>
@@ -590,13 +594,17 @@ std::optional<size_t> GetRecordsHandler(
         const Request& req,
         std::shared_ptr<app::Application> application,
         Send&& send) {
-    //if(!application->IsExistPlayer(token)) {
-    //    return 0;
-    //}
-    //std::cout << "HELLO: " << req["start"] << std::endl;
-
     std::optional<size_t> offset;
     std::optional<size_t> limit;
+    auto params = boost::urls::url_view{req.target()}.params();
+
+    if(params.contains(url_invariants::URL_PARAMETER_START)){
+        offset = GetValueFromUrlParameter<size_t>(params, url_invariants::URL_PARAMETER_START);
+    }
+
+    if(params.contains(url_invariants::URL_PARAMETER_MAX_ITEMS)){
+        limit = GetValueFromUrlParameter<size_t>(params, url_invariants::URL_PARAMETER_MAX_ITEMS);
+    }
     
     auto records_table = application->GetRecordsTable(offset, limit);
     if(!records_table) {
