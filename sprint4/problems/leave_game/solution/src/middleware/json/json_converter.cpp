@@ -8,9 +8,6 @@
 #include <boost/json/array.hpp>
 #include <boost/json.hpp>
 
-
-#include <iostream>
-
 namespace json_converter{
 
 namespace json = boost::json;
@@ -145,7 +142,7 @@ std::string CreateGameStateResponse(const std::vector< std::shared_ptr<app::Play
         palyers_obj[ss.str()] = jv_item;
     }
     res[json_keys::RESPONSE_PLAYERS] = palyers_obj;
-    
+
     for(auto [id, lost_object] : lost_objects) {
         std::stringstream ss;
         ss << *id;

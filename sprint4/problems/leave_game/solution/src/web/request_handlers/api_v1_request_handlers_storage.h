@@ -17,8 +17,6 @@
 #include <boost/url/url_view.hpp>
 #include <boost/url/parse.hpp>
 
-#include <iostream>
-
 namespace rh_storage{
 
 namespace net = boost::asio;
@@ -370,16 +368,21 @@ std::optional<size_t> GetGameStateHandler(
     if(!application->IsExistPlayer(token)) {
         return 0;
     }
+    
     boost::promise<std::variant<std::string, size_t>> res_promise;
     auto res_future = res_promise.get_future();
     net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
         [&res_promise
         , &token
         , application] {
-        auto players = application->GetPlayersFromGameSession(token);
+        auto session = application->FindGameSessionBy(token);
+        if(!session) {
+            res_promise.set_value(0ul);
+            return;    
+        }
         res_promise.set_value(json_converter::CreateGameStateResponse(
-            players,
-            application->FindGameSessionBy(token)->GetLostObjects())
+            application->GetPlayersFromGameSession(token),
+            session->GetLostObjects())
         );
     });
     auto res = res_future.get();
