@@ -13,6 +13,8 @@
 #include <boost/beast/http.hpp>
 #include <boost/thread/future.hpp>
 
+#include <iostream>
+
 namespace rh_storage{
 
 namespace net = boost::asio;
@@ -591,6 +593,8 @@ std::optional<size_t> GetRecordsHandler(
     //if(!application->IsExistPlayer(token)) {
     //    return 0;
     //}
+    //std::cout << "HELLO: " << req["start"] << std::endl;
+
     std::optional<size_t> offset;
     std::optional<size_t> limit;
     
