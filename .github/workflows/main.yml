@@ -582,7 +582,7 @@ jobs:
         run: |
           cd sprint4/problems/leave_game/solution
           docker build -t leave_game .
-          echo "COMMAND_RUN=docker run --rm --entrypoint /app/game_server --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 --config-file /app/data/config.json --www-root /app/static/ -e GAME_DB_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/records leave_game" >> $GITHUB_ENV
+          echo "COMMAND_RUN=docker run --rm --entrypoint /app/game_server --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 -e GAME_DB_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/records leave_game --config-file /app/data/config.json --www-root /app/static/" >> $GITHUB_ENV
 
       - name: run tests sprint4 leave_game
         run: pytest --junitxml=${GITHUB_WORKSPACE}/leave_game.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_leave_game.py
