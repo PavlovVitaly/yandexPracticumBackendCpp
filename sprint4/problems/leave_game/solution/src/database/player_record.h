@@ -1,10 +1,11 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
-namespace domen {
+namespace domain {
 
-struct PlayerRecord {
+class PlayerRecord {
 public:
     PlayerRecord(std::string name, size_t score, int64_t play_time)
         : name_(std::move(name))

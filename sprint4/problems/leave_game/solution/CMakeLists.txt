@@ -66,6 +66,8 @@ add_executable(game_server
 	src/app/application.cpp
 	src/app/game_session.cpp
 	src/app/player.cpp
+	src/database/postgres.cpp
+	src/database/use_cases_impl.cpp
 )
 target_include_directories(game_server PRIVATE
 	src

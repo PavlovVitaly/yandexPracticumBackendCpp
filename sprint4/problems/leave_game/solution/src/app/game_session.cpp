@@ -175,12 +175,12 @@ void GameSession::AddDog(std::shared_ptr<model::Dog> dog) {
 
 void GameSession::SetHandlerForRemoveInactiveDogsEvent(
     std::function<void(const GameSession::Id&,
-    const std::vector<domen::PlayerRecord>&)> handler) {
+    const std::vector<domain::PlayerRecord>&)> handler) {
     remove_inactive_dogs_handler = handler;
 };
 
 void GameSession::RemoveInactiveDogs() {
-    std::vector<domen::PlayerRecord> player_records;
+    std::vector<domain::PlayerRecord> player_records;
 
     std::ranges::copy(
         dogs_
@@ -190,8 +190,8 @@ void GameSession::RemoveInactiveDogs() {
                 return static_cast<bool>(dog->GetPlayTime());
             }
         ) | std::views::transform(
-            [](auto dog)->domen::PlayerRecord {
-                return domen::PlayerRecord{dog->GetName(),
+            [](auto dog)->domain::PlayerRecord {
+                return domain::PlayerRecord{dog->GetName(),
                                         dog->GetScore(),
                                         dog->GetPlayTime().value().count()};
             }
