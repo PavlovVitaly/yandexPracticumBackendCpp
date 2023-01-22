@@ -35,8 +35,8 @@ private:
 
 class PlayerRecordRepository {
 public:
-    virtual void Save(const PlayerRecord& player_record) = 0;
-    virtual std::vector<PlayerRecord> GetRecordsTable() = 0;
+    virtual void Save(const std::vector<domain::PlayerRecord>& player_records) = 0;
+    virtual std::vector<PlayerRecord> GetRecordsTable(size_t offset, size_t limit) = 0;
 
 protected:
     ~PlayerRecordRepository() = default;

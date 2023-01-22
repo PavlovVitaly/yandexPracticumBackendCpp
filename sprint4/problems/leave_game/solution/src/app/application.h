@@ -105,7 +105,7 @@ private:
 
     std::shared_ptr<app::Player> FindPlayerBy(authentication::Token token);
     void RemoveInactivePlayers(const GameSession::Id& session_id);
-    void CommitGameRecords(const std::vector<domain::PlayerRecord>& dog_records);
+    void CommitGameRecords(const std::vector<domain::PlayerRecord>& player_records);
 };
 
 }

@@ -1,6 +1,6 @@
 #pragma once
-#include "player_records_fwd.h"
 #include "use_cases.h"
+#include "database_invariants.h"
 
 namespace db_storage {
 
@@ -10,8 +10,11 @@ public:
         : player_records_{player_records} {
     }
 
-    void AddPlayerRecord(const domain::PlayerRecord& player_record) override;
-    std::vector<domain::PlayerRecord> GetRecordsTable() override;
+    void AddPlayerRecords(const std::vector<domain::PlayerRecord>& player_records) override;
+    std::vector<domain::PlayerRecord> GetRecordsTable(
+        size_t offset = db_invariants::DEFAULT_OFFSET,
+        size_t limit = db_invariants::DEFAULT_LIMIT
+    ) override;
 
 private:
     domain::PlayerRecordRepository& player_records_;

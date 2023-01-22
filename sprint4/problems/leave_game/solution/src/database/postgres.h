@@ -14,8 +14,8 @@ public:
         : connection_pool_(connection_pool) {
     };
 
-    void Save(const domain::PlayerRecord& player_record) override;
-    std::vector<domain::PlayerRecord> GetRecordsTable() override;
+    void Save(const std::vector<domain::PlayerRecord>& player_records) override;
+    std::vector<domain::PlayerRecord> GetRecordsTable(size_t offset, size_t limit) override;
 
 private:
     db::ConnectionPool& connection_pool_;

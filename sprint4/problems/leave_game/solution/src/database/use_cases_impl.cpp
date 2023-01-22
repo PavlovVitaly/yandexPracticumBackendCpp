@@ -7,12 +7,12 @@
 
 namespace db_storage {
 
-void UseCasesImpl::AddPlayerRecord(const domain::PlayerRecord& player_record) {
-    player_records_.Save(player_record);
+void UseCasesImpl::AddPlayerRecords(const std::vector<domain::PlayerRecord>& player_records) {
+    player_records_.Save(player_records);
 };
 
-std::vector<domain::PlayerRecord> UseCasesImpl::GetRecordsTable() {
-    return player_records_.GetRecordsTable();
+std::vector<domain::PlayerRecord> UseCasesImpl::GetRecordsTable(size_t offset, size_t limit) {
+    return player_records_.GetRecordsTable(offset, limit);
 };
 
 }  // namespace app
