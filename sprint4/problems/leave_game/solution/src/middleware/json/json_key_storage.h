@@ -15,6 +15,9 @@ const std::string RESPONSE_DOG_BAG                  = "bag";
 const std::string RESPONSE_BAG_ITEM_ID              = "id";
 const std::string RESPONSE_BAG_ITEM_TYPE            = "type";
 const std::string RESPONSE_PLAYER_SCORE             = "score";
+const std::string RESPONSE_PLAYER_RECORD_NAME       = "name";
+const std::string RESPONSE_PLAYER_RECORD_SCORE      = "score";
+const std::string RESPONSE_PLAYER_RECORD_PLAY_TIME  = "playTime";
 
 const std::string REQUEST_PLAYER_NAME   = "userName";
 const std::string REQUEST_MAP_ID        = "mapId";

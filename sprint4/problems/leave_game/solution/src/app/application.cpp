@@ -1,4 +1,5 @@
 #include "application.h"
+#include "database_invariants.h"
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -189,6 +190,22 @@ void Application::SaveGame() {
         boost::archive::text_oarchive oarchive{output_fstream};
         oarchive << sessions_ser;
     }
+};
+
+std::optional<std::vector<domain::PlayerRecord>> Application::GetRecordsTable(
+    std::optional<size_t> offset, std::optional<size_t> limit) {
+    size_t start{0};
+    size_t records_limit{db_invariants::DEFAULT_LIMIT};
+    if(offset) {
+        start = *offset;
+    }
+    if(limit) {
+        if(*limit > db_invariants::DEFAULT_LIMIT) {
+            return std::nullopt;
+        }
+        records_limit = *limit;
+    }
+    return use_cases_.GetRecordsTable(start, records_limit);
 };
 
 std::vector<game_data_ser::GameSessionSerialization> Application::GetSerializedData() {

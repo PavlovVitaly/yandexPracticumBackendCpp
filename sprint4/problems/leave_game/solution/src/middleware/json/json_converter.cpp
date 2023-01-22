@@ -183,6 +183,19 @@ std::string CreateInvalidEndpointResponse() {
     return json::serialize(msg);
 };
 
+std::string CreateRecordsTableResponse(const std::vector<domain::PlayerRecord>& records_table) {
+    json::array player_records_arr;
+    for(const auto& player_record : records_table) {
+        json::value item = {
+            {json_keys::RESPONSE_PLAYER_RECORD_NAME, player_record.GetName()},
+            {json_keys::RESPONSE_PLAYER_RECORD_SCORE, player_record.GetScore()},
+            {json_keys::RESPONSE_PLAYER_RECORD_PLAY_TIME, player_record.GetPlayTime()}
+        };
+        player_records_arr.push_back(item);
+    }
+    return json::serialize(player_records_arr);
+};
+
 std::optional< std::tuple<std::string, model::Map::Id> > ParseJoinToGameRequest(const std::string& msg) {
     try {
         json::value jv = json::parse(msg);

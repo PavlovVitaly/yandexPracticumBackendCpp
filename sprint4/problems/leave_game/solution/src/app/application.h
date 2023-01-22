@@ -57,6 +57,9 @@ public:
     std::shared_ptr<GameSession> FindGameSessionBy(const authentication::Token& token) const noexcept;
     void RestoreGameState(saving::SavingSettings saving_settings);
     void SaveGame();
+    std::optional<std::vector<domain::PlayerRecord>> GetRecordsTable(
+        std::optional<size_t> offset, std::optional<size_t> limit
+    );
 private:
     using PlayerIdHasher = util::TaggedHasher<Player::Id>;
     using Players = std::unordered_map<Player::Id,

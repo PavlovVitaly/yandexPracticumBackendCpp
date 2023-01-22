@@ -31,7 +31,9 @@ const std::unordered_set<std::string_view> GAME_API_URLS_WITH_AUTHORIZATION = {
     api_urls::GET_GAME_STATE_API,
     api_urls::GET_GAME_STATE_API + "/",
     api_urls::MAKE_ACTION_API,
-    api_urls::MAKE_ACTION_API + "/"
+    api_urls::MAKE_ACTION_API + "/",
+    api_urls::GET_RECORDS_API,
+    api_urls::GET_RECORDS_API + "/"
 };
 
 const std::unordered_set<std::string_view> GAME_API_URLS_WITH_JSON_REQ = {
@@ -570,6 +572,37 @@ std::optional<size_t> InvalidEndpointHandler(
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
     response.body() = json_converter::CreateInvalidEndpointResponse();
+    response.content_length(response.body().size());
+    response.keep_alive(req.keep_alive());
+    send(response);
+    return std::nullopt;
+}
+
+template <typename Request>
+bool GetRecordsActivator(const Request& req) {
+    return IsEqualUrls(api_urls::GET_RECORDS_API, req.target());
+}
+
+template <typename Request, typename Send>
+std::optional<size_t> GetRecordsHandler(
+        const Request& req,
+        std::shared_ptr<app::Application> application,
+        Send&& send) {
+    //if(!application->IsExistPlayer(token)) {
+    //    return 0;
+    //}
+    std::optional<size_t> offset;
+    std::optional<size_t> limit;
+    
+    auto records_table = application->GetRecordsTable(offset, limit);
+    if(!records_table) {
+        return 0 ;    
+    }
+    
+    StringResponse response(http::status::ok, req.version());
+    response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
+    response.set(http::field::cache_control, NO_CACHE_CONTROL);
+    response.body() = json_converter::CreateRecordsTableResponse(*records_table);
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
     send(response);

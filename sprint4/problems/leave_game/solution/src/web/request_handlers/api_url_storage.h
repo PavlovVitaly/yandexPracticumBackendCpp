@@ -10,5 +10,6 @@ const std::string MAKE_ACTION_API = "/api/v1/game/player/action";
 const std::string JOIN_TO_GAME_API = "/api/v1/game/join";
 const std::string GET_MAPS_LIST_API = "/api/v1/maps";
 const std::string MAKE_TIME_TICK_API = "/api/v1/game/tick";
+const std::string GET_RECORDS_API = "/api/v1/game/records";
 
 }

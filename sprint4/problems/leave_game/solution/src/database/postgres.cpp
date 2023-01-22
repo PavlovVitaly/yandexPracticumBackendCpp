@@ -4,6 +4,8 @@
 #include <pqxx/zview.hxx>
 #include <pqxx/pqxx>
 
+#include <iostream>
+
 namespace postgres {
 
 using namespace std::literals;
@@ -30,6 +32,7 @@ std::vector<domain::PlayerRecord> PlayerRecordRepositoryImpl::GetRecordsTable(si
     pqxx::read_transaction read_transaction_{*conn};
     auto query_text = "SELECT name, score, play_time FROM hall_of_fame ORDER BY score DESC, play_time ASC, name ASC LIMIT "
         + std::to_string(limit) + " OFFSET " + std::to_string(offset) + ";";
+    std::cout << "HELLO: " << query_text << std::endl;
     for (auto [name, score, play_time] : read_transaction_.query<std::string, size_t, int64_t>(query_text)) {
         records_table.emplace_back(name, score, play_time);
     }
