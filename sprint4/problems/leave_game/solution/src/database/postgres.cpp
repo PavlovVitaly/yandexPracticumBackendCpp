@@ -28,7 +28,8 @@ std::vector<domain::PlayerRecord> PlayerRecordRepositoryImpl::GetRecordsTable(si
     auto conn = connection_pool_.GetConnection();
     std::vector<domain::PlayerRecord> records_table;
     pqxx::read_transaction read_transaction_{*conn};
-    auto query_text = "SELECT name, score, play_time FROM hall_of_fame ORDER BY score DESC, play_time ASC, name ASC"_zv;
+    auto query_text = "SELECT name, score, play_time FROM hall_of_fame ORDER BY score DESC, play_time ASC, name ASC LIMIT "
+        + std::to_string(limit) + " OFFSET " + std::to_string(offset) + ";";
     for (auto [name, score, play_time] : read_transaction_.query<std::string, size_t, int64_t>(query_text)) {
         records_table.emplace_back(name, score, play_time);
     }
