@@ -45,16 +45,16 @@ public:
     virtual ~Application() = default;
 
     const model::Game::Maps& ListMap() const noexcept;
-    const std::shared_ptr<model::Map> FindMap(const model::Map::Id& id) const noexcept;
+    std::optional<const std::shared_ptr<model::Map>> FindMap(const model::Map::Id& id) const noexcept;
     std::tuple<authentication::Token, Player::Id> JoinGame(const std::string& player_name, const model::Map::Id& id);
-    std::vector< std::shared_ptr<Player> > GetPlayersFromGameSession(const authentication::Token& token);
+    std::optional<std::vector< std::shared_ptr<Player>>> GetPlayersFromGameSession(const authentication::Token& token);
     bool IsExistPlayer(const authentication::Token& token);
     void SetPlayerAction(const authentication::Token& token, model::Direction direction);
     bool IsManualTimeManagement();
     void UpdateGameState(const std::chrono::milliseconds& delta_time);
     void AddGameSession(std::shared_ptr<GameSession> session);
-    std::shared_ptr<GameSession> FindGameSessionBy(const model::Map::Id& id) const noexcept;
-    std::shared_ptr<GameSession> FindGameSessionBy(const authentication::Token& token) const noexcept;
+    std::optional<std::shared_ptr<GameSession>> FindGameSessionBy(const model::Map::Id& id) const noexcept;
+    std::optional<std::shared_ptr<GameSession>> FindGameSessionBy(const authentication::Token& token) const noexcept;
     void RestoreGameState(saving::SavingSettings saving_settings);
     void SaveGame();
     std::optional<std::vector<domain::PlayerRecord>> GetRecordsTable(
@@ -106,7 +106,7 @@ private:
     std::vector<game_data_ser::GameSessionSerialization> GetSerializedData();
     void RestoreGame();
 
-    std::shared_ptr<app::Player> FindPlayerBy(authentication::Token token);
+    std::optional<std::shared_ptr<app::Player>> FindPlayerBy(authentication::Token token);
     void RemoveInactivePlayers(const GameSession::Id& session_id);
     void CommitGameRecords(const std::vector<domain::PlayerRecord>& player_records);
 };

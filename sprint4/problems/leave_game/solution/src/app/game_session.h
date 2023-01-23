@@ -53,6 +53,7 @@ public:
                 loot_gen_cfg.probability),
             period_of_update_game_state_(period_of_update_game_state) {
     };
+    GameSession(GameSession&& other) = default;
     void Run();
     
     const Id& GetId() const noexcept;
@@ -85,7 +86,6 @@ private:
 
     boost::signals2::signal<void (const GameSession::Id&)> remove_inactive_players_sig;
     boost::signals2::signal<void (const std::vector<domain::PlayerRecord>&)> handle_finished_players_sig;
-    std::function<void(const GameSession::Id&, const std::vector<domain::PlayerRecord>&)> remove_inactive_dogs_handler;
     
     void GenerateLoot(const TimeInterval& delta_time);
     void CreateLostObject();

@@ -125,13 +125,13 @@ std::optional<size_t> GetMapByIdHandler(
         Send&& send) {
     auto id = SplitUrl(req.target())[3];
     auto map = application->FindMap(model::Map::Id(std::string(id)));
-    if(map == nullptr) {
+    if(!map) {
         return 0;
     }
     http::response<http::string_body> response(http::status::ok, req.version());
     response.set(http::field::content_type, CONTENT_TYPE_APPLICATION_JSON);
     response.set(http::field::cache_control, NO_CACHE_CONTROL);
-    response.body() = json_converter::ConvertMapToJson(*map);
+    response.body() = json_converter::ConvertMapToJson(**map);
     response.content_length(response.body().size());
     response.keep_alive(req.keep_alive());
     send(response);
@@ -216,7 +216,7 @@ std::optional<size_t> JoinToGameHandler(
         std::shared_ptr<app::Application> application,
         Send&& send) {
     auto [player_name, map_id] = json_converter::ParseJoinToGameRequest(req.body()).value();
-    if(application->FindMap(map_id) == nullptr) {
+    if(!application->FindMap(map_id)) {
         return 0;
     }
     StringResponse response(http::status::ok, req.version());
@@ -224,7 +224,7 @@ std::optional<size_t> JoinToGameHandler(
     if(session) {
         boost::promise<std::string> res_promise;
         auto res_future = res_promise.get_future();
-        net::dispatch(*(session->GetStrand()),
+        net::dispatch(*(session.value()->GetStrand()),
             [&res_promise
             , application
             , &player_name
@@ -316,12 +316,15 @@ std::optional<size_t> GetPlayersListHandler(
     }
     boost::promise<std::variant<std::string, size_t>> res_promise;
     auto res_future = res_promise.get_future();
-    net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
+    net::dispatch(*(application->FindGameSessionBy(token).value()->GetStrand()),
         [&res_promise
         , &token
         , application]{
         auto players = application->GetPlayersFromGameSession(token);
-        res_promise.set_value(json_converter::CreatePlayersListOnMapResponse(players));
+        if(!players) {
+            players = std::vector< std::shared_ptr<app::Player>>();
+        }
+        res_promise.set_value(json_converter::CreatePlayersListOnMapResponse(*players));
     });
     auto res = res_future.get();
     if(std::holds_alternative<size_t>(res)){
@@ -371,7 +374,7 @@ std::optional<size_t> GetGameStateHandler(
     
     boost::promise<std::variant<std::string, size_t>> res_promise;
     auto res_future = res_promise.get_future();
-    net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
+    net::dispatch(*(application->FindGameSessionBy(token).value()->GetStrand()),
         [&res_promise
         , &token
         , application] {
@@ -380,9 +383,13 @@ std::optional<size_t> GetGameStateHandler(
             res_promise.set_value(0ul);
             return;    
         }
+        auto players = application->GetPlayersFromGameSession(token);
+        if(!players) {
+            players = std::vector< std::shared_ptr<app::Player>>();
+        }
         res_promise.set_value(json_converter::CreateGameStateResponse(
-            application->GetPlayersFromGameSession(token),
-            session->GetLostObjects())
+            *players,
+            session.value()->GetLostObjects())
         );
     });
     auto res = res_future.get();
@@ -464,7 +471,7 @@ std::optional<size_t> PlayerActionHandler(
     }
     boost::promise<std::optional<size_t>> res_promise;
     auto res_future = res_promise.get_future();
-    net::dispatch(*(application->FindGameSessionBy(token)->GetStrand()),
+    net::dispatch(*(application->FindGameSessionBy(token).value()->GetStrand()),
         [&res_promise
         , &token
         , &req
