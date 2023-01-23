@@ -85,13 +85,11 @@ void Dog::MakeDogAction(
         const std::chrono::milliseconds& delta_time) {
     SetPosition(new_position);
     SetVelocity(new_velocity);
+    live_time_ += delta_time;
     if(state_ == DogState::ACTIVE) {
         inactive_time_ = std::chrono::milliseconds{0};
     } else {
         inactive_time_ += delta_time; 
-        if(inactive_time_ >= max_inactive_time_) {
-            die_time_ = std::chrono::steady_clock::now();
-        }
     }
 };
 
@@ -129,7 +127,7 @@ std::optional<std::chrono::seconds> Dog::GetPlayTime() {
     || inactive_time_ < max_inactive_time_) {
         return std::nullopt;
     }
-    return std::chrono::duration_cast<std::chrono::seconds>(die_time_ - born_time_);
+    return std::chrono::duration_cast<std::chrono::seconds>(live_time_);
 };
 
 const size_t Dog::GetScore() const {

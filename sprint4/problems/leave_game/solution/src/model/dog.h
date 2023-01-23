@@ -88,9 +88,8 @@ private:
     };
     size_t score_{0};
     size_t bag_capacity_{0};
-    const std::chrono::time_point<std::chrono::steady_clock> born_time_{std::chrono::steady_clock::now()};
-    std::chrono::time_point<std::chrono::steady_clock> die_time_;
     std::chrono::milliseconds inactive_time_{0};
+    std::chrono::milliseconds live_time_{0};
     DogState state_;
 
     void SetVelocity(Velocity velocity);
