@@ -86,10 +86,10 @@ void Dog::MakeDogAction(
     SetPosition(new_position);
     SetVelocity(new_velocity);
     if(state_ == DogState::ACTIVE) {
-        inactive_time = std::chrono::milliseconds{0};
+        inactive_time_ = std::chrono::milliseconds{0};
     } else {
-        inactive_time += delta_time; 
-        if(inactive_time >= max_inactive_time_) {
+        inactive_time_ += delta_time; 
+        if(inactive_time_ >= max_inactive_time_) {
             die_time_ = std::chrono::steady_clock::now();
         }
     }
@@ -126,7 +126,7 @@ void Dog::DropLostObjectsFromBag() {
 
 std::optional<std::chrono::seconds> Dog::GetPlayTime() {
     if(state_ == DogState::ACTIVE
-    || inactive_time < max_inactive_time_) {
+    || inactive_time_ < max_inactive_time_) {
         return std::nullopt;
     }
     return std::chrono::duration_cast<std::chrono::seconds>(die_time_ - born_time_);

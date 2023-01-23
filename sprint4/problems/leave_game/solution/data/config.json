@@ -4,7 +4,7 @@
     "period": 5.0,
     "probability": 0.5
   },
-  "dogRetirementTime": 15.0,
+  "dogRetirementTime": 10.0,
   "maps": [
     {
       "dogSpeed": 4.0,
