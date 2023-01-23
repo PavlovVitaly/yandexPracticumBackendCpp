@@ -43,6 +43,7 @@ const Velocity& Dog::GetVelocity() const {
 };
 
 void Dog::SetAction(Direction direction, double velocity) {
+    inactive_time_ = std::chrono::milliseconds{0};
     switch(direction){
         case Direction::NORTH: {
             SetDirection(direction);
@@ -86,7 +87,9 @@ void Dog::MakeDogAction(
     SetPosition(new_position);
     SetVelocity(new_velocity);
     live_time_ += delta_time;
-    if(state_ == DogState::INACTIVE) {
+    if(state_ == DogState::ACTIVE) {
+        inactive_time_ = std::chrono::milliseconds{0};
+    } else {
         inactive_time_ += delta_time;
     }
 };
@@ -143,7 +146,6 @@ const collision_detector::Gatherer& Dog::AsGatherer() const {
 void Dog::UpdateDogState(const Velocity& new_velocity) {
     if(new_velocity != Velocity{0, 0}) {
         state_ = DogState::ACTIVE;
-        inactive_time_ = std::chrono::milliseconds{0};
     } else {
         state_ = DogState::INACTIVE;
     }
