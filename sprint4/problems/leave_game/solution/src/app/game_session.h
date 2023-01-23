@@ -38,7 +38,7 @@ public:
                                     std::shared_ptr<model::Dog>,
                                     DogIdHasher>;
 
-    GameSession(std::shared_ptr<model::Map> map,
+    GameSession(std::shared_ptr<const model::Map> map,
                     const TimeInterval& period_of_update_game_state,
                     const model::LootGeneratorConfig& loot_gen_cfg,
                     net::io_context& ioc) :
@@ -57,7 +57,7 @@ public:
     void Run();
     
     const Id& GetId() const noexcept;
-    const std::shared_ptr<model::Map> GetMap();
+    const std::shared_ptr<const model::Map> GetMap();
     std::shared_ptr<SessionStrand> GetStrand();
     std::weak_ptr<model::Dog> CreateDog(const std::string& dog_name,
                                         const model::Map& map,
@@ -73,7 +73,7 @@ public:
         std::function<void(const std::vector<domain::PlayerRecord>&)> handler);
     
 private:
-    std::shared_ptr<model::Map> map_;
+    std::shared_ptr<const model::Map> map_;
     net::io_context& ioc_;
     std::shared_ptr<SessionStrand> strand_;
     Id id_;

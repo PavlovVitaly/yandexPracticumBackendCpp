@@ -15,7 +15,8 @@ const model::Game::Maps& Application::ListMap() const noexcept {
     return game_.GetMaps();
 };
 
-std::optional<const std::shared_ptr<model::Map>> Application::FindMap(const model::Map::Id& id) const noexcept {
+std::optional<std::shared_ptr<const model::Map>> Application::FindMap(const model::Map::Id& id) const noexcept {
+    //game_.FindMap(id).value()->SetBagCapacity(3);
     return game_.FindMap(id);
 };
 

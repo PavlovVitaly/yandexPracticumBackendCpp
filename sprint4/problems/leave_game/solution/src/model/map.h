@@ -50,10 +50,10 @@ public:
     void AddLootTypes(const LootTypes& loot_types);
     std::tuple<geom::Point2D, Velocity> GetValidMove(const geom::Point2D& old_position,
                             const geom::Point2D& potential_new_position,
-                            const Velocity& old_velocity);
+                            const Velocity& old_velocity) const;
     geom::Point2D GenerateRandomPosition() const;
     size_t GetNumberOfLootTypes() const noexcept;
-    const LootType& GetLootTypeBy(size_t id);
+    const LootType& GetLootTypeBy(size_t id) const;
     void SetBagCapacity(size_t bag_capacity);
     size_t GetBagCapacity() const noexcept;
 

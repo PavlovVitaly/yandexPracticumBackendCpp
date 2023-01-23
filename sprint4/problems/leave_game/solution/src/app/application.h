@@ -45,7 +45,7 @@ public:
     virtual ~Application() = default;
 
     const model::Game::Maps& ListMap() const noexcept;
-    std::optional<const std::shared_ptr<model::Map>> FindMap(const model::Map::Id& id) const noexcept;
+    std::optional<std::shared_ptr<const model::Map>> FindMap(const model::Map::Id& id) const noexcept;
     std::tuple<authentication::Token, Player::Id> JoinGame(const std::string& player_name, const model::Map::Id& id);
     std::optional<std::vector< std::shared_ptr<Player>>> GetPlayersFromGameSession(const authentication::Token& token);
     bool IsExistPlayer(const authentication::Token& token);

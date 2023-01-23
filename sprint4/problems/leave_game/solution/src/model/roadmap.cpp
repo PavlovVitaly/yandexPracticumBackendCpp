@@ -71,13 +71,18 @@ const Roadmap::Roads& Roadmap::GetRoads() const noexcept {
 
 std::tuple<geom::Point2D, Velocity> Roadmap::GetValidMove(const geom::Point2D& old_position,
                             const geom::Point2D& potential_new_position,
-                            const Velocity& old_velocity) {
+                            const Velocity& old_velocity) const {
     Velocity velocity = {0, 0};
     auto start_roads = GetCoordinatesOfPosition(old_position);
     auto end_roads = GetCoordinatesOfPosition(potential_new_position);
     if(end_roads){
-        if(!IsValidPosition(matrix_map_[end_roads.value().x][end_roads.value().y],
-                            potential_new_position)) {
+        if(!IsValidPosition(
+                matrix_map_
+                .at(end_roads.value().x)
+                .at(end_roads.value().y),
+                potential_new_position
+            )
+        ) {
             end_roads = std::nullopt;
         } else if(start_roads == end_roads) {
             return std::tie(potential_new_position, old_velocity);
@@ -85,7 +90,14 @@ std::tuple<geom::Point2D, Velocity> Roadmap::GetValidMove(const geom::Point2D& o
     }
     auto dest = GetDestinationRoadsOfRoute(start_roads, end_roads, old_velocity);
     geom::Point2D position;
-    if(dest && IsValidPosition(matrix_map_[dest.value().x][dest.value().y], potential_new_position)) {
+    if(dest 
+        && IsValidPosition(
+            matrix_map_
+            .at(dest.value().x)
+            .at(dest.value().y),
+            potential_new_position
+        )
+    ) {
         position = potential_new_position;
         velocity = old_velocity;
     } else {
@@ -113,7 +125,7 @@ geom::Point2D Roadmap::GenerateValidRandomPosition() const {
 std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetDestinationRoadsOfRoute(
                                     std::optional<const MatrixMapCoord> start,
                                     std::optional<const MatrixMapCoord> end,
-                                    const Velocity& old_velocity) {
+                                    const Velocity& old_velocity) const {
     const MatrixMapCoord start_coord = start.value();
     MatrixMapCoord current_coord = start_coord;
     if(old_velocity.vx != 0) {
@@ -129,8 +141,15 @@ std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetDestinationRoadsOfRoute
         int64_t index{0};
         for(index = start_coord.x; index != end_x; index += direction) {
             if(ValidateCoordinates({index, start_coord.y}) &&
-                IsCrossedSets(matrix_map_[start_coord.x][start_coord.y],
-                                matrix_map_[index][start_coord.y])) {
+                IsCrossedSets(
+                    matrix_map_
+                    .at(start_coord.x)
+                    .at(start_coord.y),
+                    matrix_map_
+                    .at(index)
+                    .at(start_coord.y)
+                )
+            ) {
                 current_coord = {index, start_coord.y};
             } else {
                 break;
@@ -150,8 +169,13 @@ std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetDestinationRoadsOfRoute
         int64_t index{0};
         for(index = start_coord.y; index != end_y; index += direction) {
             if(ValidateCoordinates({start_coord.x, index}) &&
-                IsCrossedSets(matrix_map_[start_coord.x][start_coord.y],
-                                matrix_map_[start_coord.x][index])) {
+                IsCrossedSets(
+                    matrix_map_
+                    .at(start_coord.x)
+                    .at(start_coord.y),
+                    matrix_map_
+                    .at(start_coord.x)
+                    .at(index))) {
                 current_coord =  {start_coord.x, index};
             } else {
                 break;
@@ -162,14 +186,16 @@ std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetDestinationRoadsOfRoute
     return std::nullopt;
 };
 
-std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetCoordinatesOfPosition(const geom::Point2D& position) {
+std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetCoordinatesOfPosition(const geom::Point2D& position) const {
     if(position.x < -OFFSET - EPSILON || position.y < -OFFSET - EPSILON) {
         return std::nullopt;
     }
     int64_t x_index = (position.x >= 0) ? std::floor(position.x * SCALE_FACTOR_OF_CELL) : std::ceil(position.x * SCALE_FACTOR_OF_CELL);
     int64_t y_index = (position.y >= 0) ? std::floor(position.y * SCALE_FACTOR_OF_CELL) : std::ceil(position.y * SCALE_FACTOR_OF_CELL);
     if(matrix_map_.contains(x_index)) {
-        if(matrix_map_[x_index].contains(y_index)) {
+        if(matrix_map_
+            .at(x_index)
+            .contains(y_index)) {
             return MatrixMapCoord{x_index, y_index};
         }
     }
@@ -177,7 +203,7 @@ std::optional<const Roadmap::MatrixMapCoord> Roadmap::GetCoordinatesOfPosition(c
 };
 
 bool Roadmap::IsCrossedSets(const std::unordered_set<size_t>& lhs,
-                            const std::unordered_set<size_t>& rhs) {
+                            const std::unordered_set<size_t>& rhs) const {
     for(auto item : lhs) {
         if(rhs.contains(item)) {
             return true;
@@ -186,20 +212,25 @@ bool Roadmap::IsCrossedSets(const std::unordered_set<size_t>& lhs,
     return false;
 };
 
-bool Roadmap::ValidateCoordinates(const MatrixMapCoord& coordinates) {
+bool Roadmap::ValidateCoordinates(const MatrixMapCoord& coordinates) const{
     if(matrix_map_.contains(coordinates.x)) {
-        return matrix_map_[coordinates.x].contains(coordinates.y);
+        return matrix_map_
+                .at(coordinates.x)
+                .contains(coordinates.y);
     }
     return false;
 };
 
 const geom::Point2D Roadmap::GetFarestPoinOfRoute(const MatrixMapCoord& roads_coord,
                                     const geom::Point2D& old_position,
-                                    const Velocity& old_velocity) {
+                                    const Velocity& old_velocity) const {
     geom::Point2D res_position{old_position};
     auto cell_pos = MatrixCoordinateToPosition(roads_coord, old_position);
     auto direction = VelocityToDirection(old_velocity);
-    for(auto road_ind : matrix_map_[roads_coord.x][roads_coord.y]) {
+    for(auto road_ind : matrix_map_
+                        .at(roads_coord.x)
+                        .at(roads_coord.y)
+    ) {
         auto start_position = cell_pos.at(DIRECTION_TO_OPOSITE_DIRECTION.at(direction));
         auto end_position = cell_pos.at(direction);
         if(IsValidPositionOnRoad(roads_[road_ind], start_position)) {
@@ -212,8 +243,8 @@ const geom::Point2D Roadmap::GetFarestPoinOfRoute(const MatrixMapCoord& roads_co
     return res_position;
 };
 
-const std::unordered_map<Direction, geom::Point2D> Roadmap::MatrixCoordinateToPosition(const MatrixMapCoord& coord,
-                                                                                const geom::Point2D& target_position){
+const std::unordered_map<Direction, geom::Point2D> Roadmap::MatrixCoordinateToPosition(
+    const MatrixMapCoord& coord, const geom::Point2D& target_position) const {
     std::unordered_map<Direction, geom::Point2D> res;
     int64_t x_inc_e = (coord.x < 0) ? 0 : 1;
     int64_t y_inc_s = (coord.y < 0) ? 0 : 1;
@@ -235,7 +266,7 @@ const std::unordered_map<Direction, geom::Point2D> Roadmap::MatrixCoordinateToPo
     return res;
 }
 
-const Direction Roadmap::VelocityToDirection(const Velocity& velocity) {
+const Direction Roadmap::VelocityToDirection(const Velocity& velocity) const {
     Velocity vel{0, 0};
     if(velocity.vx != 0) {
         vel.vx = std::signbit(velocity.vx) ? -1 : 1;
@@ -246,16 +277,17 @@ const Direction Roadmap::VelocityToDirection(const Velocity& velocity) {
     return VELOCITY_TO_DIRECTION.at(vel);
 }
 
-bool Roadmap::IsValidPosition(const std::unordered_set<size_t>& roads_ind, const geom::Point2D& position) {
+bool Roadmap::IsValidPosition(const std::unordered_set<size_t>& roads_ind,
+                                const geom::Point2D& position) const {
     for(auto road_index : roads_ind) {
-        if(IsValidPositionOnRoad(roads_[road_index], position)) {
+        if(IsValidPositionOnRoad(roads_.at(road_index), position)) {
             return true;
         }
     }
     return false;
 };
 
-bool Roadmap::IsValidPositionOnRoad(const Road& road, const geom::Point2D& position) {
+bool Roadmap::IsValidPositionOnRoad(const Road& road, const geom::Point2D& position) const {
     double start_x, end_x, start_y, end_y;
     if(road.IsHorizontal()) {
         start_x = (road.GetStart().x < road.GetEnd().x) ? (road.GetStart().x) : (road.GetEnd().x);

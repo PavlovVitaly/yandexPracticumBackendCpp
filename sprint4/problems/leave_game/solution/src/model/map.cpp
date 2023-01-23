@@ -94,7 +94,7 @@ void Map::AddLootTypes(const Map::LootTypes& loot_types) {
 
 std::tuple<geom::Point2D, Velocity> Map::GetValidMove(const geom::Point2D& old_position,
                                                 const geom::Point2D& potential_new_position,
-                                                const Velocity& old_velocity) {
+                                                const Velocity& old_velocity) const {
     return roadmap_.GetValidMove(old_position, potential_new_position, old_velocity);
 };
 
@@ -106,7 +106,7 @@ size_t Map::GetNumberOfLootTypes() const noexcept{
     return loot_types_.size();
 };
 
-const LootType& Map::GetLootTypeBy(size_t id) {
+const LootType& Map::GetLootTypeBy(size_t id) const {
     return loot_types_[id];
 };
 

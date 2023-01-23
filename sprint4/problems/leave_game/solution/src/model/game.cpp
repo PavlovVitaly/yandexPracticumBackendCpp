@@ -37,7 +37,7 @@ const Game::Maps& Game::GetMaps() const noexcept {
     return maps_;
 }
 
-std::optional<const std::shared_ptr<Map>> Game::FindMap(const Map::Id& id) const noexcept {
+std::optional<std::shared_ptr<const Map>> Game::FindMap(const Map::Id& id) const noexcept {
     if (auto it = map_id_to_index_.find(id); it != map_id_to_index_.end()) {
         return maps_.at(it->second);
     }

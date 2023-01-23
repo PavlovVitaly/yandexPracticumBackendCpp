@@ -32,7 +32,7 @@ const GameSession::Id& GameSession::GetId() const noexcept {
     return id_;
 }
 
-const std::shared_ptr<model::Map> GameSession::GetMap() {
+const std::shared_ptr<const model::Map> GameSession::GetMap() {
     return map_;
 };
 

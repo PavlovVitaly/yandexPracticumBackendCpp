@@ -26,7 +26,7 @@ public:
     const Roads& GetRoads() const noexcept;
     std::tuple<geom::Point2D, Velocity> GetValidMove(const geom::Point2D& old_position,
                             const geom::Point2D& potential_new_position,
-                            const Velocity& old_velocity);
+                            const Velocity& old_velocity) const;
     geom::Point2D GenerateValidRandomPosition() const;
 private:
     struct MatrixMapCoord {
@@ -44,21 +44,21 @@ private:
     std::optional<const MatrixMapCoord> GetDestinationRoadsOfRoute(
         std::optional<const MatrixMapCoord> start,
         std::optional<const MatrixMapCoord> end,
-        const Velocity& old_velocity);
-    std::optional<const MatrixMapCoord> GetCoordinatesOfPosition(const geom::Point2D& position);
-    const Direction VelocityToDirection(const Velocity& velocity);
-    const std::unordered_map<Direction, geom::Point2D> MatrixCoordinateToPosition(const MatrixMapCoord& coord,
-                                                                            const geom::Point2D& target_position);
+        const Velocity& old_velocity) const;
+    std::optional<const MatrixMapCoord> GetCoordinatesOfPosition(const geom::Point2D& position) const;
+    const Direction VelocityToDirection(const Velocity& velocity) const;
+    const std::unordered_map<Direction, geom::Point2D> MatrixCoordinateToPosition(
+        const MatrixMapCoord& coord, const geom::Point2D& target_position) const;
     bool IsCrossedSets(const std::unordered_set<size_t>& lhs,
-                        const std::unordered_set<size_t>& rhs);
-    bool ValidateCoordinates(const MatrixMapCoord& coordinates);
+                        const std::unordered_set<size_t>& rhs) const;
+    bool ValidateCoordinates(const MatrixMapCoord& coordinates) const;
     const geom::Point2D GetFarestPoinOfRoute(const MatrixMapCoord& roads_coord,
                                         const geom::Point2D& old_position,
-                                        const Velocity& old_velocity);
+                                        const Velocity& old_velocity) const;
     bool IsValidPosition(const std::unordered_set<size_t>& roads_ind,
-                        const geom::Point2D& position);
+                        const geom::Point2D& position) const;
     
-    bool IsValidPositionOnRoad(const Road& road, const geom::Point2D& position);
+    bool IsValidPositionOnRoad(const Road& road, const geom::Point2D& position) const;
     void CopyContent(const Roads& roads);
 };
 
