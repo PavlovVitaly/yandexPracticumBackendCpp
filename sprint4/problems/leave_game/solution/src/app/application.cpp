@@ -120,11 +120,13 @@ void Application::AddGameSession(std::shared_ptr<GameSession> session) {
             throw;
         }
     }
-    session->SetHandlerForRemoveInactiveDogsEvent(
-        [self = shared_from_this()](
-            const GameSession::Id& session_id,
-            const std::vector<domain::PlayerRecord>& player_records) {
+    session->AddHandlingFinishedPlayersEvent(
+        [self = shared_from_this()](const std::vector<domain::PlayerRecord>& player_records) {
             self->CommitGameRecords(player_records);
+        }
+    );
+    session->AddRemoveInactivePlayersHandler(
+        [self = shared_from_this()](const GameSession::Id& session_id) {
             self->RemoveInactivePlayers(session_id);
         }
     );

@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/signals2/signal.hpp>
 #include <functional>
 
 namespace app {
@@ -64,9 +65,11 @@ public:
     const LostObjects& GetLostObjects();
     void AddLostObject(model::LostObject lost_object);
     void AddDog(std::shared_ptr<model::Dog> dog);
-    void SetHandlerForRemoveInactiveDogsEvent(
-        std::function<void(const GameSession::Id&,
-        const std::vector<domain::PlayerRecord>&)> handler);
+    
+    void AddRemoveInactivePlayersHandler(
+        std::function<void(const GameSession::Id&)> handler);
+    void AddHandlingFinishedPlayersEvent(
+        std::function<void(const std::vector<domain::PlayerRecord>&)> handler);
     
 private:
     std::shared_ptr<model::Map> map_;
@@ -79,6 +82,9 @@ private:
     TimeInterval period_of_update_game_state_;
     std::shared_ptr<time_m::Ticker> update_game_state_ticker_;
     std::shared_ptr<time_m::Ticker> generate_loot_ticker_;
+
+    boost::signals2::signal<void (const GameSession::Id&)> remove_inactive_players_sig;
+    boost::signals2::signal<void (const std::vector<domain::PlayerRecord>&)> handle_finished_players_sig;
     std::function<void(const GameSession::Id&, const std::vector<domain::PlayerRecord>&)> remove_inactive_dogs_handler;
     
     void GenerateLoot(const TimeInterval& delta_time);
