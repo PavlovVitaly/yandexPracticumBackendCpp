@@ -73,9 +73,14 @@ private:
                                                         OnlyPostMethodAllowedHandler,
                                                         {JoinToGameMapNotFoundHandler}),
 
+        //RequestHandlerNode<ActivatorType, HandlerType>(GetRecordsActivator,
+        //                                                {{http::verb::get, GetRecordsHandler}},
+        //                                                InvalidMethodHandler,
+        //                                                {BadRequestHandler}),
+
         RequestHandlerNode<ActivatorType, HandlerType>(GetRecordsActivator,
-                                                        {{http::verb::get, GetRecordsHandler}},
-                                                        InvalidMethodHandler,
+                                                        {{http::verb::get, BadRequestHandler}},
+                                                        BadRequestHandler,
                                                         {BadRequestHandler}),
 
         RequestHandlerNode<ActivatorType, HandlerType>(EmptyAuthorizationActivator,
