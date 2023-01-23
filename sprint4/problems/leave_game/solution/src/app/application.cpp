@@ -7,8 +7,6 @@
 #include <ranges>
 #include <algorithm>
 
-#include <iostream>
-
 namespace app {
 
 using namespace std::literals;
@@ -299,9 +297,6 @@ std::optional<std::shared_ptr<Player>> Application::FindPlayerBy(authentication:
 };
 
 void Application::CommitGameRecords(const std::vector<domain::PlayerRecord>& player_records) {
-    for(auto p : player_records) {
-        std::cout << "HELLO! name: " << p.GetName() << " playTime: " << p.GetPlayTime() << std::endl;
-    }
     use_cases_.AddPlayerRecords(player_records);
 };
 
