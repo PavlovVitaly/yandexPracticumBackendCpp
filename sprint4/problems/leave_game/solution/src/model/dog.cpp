@@ -43,7 +43,10 @@ const Velocity& Dog::GetVelocity() const {
 };
 
 void Dog::SetAction(Direction direction, double velocity) {
-    inactive_time_ = std::chrono::milliseconds{0};
+    if((!isInactiveCommandRun && direction == Direction::NONE) 
+        || direction != Direction::NONE) {
+        inactive_time_ = std::chrono::milliseconds{0};
+    }
     isInactiveCommandRun = (direction == Direction::NONE);
     switch(direction){
         case Direction::NORTH: {
