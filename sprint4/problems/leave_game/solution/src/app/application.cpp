@@ -52,15 +52,15 @@ void Application::BoundPlayerAndGameSession(std::shared_ptr<Player> player,
     player->SetDog(dog);
 };
 
-std::optional<std::vector< std::shared_ptr<Player>>> Application::GetPlayersFromGameSession(
+std::vector< std::shared_ptr<Player>> Application::GetPlayersFromGameSession(
     const authentication::Token& token) {
     auto player = FindPlayerBy(token);
     if(!player) {
-        return std::nullopt;
+        return std::vector< std::shared_ptr<Player>>();
     }
     auto session_id = player.value()->GetGameSessionId();
     if(!session_id_to_token_player_pairs_.contains(session_id)) {
-        return std::nullopt;
+        return std::vector< std::shared_ptr<Player>>();
     }
     std::vector< std::shared_ptr<Player> > players;
     std::ranges::transform(

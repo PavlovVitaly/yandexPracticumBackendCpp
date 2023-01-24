@@ -90,6 +90,7 @@ private:
     size_t bag_capacity_{0};
     std::chrono::milliseconds inactive_time_{0};
     std::chrono::milliseconds live_time_{0};
+    bool isInactiveCommandRun{false};
     DogState state_;
 
     void SetVelocity(Velocity velocity);

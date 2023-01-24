@@ -320,11 +320,9 @@ std::optional<size_t> GetPlayersListHandler(
         [&res_promise
         , &token
         , application]{
-        auto players = application->GetPlayersFromGameSession(token);
-        if(!players) {
-            players = std::vector< std::shared_ptr<app::Player>>();
-        }
-        res_promise.set_value(json_converter::CreatePlayersListOnMapResponse(*players));
+        res_promise.set_value(
+            json_converter::CreatePlayersListOnMapResponse(application->GetPlayersFromGameSession(token))
+        );
     });
     auto res = res_future.get();
     if(std::holds_alternative<size_t>(res)){
@@ -383,12 +381,8 @@ std::optional<size_t> GetGameStateHandler(
             res_promise.set_value(0ul);
             return;    
         }
-        auto players = application->GetPlayersFromGameSession(token);
-        if(!players) {
-            players = std::vector< std::shared_ptr<app::Player>>();
-        }
         res_promise.set_value(json_converter::CreateGameStateResponse(
-            *players,
+            application->GetPlayersFromGameSession(token),
             session.value()->GetLostObjects())
         );
     });

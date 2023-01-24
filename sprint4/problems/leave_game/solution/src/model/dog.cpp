@@ -44,6 +44,7 @@ const Velocity& Dog::GetVelocity() const {
 
 void Dog::SetAction(Direction direction, double velocity) {
     inactive_time_ = std::chrono::milliseconds{0};
+    isInactiveCommandRun = (direction == Direction::NONE);
     switch(direction){
         case Direction::NORTH: {
             SetDirection(direction);
@@ -87,9 +88,7 @@ void Dog::MakeDogAction(
     SetPosition(new_position);
     SetVelocity(new_velocity);
     live_time_ += delta_time;
-    if(state_ == DogState::ACTIVE) {
-        inactive_time_ = std::chrono::milliseconds{0};
-    } else {
+    if(isInactiveCommandRun && state_ == DogState::INACTIVE) {
         inactive_time_ += delta_time;
     }
 };
