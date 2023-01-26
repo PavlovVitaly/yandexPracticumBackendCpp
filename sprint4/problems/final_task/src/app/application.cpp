@@ -219,8 +219,7 @@ std::optional<std::vector<domain::PlayerRecord>> Application::GetRecordsTable(
 std::vector<game_data_ser::GameSessionSerialization> Application::GetSerializedData() {
     using game_data_ser::GameSessionSerialization;
     std::vector<GameSessionSerialization> sessions_ser;
-    for(auto& item : sessions_){
-        auto [session_id, session] = item;
+    for(auto& [session_id, session] : sessions_){
         boost::promise<GameSessionSerialization> promise;
         auto res_future = promise.get_future();
         net::dispatch(*(session->GetStrand()),

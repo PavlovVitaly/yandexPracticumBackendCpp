@@ -9,7 +9,7 @@ namespace postgres {
 using namespace std::literals;
 using pqxx::operator"" _zv;
 
-void PlayerRecordRepositoryImpl::Save(const std::vector<domain::PlayerRecord>& player_records) {
+void PlayerRecordRepositoryImpl::SaveRecordsTable(const std::vector<domain::PlayerRecord>& player_records) {
     auto conn = connection_pool_.GetConnection();
     pqxx::work work_{*conn};
     for(const auto& player_record : player_records) {
