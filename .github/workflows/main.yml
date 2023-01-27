@@ -541,7 +541,7 @@ jobs:
       - name: run tests sprint4 db_of_books
         run: pytest --junitxml=${GITHUB_WORKSPACE}/db_of_books.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_db_of_books.py
         env:
-          DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/db_of_books/solution/build/book_manager
+          DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/db_of_books/solution/build/bin/book_manager
 
 
       - name: build sprint4 bookypedia-1
