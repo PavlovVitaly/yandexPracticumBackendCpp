@@ -4,11 +4,11 @@
 #include <string>
 #include <sstream>
 
-namespace collision_detector {
+namespace collision_detector_ex {
 
-class ZeroMoveException : public std::exception {
+class ZeroMove : public std::exception {
 public:
-    ZeroMoveException(
+    ZeroMove(
         const geom::Point2D& start,
         const geom::Point2D& end)
         : start_(start)

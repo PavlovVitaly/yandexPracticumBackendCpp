@@ -1,12 +1,10 @@
 #pragma once
 
+#include "database_exceptions.h"
+
 #include <mutex>
 #include <condition_variable>
 #include <pqxx/connection>
-//#include <pqxx/transaction>
-//#include <string>
-//#include <pqxx/zview.hxx>
-//#include <pqxx/pqxx>
 #include <memory>
 
 namespace db {
@@ -75,7 +73,9 @@ private:
         // Возвращаем соединение обратно в пул
         {
             std::lock_guard lock{mutex_};
-            assert(used_connections_ != 0);
+            if(used_connections_ == 0) {
+                db_ex::ReturnZeroDbConnection();
+            }
             pool_[--used_connections_] = std::move(conn);
         }
         // Уведомляем один из ожидающих потоков об изменении состояния пула
