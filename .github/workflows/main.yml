@@ -606,3 +606,4 @@ jobs:
         if: always()
         with:
           junit_files: ${{ github.workspace }}/*.xml
+
