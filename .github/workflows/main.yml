@@ -512,7 +512,6 @@ jobs:
           POSTGRES_PASSWORD: Mys3Cr3t
           POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
-
     steps:
       - name: get docker network
         run: |
