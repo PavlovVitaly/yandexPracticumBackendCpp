@@ -11,7 +11,7 @@ CollectionResult TryCollectPoint(geom::Point2D a, geom::Point2D b, geom::Point2D
     // пскольку при сборе заказов придётся учитывать перемещение даже на небольшое
     // расстояние.
     if(!(b.x != a.x || b.y != a.y)) {
-        throw ZeroMoveException(a, b);
+        throw collision_detector_ex::ZeroMove(a, b);
     };
     const double u_x = c.x - a.x;
     const double u_y = c.y - a.y;

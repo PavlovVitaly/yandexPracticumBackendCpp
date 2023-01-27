@@ -9,4 +9,11 @@ public:
     }
 };
 
+class ReturnZeroDbConnection : public std::exception {
+public:
+    char const* what () {
+        return "Returned database connection but used zero connections.";
+    }
+};
+
 }
