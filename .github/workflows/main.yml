@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: get docker network
         run: echo "DOCKER_NETWORK=$(docker inspect main-container -f '{{range $k, $v := .NetworkSettings.Networks}}{{printf "%s" $k}}{{end}}')" >> $GITHUB_ENV
-          
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -25,7 +25,7 @@ jobs:
         with:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
-          
+
       - name: Install dependencies
         run: |
           cp -R /home/forconan/.conan /github/home/.conan
@@ -118,13 +118,13 @@ jobs:
         run: |
           cd sprint1/problems/final_task/solution
           docker build -t final_task .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 final_task" >> $GITHUB_ENV
 
       - name: run tests sprint1 final_task
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/final_task.xml cpp-backend-tests-practicum/tests/test_l05_final_task.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/final_task.xml cpp-backend-tests-practicum/tests/test_l05_final_task.py
         env:
           SERVER_DOMAIN: cppserver
           CONFIG_PATH: ${{ github.workspace }}/sprint1/problems/final_task/solution/data/config.json
-          IMAGE_NAME: final_task
 
       - name: build tests sprint2 static_content
         run: |
@@ -165,75 +165,73 @@ jobs:
         run: |
           cd sprint2/problems/server_logging/solution
           docker build -t server_logging .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 server_logging" >> $GITHUB_ENV
 
       - name: run tests sprint2 server_logging
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/server_logging.xml cpp-backend-tests-practicum/tests/test_s02_server_logging.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/server_logging.xml cpp-backend-tests-practicum/tests/test_s02_server_logging.py
         env:
           SERVER_DOMAIN: cppserver
           CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/server_logging/solution/data/config.json
-          IMAGE_NAME: server_logging
-          
+
       - name: build tests sprint2 join_game
         run: |
           cd sprint2/problems/join_game/solution
           docker build -t join_game .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 join_game" >> $GITHUB_ENV
 
       - name: run tests sprint2 join_game
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/join_game.xml cpp-backend-tests-practicum/tests/test_s02_join_game.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/join_game.xml cpp-backend-tests-practicum/tests/test_s02_join_game.py
         env:
           SERVER_DOMAIN: cppserver
           CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/join_game/solution/data/config.json
-          IMAGE_NAME: join_game
 
       - name: build tests sprint2 game_state
         run: |
           cd sprint2/problems/game_state/solution
           docker build -t game_state .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 game_state" >> $GITHUB_ENV
 
       - name: run tests sprint2 game_state
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/game_state.xml cpp-backend-tests-practicum/tests/test_s02_game_state.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/game_state.xml cpp-backend-tests-practicum/tests/test_s02_game_state.py
         env:
           SERVER_DOMAIN: cppserver
           CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/game_state/solution/data/config.json
-          IMAGE_NAME: game_state
 
       - name: build tests sprint2 move_players
         run: |
           cd sprint2/problems/move_players/solution
           docker build -t move_players .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 move_players" >> $GITHUB_ENV
 
       - name: run tests sprint2 move_players
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/move_players.xml cpp-backend-tests-practicum/tests/test_s02_move_players.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/move_players.xml cpp-backend-tests-practicum/tests/test_s02_move_players.py
         env:
           SERVER_DOMAIN: cppserver
           CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/move_players/solution/data/config.json
-          IMAGE_NAME: move_players
 
       - name: build tests sprint2 time_control
         run: |
           cd sprint2/problems/time_control/solution
           docker build -t time_control .
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 time_control" >> $GITHUB_ENV
 
       - name: run tests sprint2 time_control
-        run: pytest --junitxml=${GITHUB_WORKSPACE}/time_control.xml --workers auto cpp-backend-tests-practicum/tests/test_s02_time_control.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/time_control.xml cpp-backend-tests-practicum/tests/test_s02_time_control.py
         env:
           SERVER_DOMAIN: cppserver
           CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/time_control/solution/data/config.json
-          IMAGE_NAME: time_control
 
       - name: build tests sprint2 command_line
         run: |
           cd sprint2/problems/command_line/solution
           docker build -t command_line .
+          echo "COMMAND_RUN=docker run --rm --entrypoint /app/game_server --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 command_line --config-file /app/data/config.json --www-root /app/static/" >> $GITHUB_ENV
 
       - name: run tests sprint2 command_line
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/command_line.xml cpp-backend-tests-practicum/tests/test_s02_command_line.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/command_line.xml cpp-backend-tests-practicum/tests/test_s02_command_line.py
         env:
           SERVER_DOMAIN: cppserver
           CONFIG_PATH: ${{ github.workspace }}/sprint2/problems/command_line/solution/data/config.json
-          ENTRYPOINT: /app/game_server
-          CONTAINER_ARGS: --config-file /app/data/config.json --www-root /app/static/
-          IMAGE_NAME: command_line
 
       - name: Publish XML reports
         uses: EnricoMi/publish-unit-test-result-action@v2
@@ -249,7 +247,6 @@ jobs:
         run: |
           sudo pip3 install --no-cache-dir \
             pytest==7.1.2 \
-            pytest-parallel==0.1.1 \
             pytest-xprocess==0.20.0 \
             pytest-quickcheck==0.9.0 \
             conan \
@@ -263,7 +260,6 @@ jobs:
         with:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
-          
 
       - name: build tests sprint3 instrumentation
         run: |
@@ -305,27 +301,23 @@ jobs:
         run: |
           cd sprint3/problems/gen_objects/solution
           docker build -t gen_objects .
-          
+          echo "COMMAND_RUN=docker run --rm --entrypoint /app/game_server -p 8080:8080 gen_objects --config-file /app/data/config.json --www-root /app/static/" >> $GITHUB_ENV
+
       - name: run tests sprint3 gen_objects
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/gen_objects.xml cpp-backend-tests-practicum/tests/test_s03_gen_objects.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/gen_objects.xml cpp-backend-tests-practicum/tests/test_s03_gen_objects.py
         env:
           CONFIG_PATH: ${{ github.workspace }}/sprint3/problems/gen_objects/solution/data/config.json
-          IMAGE_NAME: gen_objects
-          ENTRYPOINT: /app/game_server
-          CONTAINER_ARGS: '--config-file /app/data/config.json --www-root /app/static/'
 
       - name: build tests sprint3 static_lib
         run: |
           cd sprint3/problems/static_lib/solution
           docker build -t static_lib .
-          
+          echo "COMMAND_RUN=docker run --rm --entrypoint /app/game_server -p 8080:8080 static_lib --config-file /app/data/config.json --www-root /app/static/" >> $GITHUB_ENV
+
       - name: run tests sprint3 static_lib
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/static_lib.xml cpp-backend-tests-practicum/tests/test_s03_gen_objects.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/static_lib.xml cpp-backend-tests-practicum/tests/test_s03_gen_objects.py
         env:
           CONFIG_PATH: ${{ github.workspace }}/sprint3/problems/static_lib/solution/data/config.json
-          IMAGE_NAME: static_lib
-          ENTRYPOINT: /app/game_server
-          CONTAINER_ARGS: '--config-file /app/data/config.json --www-root /app/static/'
 
       - name: build tests sprint3 gather-tests
         run: |
@@ -335,7 +327,7 @@ jobs:
 
       - name: run tests sprint3 gather-tests
         run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests
-      
+
       - name: build tests sprint3 gather-tests_wrong1
         run: |
           cp -r cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/* sprint3/problems/gather-tests/solution/src/
@@ -344,6 +336,7 @@ jobs:
           cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile1 sprint3/problems/gather-tests/solution/Dockerfile
           cd sprint3/problems/gather-tests/solution
           docker build -t gather-tests_wrong1 .
+
       - name: run tests sprint3 gather-tests_wrong1
         run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong1  || [ $? -ne 0 ]
 
@@ -355,6 +348,7 @@ jobs:
           cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile2 sprint3/problems/gather-tests/solution/Dockerfile
           cd sprint3/problems/gather-tests/solution
           docker build -t gather-tests_wrong2 .
+
       - name: run tests sprint3 gather-tests_wrong2
         run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong2  || [ $? -ne 0 ]
 
@@ -366,6 +360,7 @@ jobs:
           cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile3 sprint3/problems/gather-tests/solution/Dockerfile
           cd sprint3/problems/gather-tests/solution
           docker build -t gather-tests_wrong3 .
+
       - name: run tests sprint3 gather-tests_wrong3
         run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong3  || [ $? -ne 0 ]
 
@@ -377,6 +372,7 @@ jobs:
           cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile4 sprint3/problems/gather-tests/solution/Dockerfile
           cd sprint3/problems/gather-tests/solution
           docker build -t gather-tests_wrong4 .
+
       - name: run tests sprint3 gather-tests_wrong4
         run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong4  || [ $? -ne 0 ]
 
@@ -388,9 +384,10 @@ jobs:
           cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather-tests/wrong/Dockerfile5 sprint3/problems/gather-tests/solution/Dockerfile
           cd sprint3/problems/gather-tests/solution
           docker build -t gather-tests_wrong5 .
+
       - name: run tests sprint3 gather-tests_wrong5
         run: docker run --rm --entrypoint /app/build/collision_detection_tests gather-tests_wrong5  || [ $? -ne 0 ]
-        
+
       - name: build tests sprint3 gather
         run: |
           cp cpp-backend-tests-practicum/tests/cpp/test_s03_gather/* sprint3/problems/gather/solution/tests/
@@ -404,28 +401,23 @@ jobs:
         run: |
           cd sprint3/problems/find_return/solution
           docker build -t find_return .
-          
+          echo "COMMAND_RUN=docker run --rm --entrypoint /app/game_server -p 8080:8080 find_return --config-file /app/data/config.json --www-root /app/static/" >> $GITHUB_ENV
+
       - name: run tests sprint3 find_return
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/find_return.xml cpp-backend-tests-practicum/tests/test_s03_find_return.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/find_return.xml cpp-backend-tests-practicum/tests/test_s03_find_return.py
         env:
           CONFIG_PATH: ${{ github.workspace }}/sprint3/problems/find_return/solution/data/config.json
-          IMAGE_NAME: find_return 
-          ENTRYPOINT: /app/game_server
-          CONTAINER_ARGS: '--config-file /app/data/config.json --www-root /app/static/'
-          
+
       - name: build tests sprint3 scores
         run: |
           cd sprint3/problems/scores/solution
           docker build -t scores .
-          
+          echo "COMMAND_RUN=docker run --rm --entrypoint /app/game_server -p 8080:8080 scores --config-file /app/data/config.json --www-root /app/static/" >> $GITHUB_ENV
+
       - name: run tests sprint3 scores
-        run: pytest --workers auto --junitxml=${GITHUB_WORKSPACE}/scores.xml cpp-backend-tests-practicum/tests/test_s03_scores.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/scores.xml cpp-backend-tests-practicum/tests/test_s03_scores.py
         env:
           CONFIG_PATH: ${{ github.workspace }}/sprint3/problems/scores/solution/data/config.json
-          IMAGE_NAME: scores 
-          ENTRYPOINT: /app/game_server
-          CONTAINER_ARGS: '--config-file /app/data/config.json --www-root /app/static/'
-                    
 
       - name: build tests sprint4 state_serialization
         run: |
@@ -497,7 +489,6 @@ jobs:
         with:
           junit_files: ${{ github.workspace }}/*.xml
 
-
   with_postgress:
     runs-on: ubuntu-22.04
     container:
@@ -510,13 +501,17 @@ jobs:
         image: ubuntu/postgres:14-22.04_beta
         env:
           POSTGRES_PASSWORD: Mys3Cr3t
-          POSTGRES_HOST: postgres
-          POSTGRES_PORT: 5432
 
     steps:
       - name: get docker network
+        run: echo "DOCKER_NETWORK=$(docker inspect main-container -f '{{range $k, $v := .NetworkSettings.Networks}}{{printf "%s" $k}}{{end}}')" >> $GITHUB_ENV
+
+      - name: set postgresql credentials
         run: |
-          echo "DOCKER_NETWORK=$(docker inspect main-container -f '{{range $k, $v := .NetworkSettings.Networks}}{{printf "%s" $k}}{{end}}')" >> $GITHUB_ENV
+          echo "POSTGRES_USER=postgres" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=Mys3Cr3t" >> $GITHUB_ENV
+          echo "POSTGRES_HOST=postgres" >> $GITHUB_ENV
+          echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -527,11 +522,10 @@ jobs:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
 
-
       - name: Install dependencies
         run: |
           cp -R /home/forconan/.conan /github/home/.conan
-          
+
       - name: build sprint4 db_of_books
         run: |
           cd sprint4/problems/db_of_books/solution
@@ -540,11 +534,6 @@ jobs:
           conan install ..
           cmake -DCMAKE_BUILD_TYPE=Release ..
           cmake --build .
-          echo "POSTGRES_USER=postgres" >> $GITHUB_ENV
-          echo "POSTGRES_PASSWORD=Mys3Cr3t" >> $GITHUB_ENV
-          echo "POSTGRES_HOST=postgres" >> $GITHUB_ENV
-          echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
-          
 
       - name: configure postgresql database
         run: python3 ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_db_of_books.py
@@ -553,8 +542,9 @@ jobs:
         run: pytest --junitxml=${GITHUB_WORKSPACE}/db_of_books.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_db_of_books.py
         env:
           DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/db_of_books/solution/build/book_manager
-      
-       - name: build sprint4 bookypedia-1
+
+
+      - name: build sprint4 bookypedia-1
         run: |
           cd sprint4/problems/bookypedia-1/solution
           mkdir build
@@ -562,6 +552,7 @@ jobs:
           conan install ..
           cmake -DCMAKE_BUILD_TYPE=Release ..
           cmake --build .
+
       - name: run tests sprint4 bookypedia-1
         run: pytest --junitxml=${GITHUB_WORKSPACE}/bookypedia-1.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_bookypedia-1.py
         env:
@@ -580,30 +571,28 @@ jobs:
           echo "POSTGRES_PASSWORD=Mys3Cr3t" >> $GITHUB_ENV
           echo "POSTGRES_HOST=postgres" >> $GITHUB_ENV
           echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
+
       - name: run tests sprint4 bookypedia-2
         run: pytest --junitxml=${GITHUB_WORKSPACE}/bookypedia-2.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_bookypedia-2.py
         env:
           DELIVERY_APP: ${{ github.workspace }}/sprint4/problems/bookypedia-2/solution/build/bookypedia
-      
+
+
       - name: build sprint4 leave_game
         run: |
           cd sprint4/problems/leave_game/solution
           docker build -t leave_game .
-        
+          echo "COMMAND_RUN=docker run --rm --network ${DOCKER_NETWORK} --name cppserver -p 8080:8080 -e GAME_DB_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/records leave_game" >> $GITHUB_ENV
+
       - name: run tests sprint4 leave_game
-        run: pytest --workers 4 --junitxml=${GITHUB_WORKSPACE}/leave_game.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_leave_game.py
+        run: pytest --junitxml=${GITHUB_WORKSPACE}/leave_game.xml ${GITHUB_WORKSPACE}/cpp-backend-tests-practicum/tests/test_s04_leave_game.py
         env:
+          SERVER_DOMAIN: cppserver
           CONFIG_PATH: ${{ github.workspace }}/sprint4/problems/leave_game/solution/data/config.json
-          IMAGE_NAME: leave_game
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: Mys3Cr3t
-          POSTGRES_HOST: postgres
-          POSTGRES_PORT: 5432
-      
-      
+
+
       - name: Publish XML reports
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           junit_files: ${{ github.workspace }}/*.xml
-
